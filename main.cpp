@@ -646,20 +646,20 @@ int main(int argc, char** argv) {
     // Additional convienience Strings
     vector<string> daily {"e10", "e10", "f10", "a10", "nebra:22"};
     vector<string> test {"a10", "tiny:92"};
-    vector<string> test2 {"f9", "a8", "w8", "a8", "a8"};
+    vector<string> test2 {"f10","a10","f10","a10","t4urus:99"};
     vector<string> test3 {"a9", "f8", "a8"}; // soultion should be (e7, w7, ailen:53, rei:1)(274k) or better but gets dominated {0,0,0,0,1,1,0,3,0,0,2,1,1,53,2,0,0,0,0,0,0,0,1,1,0,0,0};
     
     // Declare Hero Levels
     // INPUT YOUR HERO LEVELS HERE (For manual editing: Names tell you which number is the level of which hero)
-    yourHeroLevels = { 1, 1, 0, 0,      // "lady of twilight","tiny","nebra","james"
-                      99, 2, 1,         // "hunter","shaman","alpha"
-                       5, 2, 1,         // "carl","nimue","athos"
-                       5, 8, 0,         // "jet","geron","rei"
-                      99, 4, 0,         // "ailen","faefyr","auri"
-                       1, 0, 0,         // "k41ry", "t4urus", "tr0n1x"
-                       1, 0, 0,         // "aquortis", "aeris", "geum"
-                       1, 1, 1, 1, 1,   // "valor","rokka","pyromancer","bewat","nicte"
-    }; 
+//    yourHeroLevels = { 1, 1, 0, 0,      // "lady of twilight","tiny","nebra","james"
+//                      99, 2, 1,         // "hunter","shaman","alpha"
+//                       5, 2, 1,         // "carl","nimue","athos"
+//                       5, 8, 0,         // "jet","geron","rei"
+//                      99, 4, 0,         // "ailen","faefyr","auri"
+//                       1, 0, 0,         // "k41ry", "t4urus", "tr0n1x"
+//                       1, 0, 0,         // "aquortis", "aeris", "geum"
+//                       1, 1, 1, 1, 1,   // "valor","rokka","pyromancer","bewat","nicte"
+//    }; 
     yourHeroLevels = { 1, 1, 0, 0,      // "lady of twilight","tiny","nebra","james"
                       99, 0, 1,         // "hunter","shaman","alpha"
                        0, 0, 1,         // "carl","nimue","athos"
@@ -669,12 +669,11 @@ int main(int argc, char** argv) {
                        1, 0, 0,         // "aquortis", "aeris", "geum"
                        0, 0, 0, 0, 1,   // "valor","rokka","pyromancer","bewat","nicte"
     }; 
-//    yourHeroLevels = {0,0,0,0,1,1,0,3,0,0,2,1,1,53,2,0,0,0,0,0,0,0,1,1,0,0,0};
     
     // Use these variables to specify the fight
     bool ignoreConsole = false;                         // Disables the console question whether you want to read from file or command line
     int limit = 6;                                      // Set this to how many Monsters should be in the solution (f.e 4 for X-3 Quests) 
-    hostileLineup = makeMonstersFromStrings(daily);   // Choose against which lineup you want to fight use one from above or make your own and then change the name accordingly
+    hostileLineup = makeMonstersFromStrings(test2);     // Choose against which lineup you want to fight use one from above or make your own and then change the name accordingly
     bool individual = false;                            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
     bool time_it = true;                                // Set this to true if you want to see how far the execution is and how lone the execution took altogether
     bool manualInput = false;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
@@ -749,5 +748,6 @@ int main(int argc, char** argv) {
 
     cout << totalFightsSimulated << " Fights simulated." << endl;
     cout << "Total Calculation Time: " << time(NULL) - startTime << endl;
+    system("pause");
     return 0;
 }
