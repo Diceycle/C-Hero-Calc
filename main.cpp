@@ -82,7 +82,7 @@ void one_turn(vector<int> & result, const vector<Monster *> & left, size_t leftI
         } else if (skillType == aoe && (skillTarget == all || skillTarget == currentLeft->element)) {
             aoeDamageRight += skill->amount;
         } else if (skillType == pAoe && i == rightIndex) {
-            paoeDamageRight += skill->amount;
+            paoeDamageRight += right[i]->damage;
         } else if (skillType== buff && (skillTarget == all || skillTarget == currentRight->element)) {
             damageRight += skill->amount;
         }
@@ -99,7 +99,7 @@ void one_turn(vector<int> & result, const vector<Monster *> & left, size_t leftI
         } else if (skillType == aoe && (skillTarget == all || skillTarget == currentRight->element)) {
             aoeDamageLeft += skill->amount;
         } else if (skillType == pAoe && i == leftIndex) {
-            paoeDamageLeft += skill->amount;
+            paoeDamageLeft += left[i]->damage;
         } else if (skillType== buff && (skillTarget == all || skillTarget == currentLeft->element)) {
             damageLeft += skill->amount;
         }
