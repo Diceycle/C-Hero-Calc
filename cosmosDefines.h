@@ -69,7 +69,7 @@ static vector<Monster> baseHeroes { // unleveled heroes
     Monster( 45, 20, 0, "lady of twilight",  air,   {protect, all, air, 1}),
     Monster( 70, 30, 0, "tiny",              earth, {aoe,     all, earth, 2}),
     Monster( 90, 40, 0, "nebra",             fire,  {buff,    all, fire, 4}),
-    Monster( 50, 12, 0, "james",             earth, {pAoe,    all, earth, 12}),
+    Monster( 50, 12, 0, "james",             earth, {pAoe,    all, earth, 1}),
     Monster( 22, 14, 0, "hunter",            air,   {buff,    air, air, 2}),
     Monster( 40, 20, 0, "shaman",            earth, {protect, earth, earth , 2}),
     Monster( 82, 22, 0, "alpha",             fire,  {aoe,     all, fire, 1}),
@@ -124,12 +124,6 @@ static map<string, int> rarities { // hero rarities
     {"bewat",  0},
     {"nicte",  1},
 };
-static map<string, string> counteredBy { // Which mob is the cheapest that can win(not draw) against another (does not need pointers as it is only used once)
-    {"a1", "e1"}, {"a2", "e2"}, {"a3", "e3"}, {"a4", "e4"}, {"a5", "e5"}, {"a6", "e6"}, {"a7", "e7"}, {"a8", "e8"}, {"a9", "e9"}, {"a10", "e10"},
-    {"w1", "a1"}, {"w2", "a2"}, {"w3", "a3"}, {"w4", "a4"}, {"w5", "a5"}, {"w6", "a6"}, {"w7", "a7"}, {"w8", "a8"}, {"w9", "a9"}, {"w10", "a10"},
-    {"e1", "f1"}, {"e2", "f2"}, {"e3", "f3"}, {"e4", "f4"}, {"e5", "f5"}, {"e6", "f6"}, {"e7", "f7"}, {"e8", "f8"}, {"e9", "f9"}, {"e10", "f10"},
-    {"f1", "w1"}, {"f2", "w2"}, {"f3", "w3"}, {"f4", "w4"}, {"f5", "w5"}, {"f6", "w6"}, {"f7", "w7"}, {"f8", "w8"}, {"f9", "w9"}, {"f10", "w10"}
-}; 
 
 // Declare Convienience Lineups
 static vector<vector<string>> quests {
@@ -137,27 +131,27 @@ static vector<vector<string>> quests {
 	{"f1", "a1", "f1", "a1", "f1", "a1"},
 	{"f5", "a5"},
 	{"f2", "a2", "e2", "w2", "f3", "a3"},
-	{"w3", "e3", "w3", "e3", "w3", "e3"},
+	{"w3", "e3", "w3", "e3", "w3", "e3"},   //5
 	{"w4", "e1", "a4", "f4", "w1", "e4"},
 	{"f5", "a5", "f4", "a3", "f2", "a1"},
 	{"e4", "w4", "w5", "e5", "w4", "e4"},
 	{"w5", "f5", "e5", "a5", "w4", "f4"},
-	{"w5", "e5", "a5", "f5", "e5", "w5"},
+	{"w5", "e5", "a5", "f5", "e5", "w5"},   //10
 	{"f5", "f6", "e5", "e6", "a5", "a6"},
-	{"e5", "w5", "f5", "a6", "f6", "w6"},
-	{"a7", "a6", "a5", "a4", "a3", "a2"},
+	{"e5", "w5", "f5", "e6", "f6", "w6"},
+	{"a8", "a7", "a6", "a5", "a4", "a3"},
 	{"f7", "f6", "f5", "e7", "e6", "e6"},
-	{"w5", "e6", "w6", "e8", "w8"},
+	{"w5", "e6", "w6", "e8", "w8"},         //15
 	{"a9", "f8", "a8"},
 	{"w5", "e6", "w7", "e8", "w8"},
-	{"f7", "f7", "a6", "f5", "a7", "a8"},
+	{"f7", "f6", "a6", "f5", "a7", "a8"},
 	{"e7", "w9", "f9", "e9"},
-	{"f2", "a4", "f5", "a7", "f8", "a10"},
+	{"f2", "a4", "f5", "a7", "f8", "a10"},  //20
 	{"w10", "a10", "w10"},
 	{"w9", "e10", "f10"},
 	{"e9", "a9", "w8", "f8", "e8"},
 	{"f6", "a7", "f7", "a8", "f8", "a9"},
-	{"w8", "w7", "w8", "w8", "w7", "w8"},
+	{"w8", "w7", "w8", "w8", "w7", "w8"},   //25
 };
 
 #endif
