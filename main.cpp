@@ -34,6 +34,11 @@ bool hasFewerFollowers(FightResult & a, FightResult & b) { // used for sorting.
     return (a.source->followerCost < b.source->followerCost);
 }
 
+// Function for sorting Monsters by cost (ascending)
+bool isCheaper(Monster * a, Monster * b) {
+    return a->cost < b->cost;
+}
+
 // Returns damage done depending on the elements of the fighting monsters
 int getElementalAdvantage(int damage, Element sourceElement, Element targetElement) {
     if ((sourceElement == earth && targetElement == air) || 
@@ -157,7 +162,7 @@ void simulate_fight(FightResult & result, const Army & left, const Army & right,
         rightCumAoeDamage = left.precomputedFight.rightAoeDamage;
         rightBerserk = left.precomputedFight.berserk;
     }
-    
+      
     vector<int> turnSimulation; turnSimulation.reserve(8);
     while (leftLost < leftArmySize && rightLost < rightArmySize) {
         //attack once
@@ -279,6 +284,64 @@ void expand(vector<Army> & source, vector<FightResult> & current_armies, const v
     }
 }
 
+// Use a greedy method to get a first upper bound on follower cost for the solution
+// TODO: Think of an algorithm that works on limit < targetsize semi-reliable
+void getQuickSolutions(const vector<Monster *> & availableHeroes, Army target, size_t limit) {
+    Army tempArmy = Army();
+    FightResult tempResult;
+    vector<Monster *> greedy {};
+    vector<Monster *> greedyHeroes {};
+    vector<Monster *> greedyTemp {};
+    size_t targetSize = target.monsters.size();
+    bool invalid = false;
+    
+    cout << "Trying to find solutions greedily..." << endl;
+    
+    // Create Army that kills as many monsters as the army is big
+    if (targetSize <= limit) {
+        for (size_t i = 0; i < limit; i++) {
+            for (size_t m = 0; m < monsterList.size(); m++) {
+                tempArmy = Army(greedy);
+                tempArmy.add(monsterList[m]);
+                simulate_fight(tempResult, tempArmy, target);
+                if (!tempResult.rightWon || (tempResult.monstersLost > i && i+1 < limit)) { // the last monster has to win the encounter
+                    greedy.push_back(monsterList[m]);
+                    break;
+                }
+            }
+            invalid = greedy.size() < limit;
+        }
+        if (!invalid) {
+            cout << "  ";
+            tempArmy.print();
+            best = tempArmy;
+            followerUpperBound = tempArmy.followerCost;
+            
+            // Try to replace monsters in the setup with heroes to save followers
+            greedyHeroes = greedy;
+            for (size_t m = 0; m < availableHeroes.size(); m++) {
+                for (size_t i = 0; i < greedyHeroes.size(); i++) {
+                    greedyTemp = greedyHeroes;
+                    greedyTemp[i] = availableHeroes[m];
+                    tempArmy = Army(greedyTemp);
+                    simulate_fight(tempResult, tempArmy, target);
+                    if (!tempResult.rightWon) { // Setup still needs to win
+                        greedyHeroes = greedyTemp;
+                        break;
+                    }
+                }
+            }
+            cout << "  ";
+            tempArmy = Army(greedyHeroes);
+            best = tempArmy;
+            followerUpperBound = tempArmy.followerCost;
+            tempArmy.print();
+        } else {
+            cout << "  Could not find valid solution while being greedy" << endl;
+        }
+    }
+}
+
 void solve_instance(const vector<Monster *> & heroes_available, Army target, size_t limit, bool time_it) {
     Army tempArmy = Army();
     FightResult tempResult;
@@ -287,18 +350,8 @@ void solve_instance(const vector<Monster *> & heroes_available, Army target, siz
     
     size_t i, j, sj, si, c;
 
-    // Try to counter every mob and get a first, if inefficient Solution (depending on the heroes involved this might not work)
-    for (i = 0; i < target.monsters.size() && i < limit; i++) {
-        if(counteredBy.count(target.monsters[i]->name) != 0) { // if it is not a hero
-            tempArmy.add(monsterMap.at(counteredBy.at(target.monsters[i]->name)));
-        }
-    }
-    // Check if the counter arrangement wins against the target
-    simulate_fight(tempResult, tempArmy, target);
-    if (!tempResult.rightWon) {
-        followerUpperBound = tempArmy.followerCost;
-        best = tempArmy;
-    }
+    getQuickSolutions(heroes_available, target, limit);
+    if (!askYesNoQuestion("Continue calculation?")) {return;}
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
     vector<Army> heroMonsterArmies {}; // initialize with all heroes
@@ -633,6 +686,9 @@ int main(int argc, char** argv) {
         monsterMap.insert(pair<string, Monster *>(monsterBaseList[i].name, &monsterBaseList[i]));
     }
     
+    // Sort MonsterList by followers
+    sort(monsterList.begin(), monsterList.end(), isCheaper);
+    
     // Reserve some space for heroes, otherwise pointers will become invalid (Important!)
     heroReference.reserve(baseHeroes.size()*2);
     
@@ -732,20 +788,19 @@ int main(int argc, char** argv) {
             for (int i = 1; i <= 10; i++) {
                 cout << "ERROR";
             }
+            system("pause");
             return -1;
         } else {
             // Print the winning combination!
-            cout << endl << "The minimum amount of followers is : " << followerUpperBound << endl;
-            cout << "The optimal combination is: ";
-            for (size_t i = 0; i < best.monsters.size(); i++) {
-                cout << best.monsters[best.monsters.size() - 1 - i]->name << " "; // backwards
-            } cout << endl;
+            cout << endl << "The optimal combination is:" << endl;
+            best.print();
             cout << "(Right-most fights first)" << endl;
         }
     } else {
-        cout << "Could not find a solution that beats this lineup." << endl;
+        cout << endl << "Could not find a solution that beats this lineup." << endl;
     }
-
+    
+    cout << endl;
     cout << totalFightsSimulated << " Fights simulated." << endl;
     cout << "Total Calculation Time: " << time(NULL) - startTime << endl;
     system("pause");
