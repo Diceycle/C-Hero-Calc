@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -52,6 +54,7 @@ class Army {
         int followerCost;
         
         void add(Monster * m);
+        void print();
         Army(vector<Monster *> monsters = {});
 };
 

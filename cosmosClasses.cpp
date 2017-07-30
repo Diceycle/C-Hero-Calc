@@ -30,6 +30,13 @@ void Army::add(Monster * m) {
     this->followerCost += m->cost;
 }
 
+void Army::print() {
+    cout << "(Followers: " << setw(7) << this->followerCost << " | ";
+    for (size_t i = 0; i < this->monsters.size() ; i++) {
+        cout << this->monsters[this->monsters.size() -1-i]->name << " ";
+    } cout << ")" << endl; 
+}
+
 FightResult::FightResult() {}
 
 bool FightResult::operator <=(FightResult & toCompare) { // both results are expected to not have won
