@@ -66,7 +66,7 @@ vector<int> takeHerolevelInput() {
         for (size_t i = 0; i < levels.size()-1; i++) {
             heroFile << levels[i] << ',';
 		}
-		heroFile << levels[levels.size()];
+		heroFile << levels[levels.size()-1];
 		heroFile.close();
         cout << "Hero Levels have been saved in a file. Next time you use this program you can load them from file." << endl;
     }
