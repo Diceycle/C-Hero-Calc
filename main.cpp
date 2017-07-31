@@ -201,7 +201,7 @@ void simulateFight(FightResult & result, const Army & left, const Army & right, 
         
         // Output detailed fight Data for debugging
         if (verbose) {
-            cout << leftLost << " " << leftDamageTaken << " " << rightLost << " " << rightDamageTaken << endl;
+            cout << setw(3) << leftLost << " " << setw(3) << leftDamageTaken << " " << setw(3) << rightLost << " " << setw(3) << rightDamageTaken << endl;
         }
     }
     
@@ -655,9 +655,10 @@ int main(int argc, char** argv) {
     if (followerUpperBound < numeric_limits<int>::max()) {
         best.precomputedFight.valid = false;
         FightResult finalResult;
-        simulateFight(finalResult, best, hostileArmy, true);
+        simulateFight(finalResult, best, hostileArmy);
         if (finalResult.rightWon) {
             best.print();
+            cout << "This does not beat the lineup!!!" << endl;
             for (int i = 1; i <= 10; i++) {
                 cout << "ERROR";
             }
@@ -665,9 +666,9 @@ int main(int argc, char** argv) {
             return -1;
         } else {
             // Print the winning combination!
-            cout << endl << "The optimal combination is:" << endl;
+            cout << endl << "The optimal combination is:" << endl << "  ";
             best.print();
-            cout << "(Right-most fights first)" << endl;
+            cout << "  (Right-most fights first)" << endl;
         }
     } else {
         cout << endl << "Could not find a solution that beats this lineup." << endl;
