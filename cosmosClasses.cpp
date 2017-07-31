@@ -33,7 +33,7 @@ void Army::add(Monster * m) {
 void Army::print() {
     cout << "(Followers: " << setw(7) << this->followerCost << " | ";
     for (size_t i = 0; i < this->monsters.size() ; i++) {
-        cout << this->monsters[this->monsters.size() -1-i]->name << " ";
+        cout << this->monsters[this->monsters.size() -1-i]->name << " "; // Print in reversed Order
     } cout << ")" << endl; 
 }
 

@@ -17,9 +17,9 @@ struct HeroSkill {
     SkillType type;
     Element target;
     Element sourceElement;
-    int amount; //amount - self explanatory
+    int amount;
 };
-static HeroSkill none = HeroSkill({nothing, air, air, 1});
+static HeroSkill none = HeroSkill({nothing, air, air, 1}); // base skill used for normal monsters
 
 // Defines a fight that was run before. Used for skipping parts of a fight with no new heroSkills involved
 struct KnownFight {
@@ -50,7 +50,7 @@ class Monster{
 class Army {
     public:
         vector<Monster *> monsters;
-        KnownFight precomputedFight;;
+        KnownFight precomputedFight;
         int followerCost;
         
         void add(Monster * m);

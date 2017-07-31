@@ -17,10 +17,10 @@ extern Army best;
 
 extern vector<Monster> heroReference; // Will be filled with leveled heroes if needed (determined by input)
 
-extern vector<Monster *> monsterList; // Contains pointers to raw Monster Data from a1 to f10
+extern vector<Monster *> monsterList; // Contains pointers to raw Monster Data from a1 to f10, will be sorted by follower cost
 extern map<string, Monster *> monsterMap; // Maps monster Names to their pointers (includes heroes)
 
-static vector<Monster> monsterBaseList { // non-heroes
+static vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual Objects
     Monster( 20,   8,    1000,  "a1", air),
     Monster( 48,   6,    3900,  "a2", air),
     Monster( 36,  12,    8000,  "a3", air),
@@ -65,7 +65,7 @@ static vector<Monster> monsterBaseList { // non-heroes
     Monster(102,  58,  454000,  "f9", fire),
     Monster(104,  82,  787000, "f10", fire)
 };
-static vector<Monster> baseHeroes { // unleveled heroes
+static vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Objects
     Monster( 45, 20, 0, "lady of twilight",  air,   {protect, all, air, 1}),
     Monster( 70, 30, 0, "tiny",              earth, {aoe,     all, earth, 2}),
     Monster( 90, 40, 0, "nebra",             fire,  {buff,    all, fire, 4}),
@@ -125,8 +125,7 @@ static map<string, int> rarities { // hero rarities
     {"nicte",  1},
 };
 
-// Declare Convienience Lineups
-static vector<vector<string>> quests {
+static vector<vector<string>> quests { // Contains all quest lineups for easy referencing
 	{"w5"},
 	{"f1", "a1", "f1", "a1", "f1", "a1"},
 	{"f5", "a5"},
