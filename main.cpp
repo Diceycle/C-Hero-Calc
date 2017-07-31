@@ -283,6 +283,8 @@ void expand(vector<Army> & newArmies, vector<FightResult> & fightResults, const 
                             newArmies[newArmies.size()-1].precomputedFight.valid = false;
                         }
                     }
+                } else {
+                    break; // since list is sorted by follower cost (and heroes don't cost anything)
                 }
             }
         }
