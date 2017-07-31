@@ -157,10 +157,14 @@ void simulateFight(FightResult & result, const Army & left, const Army & right, 
         // Set pre-computed values to pick up where we left off
         leftLost = leftArmySize-1;
         leftDamageTaken = left.precomputedFight.leftAoeDamage;
+        leftCumAoeDamage = left.precomputedFight.leftAoeDamage;
         rightLost = left.precomputedFight.monstersLost;
         rightDamageTaken = left.precomputedFight.damage;
         rightCumAoeDamage = left.precomputedFight.rightAoeDamage;
         rightBerserk = left.precomputedFight.berserk;
+        if (left.monsters[leftLost]->hp <= leftCumAoeDamage) {
+            leftLost++;
+        }
     }
       
     vector<int> turnSimulation; turnSimulation.reserve(8);
