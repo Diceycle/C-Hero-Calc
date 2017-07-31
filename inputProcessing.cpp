@@ -51,6 +51,7 @@ vector<int> takeHerolevelInput() {
             heroFile.close();
         } catch (const exception & e) {
             cout << "Could not open File. Make sure you input the hero Levels manually at least once." << endl;
+            system("pause");
             exit(EXIT_FAILURE);
         }
     } else {
