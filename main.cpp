@@ -50,7 +50,7 @@ int getElementalAdvantage(int damage, Element sourceElement, Element targetEleme
     return damage;
 }
 
-void one_turn(vector<int> & result, const vector<Monster *> & left, size_t leftIndex, const vector<Monster *> & right, size_t rightIndex) {
+void simulateTurn(vector<int> & result, const vector<Monster *> & left, size_t leftIndex, const vector<Monster *> & right, size_t rightIndex) {
     // simulates one turn (left attacks right and right attacks left)
     // returns all the damage values
     // may seem unelegant to do both side in one function but it probably saves about 10 million function calls even on small problems
@@ -134,7 +134,7 @@ void one_turn(vector<int> & result, const vector<Monster *> & left, size_t leftI
 }
 
 // TODO: Check and potentially implement hero death - skill interaction
-void simulate_fight(FightResult & result, const Army & left, const Army & right, bool verbose = false) {
+void simulateFight(FightResult & result, const Army & left, const Army & right, bool verbose = false) {
     //fights left to right, so left[0] and right[0] are the first to fight
     totalFightsSimulated++;
     int leftLost = 0;
@@ -169,7 +169,7 @@ void simulate_fight(FightResult & result, const Army & left, const Army & right,
         leftBerserkActive = left.monsters[leftLost]->skill.type == berserk;
         rightBerserkActive = right.monsters[rightLost]->skill.type == berserk;
         
-        one_turn(turnSimulation, left.monsters, leftLost, right.monsters, rightLost);
+        simulateTurn(turnSimulation, left.monsters, leftLost, right.monsters, rightLost);
         rightDamageTaken += turnSimulation[0] * leftBerserk + turnSimulation[2]; // first mob takes normal damage and aoe
         rightCumAoeDamage += turnSimulation[2] + turnSimulation[3]; // normal aoe + piercing aoe
         leftDamageTaken += turnSimulation[4] * rightBerserk + turnSimulation[6]; // same values for the other side
@@ -222,13 +222,13 @@ void simulate_fight(FightResult & result, const Army & left, const Army & right,
     }
 }
 
-void simulate_multiple_fights(vector<FightResult> & results, vector<Army> & armies, const Army & target) {
-    //simulates all of the fights from armies and puts it into a vector of fight_results.
+void simulateMultipleFights(vector<FightResult> & results, vector<Army> & armies, const Army & target) {
+    //simulates all of the fights from armies and puts it into a vector of fightResults.
     results.reserve(armies.size());
     FightResult currentResult;
     
     for (size_t i = 0; i < armies.size(); i++) {
-        simulate_fight(currentResult, armies[i], target);
+        simulateFight(currentResult, armies[i], target);
         currentResult.source = &armies[i];
         if (!currentResult.rightWon) {  // left (our side) wins:
             if (currentResult.source->followerCost < followerUpperBound) {
@@ -247,35 +247,40 @@ void simulate_multiple_fights(vector<FightResult> & results, vector<Army> & armi
     }
 }
 
-void expand(vector<Army> & source, vector<FightResult> & current_armies, const vector<Monster *> & to_expand_with, bool check_heroes_repeat) {
+void expand(vector<Army> & newArmies, vector<FightResult> & fightResults, const vector<Monster *> & toExpandWith, bool checkHeroRepeat) {
     // expand stuff directly onto source, does not expand dominated or winning or too costly armies
     // if the bool is true, we check if we repeat any heroes
-    FightResult * this_result;
+    FightResult * currentResult;
     bool heroUseable;
     size_t i, j, k;
     
-    for (i = 0; i < current_armies.size(); i++) {
-        this_result = &current_armies[i]; 
-        if (!this_result->dominated) { // if this setup isn't worse than another and hasn't won yet
-            for (j = 0; j < to_expand_with.size(); j++) { // expand this setup with all available mobs
-                if (this_result->source->followerCost + to_expand_with[j]->cost < followerUpperBound) {
+    for (i = 0; i < fightResults.size(); i++) {
+        currentResult = &fightResults[i]; 
+        if (!currentResult->dominated) { // if this setup isn't worse than another and hasn't won yet
+            for (j = 0; j < toExpandWith.size(); j++) { // expand this setup with all available mobs
+                if (currentResult->source->followerCost + toExpandWith[j]->cost < followerUpperBound) {
                     
                     heroUseable = true;
-                    if (check_heroes_repeat) { // check if a hero has been used before
-                        for (k = 0; k < this_result->source->monsters.size(); k++) {
-                            if (this_result->source->monsters[k] == to_expand_with[j]) { // since were only expanding with heroes in this case we can compare normal mobs too
+                    if (checkHeroRepeat) { // check if a hero has been used before
+                        for (k = 0; k < currentResult->source->monsters.size(); k++) {
+                            if (currentResult->source->monsters[k] == toExpandWith[j]) { // since were only expanding with heroes in this case we can compare normal mobs too
                                 heroUseable = false;
                                 break;
                             }
                         }
                     }
                     if (heroUseable) {
-                        source.push_back(*(this_result->source));
-                        source[source.size() - 1].add(to_expand_with[j]);
-                        if (!to_expand_with[j]->isHero) {
-                            source[source.size()-1].precomputedFight = KnownFight({this_result->monstersLost, this_result->damage, this_result->berserk, this_result->leftAoeDamage, this_result->rightAoeDamage, true}); // pre-computed fight
+                        newArmies.push_back(*(currentResult->source));
+                        newArmies[newArmies.size() - 1].add(toExpandWith[j]);
+                        if (!toExpandWith[j]->isHero) {
+                            newArmies[newArmies.size()-1].precomputedFight = KnownFight({currentResult->monstersLost, 
+                                                                                         currentResult->damage, 
+                                                                                         currentResult->berserk, 
+                                                                                         currentResult->leftAoeDamage, 
+                                                                                         currentResult->rightAoeDamage, 
+                                                                                         true}); // pre-computed fight
                         } else {
-                            source[source.size()-1].precomputedFight.valid = false;
+                            newArmies[newArmies.size()-1].precomputedFight.valid = false;
                         }
                     }
                 }
@@ -303,7 +308,7 @@ void getQuickSolutions(const vector<Monster *> & availableHeroes, Army target, s
             for (size_t m = 0; m < monsterList.size(); m++) {
                 tempArmy = Army(greedy);
                 tempArmy.add(monsterList[m]);
-                simulate_fight(tempResult, tempArmy, target);
+                simulateFight(tempResult, tempArmy, target);
                 if (!tempResult.rightWon || (tempResult.monstersLost > i && i+1 < limit)) { // the last monster has to win the encounter
                     greedy.push_back(monsterList[m]);
                     break;
@@ -324,7 +329,7 @@ void getQuickSolutions(const vector<Monster *> & availableHeroes, Army target, s
                     greedyTemp = greedyHeroes;
                     greedyTemp[i] = availableHeroes[m];
                     tempArmy = Army(greedyTemp);
-                    simulate_fight(tempResult, tempArmy, target);
+                    simulateFight(tempResult, tempArmy, target);
                     if (!tempResult.rightWon) { // Setup still needs to win
                         greedyHeroes = greedyTemp;
                         break;
@@ -342,7 +347,7 @@ void getQuickSolutions(const vector<Monster *> & availableHeroes, Army target, s
     }
 }
 
-void solve_instance(const vector<Monster *> & heroes_available, Army target, size_t limit, bool time_it) {
+void solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t limit, bool debugInfo) {
     Army tempArmy = Army();
     FightResult tempResult;
     int startTime = time(NULL);
@@ -350,8 +355,9 @@ void solve_instance(const vector<Monster *> & heroes_available, Army target, siz
     
     size_t i, j, sj, si, c;
 
-    getQuickSolutions(heroes_available, target, limit);
+    getQuickSolutions(availableHeroes, target, limit);
     if (!askYesNoQuestion("Continue calculation?")) {return;}
+    cout << endl;
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
     vector<Army> heroMonsterArmies {}; // initialize with all heroes
@@ -360,8 +366,8 @@ void solve_instance(const vector<Monster *> & heroes_available, Army target, siz
             pureMonsterArmies.push_back(Army(vector<Monster *>{monsterList[i]}));
         }
     }
-    for (i = 0; i < heroes_available.size(); i++) { // Ignore chacking for Hero Cost
-        heroMonsterArmies.push_back(Army(vector<Monster *>{heroes_available[i]}));// emplace back!
+    for (i = 0; i < availableHeroes.size(); i++) { // Ignore chacking for Hero Cost
+        heroMonsterArmies.push_back(Army(vector<Monster *>{availableHeroes[i]}));
     }
     
     // Check if a single monster can beat the last two monsters of the target. If not, solutions that can only beat n-2 monsters need not be expanded later
@@ -372,7 +378,7 @@ void solve_instance(const vector<Monster *> & heroes_available, Army target, siz
     
     if (optimizable) { // Check with normal Mobs
         for (i = 0; i < pureMonsterArmies.size(); i++) {
-            simulate_fight(tempResult, pureMonsterArmies[i], tempArmy);
+            simulateFight(tempResult, pureMonsterArmies[i], tempArmy);
             if (!tempResult.rightWon) { // Monster won the fight
                 optimizable = false;
                 break;
@@ -382,15 +388,13 @@ void solve_instance(const vector<Monster *> & heroes_available, Army target, siz
 
     if (optimizable) { // Check with Heroes
         for (i = 0; i < heroMonsterArmies.size(); i++) {
-            simulate_fight(tempResult, heroMonsterArmies[i], tempArmy);
+            simulateFight(tempResult, heroMonsterArmies[i], tempArmy);
             if (!tempResult.rightWon) { // Hero won the fight
                 optimizable = false;
                 break;
             }
         }
     }
-    
-    cout << optimizable << (followerUpperBound != numeric_limits<int>::max()) << endl;
 
     // Run the Bruteforce Loop
     size_t armySize = 0;
@@ -403,28 +407,28 @@ void solve_instance(const vector<Monster *> & heroes_available, Army target, siz
         debugOutput(tempTime, "Starting loop for armies of size " + to_string(c), true, false, true);
         
         // Run Fights for non-Hero setups
-        debugOutput(tempTime, "  Simulating " + to_string(pureMonsterArmies.size()) + " non-hero Fights... ", time_it, false, false);
+        debugOutput(tempTime, "  Simulating " + to_string(pureMonsterArmies.size()) + " non-hero Fights... ", debugInfo, false, false);
         tempTime = time(NULL);
-        vector<FightResult> result;
-        simulate_multiple_fights(result, pureMonsterArmies, target);
+        vector<FightResult> pureResults;
+        simulateMultipleFights(pureResults, pureMonsterArmies, target);
         
         // Run fights for setups with heroes
-        debugOutput(tempTime, "  Simulating " + to_string(heroMonsterArmies.size()) + " hero Fights... ", time_it, true, false);
+        debugOutput(tempTime, "  Simulating " + to_string(heroMonsterArmies.size()) + " hero Fights... ", debugInfo, true, false);
         tempTime = time(NULL);
-        vector<FightResult> result_heroes;
-        simulate_multiple_fights(result_heroes, heroMonsterArmies, target);
+        vector<FightResult> heroResults;
+        simulateMultipleFights(heroResults, heroMonsterArmies, target);
         
-        fightResultAmount = result.size();
-        herofightResultAmount = result_heroes.size();
+        fightResultAmount = pureResults.size();
+        herofightResultAmount = heroResults.size();
         if (c < limit) { 
             // Sort the results by follower cost for some optimization
-            debugOutput(tempTime, "  Sorting List... ", time_it, true, false);
+            debugOutput(tempTime, "  Sorting List... ", debugInfo, true, false);
             tempTime = time(NULL);
-            sort(result.begin(), result.end(), hasFewerFollowers);
-            sort(result_heroes.begin(), result_heroes.end(), hasFewerFollowers);
+            sort(pureResults.begin(), pureResults.end(), hasFewerFollowers);
+            sort(heroResults.begin(), heroResults.end(), hasFewerFollowers);
             
             // Calculate which results are strictly better than others (dominance)
-            debugOutput(tempTime, "  Calculating Dominance for non-heroes... ", time_it, true, false);
+            debugOutput(tempTime, "  Calculating Dominance for non-heroes... ", debugInfo, true, false);
             tempTime = time(NULL);
             
             int leftFollowerCost;
@@ -434,45 +438,45 @@ void solve_instance(const vector<Monster *> & heroes_available, Army target, siz
             Monster * leftMonster;
             // First Check dominance for non-Hero setups
             for (i = 0; i < fightResultAmount; i++) {
-                leftFollowerCost = result[i].source->followerCost;
+                leftFollowerCost = pureResults[i].source->followerCost;
                 // A result is obsolete if only one expansion is left but no single mob can beat the last two enemy mobs alone (optimizable)
                 if (c == (limit - 1) && optimizable) {
                     // TODO: Investigate whether this is truly correct: What if the second-to-last mob is already damaged (not from aoe) i.e. it defeated the last mob of left?
-                    if (result[i].rightWon && result[i].monstersLost < targetSize - 2 && result[i].rightAoeDamage == 0) {
-                        result[i].dominated = true;
+                    if (pureResults[i].rightWon && pureResults[i].monstersLost < targetSize - 2 && pureResults[i].rightAoeDamage == 0) {
+                        pureResults[i].dominated = true;
                     }
                 }
                 // A result is dominated If:
-                if (!result[i].dominated) { 
-                    // Another result got farther with a less costly lineup
+                if (!pureResults[i].dominated) { 
+                    // Another pureResults got farther with a less costly lineup
                     for (j = i+1; j < fightResultAmount; j++) {
-                        if (leftFollowerCost < result[j].source->followerCost) {
+                        if (leftFollowerCost < pureResults[j].source->followerCost) {
                             break; 
-                        } else if (result[i] <= result[j]) { // result[i] has more followers implicitly 
-                            result[i].dominated = true;
+                        } else if (pureResults[i] <= pureResults[j]) { // pureResults[i] has more followers implicitly 
+                            pureResults[i].dominated = true;
                             break;
                         }
                     }
                     // A lineup without heroes is better than a setup with heroes even if it got just as far
                     for (j = 0; j < herofightResultAmount; j++) {
-                        if (leftFollowerCost > result_heroes[j].source->followerCost) {
+                        if (leftFollowerCost > heroResults[j].source->followerCost) {
                             break; 
-                        } else if (result[i] >= result_heroes[j] ) { // result[i] has less followers implicitly
-                            result_heroes[j].dominated = true;
+                        } else if (pureResults[i] >= heroResults[j] ) { // pureResults[i] has less followers implicitly
+                            heroResults[j].dominated = true;
                         }                       
                     }
                 }
             }
             
-            debugOutput(tempTime, "  Calculating Dominance for heroes... ", time_it, true, false);
+            debugOutput(tempTime, "  Calculating Dominance for heroes... ", debugInfo, true, false);
             tempTime = time(NULL);
             // Domination for setups with heroes
-            bool usedHeroSubset, i_used_hero;
+            bool usedHeroSubset, leftUsedHero;
             for (i = 0; i < herofightResultAmount; i++) {
-                leftFollowerCost = result_heroes[i].source->followerCost;
+                leftFollowerCost = heroResults[i].source->followerCost;
                 leftHeroList.clear();
                 for (si = 0; si < armySize; si++) {
-                    leftMonster = result_heroes[i].source->monsters[si];
+                    leftMonster = heroResults[i].source->monsters[si];
                     if (leftMonster->isHero) {
                         leftHeroList.push_back(leftMonster);
                     }
@@ -480,39 +484,39 @@ void solve_instance(const vector<Monster *> & heroes_available, Army target, siz
                 leftHeroListSize = leftHeroList.size();
                 
                 // A result is obsolete if only one expansion is left but no single mob can beat the last two enemy mobs alone (optimizable)
-                if (c == (limit-1) && optimizable && result_heroes[i].rightAoeDamage == 0) {
+                if (c == (limit-1) && optimizable && heroResults[i].rightAoeDamage == 0) {
                     // TODO: Investigate whether this is truly correct: What if the second-to-last mob is already damaged (not from aoe) i.e. it defeated the last mob of left?
-                    if (result_heroes[i].rightWon && result_heroes[i].monstersLost < targetSize - 2){
-                        result_heroes[i].dominated = true;
+                    if (heroResults[i].rightWon && heroResults[i].monstersLost < targetSize - 2){
+                        heroResults[i].dominated = true;
                     }
                 }
                 
                 // A result is dominated If:
-                if (!result_heroes[i].dominated) {
+                if (!heroResults[i].dominated) {
                     // if i costs more followers and got less far than j, then i is dominated
                     for (j = i+1; j < herofightResultAmount; j++) {
-                        if (leftFollowerCost < result_heroes[j].source->followerCost) {
+                        if (leftFollowerCost < heroResults[j].source->followerCost) {
                             break;
-                        } else if (result_heroes[i] <= result_heroes[j]) { // i has more followers implicitly
+                        } else if (heroResults[i] <= heroResults[j]) { // i has more followers implicitly
                             usedHeroSubset = true; // If j doesn't use a strict subset of the heroes i used, it cannot dominate i
                             for (sj = 0; sj < armySize; sj++) { // for every hero in j there must be the same hero in i
-                                i_used_hero = false; 
-                                rightMonster = result_heroes[j].source->monsters[sj];
+                                leftUsedHero = false; 
+                                rightMonster = heroResults[j].source->monsters[sj];
                                 if (rightMonster->isHero) { // mob is a hero
                                     for (si = 0; si < leftHeroListSize; si++) {
                                         if (leftHeroList[si] == rightMonster) {
-                                            i_used_hero = true;
+                                            leftUsedHero = true;
                                             break;
                                         }
                                     }
-                                    if (!i_used_hero) {
+                                    if (!leftUsedHero) {
                                         usedHeroSubset = false;
                                         break;
                                     }
                                 }
                             }
                             if (usedHeroSubset) {
-                                result_heroes[i].dominated = true;
+                                heroResults[i].dominated = true;
                                 break;
                             }                           
                         }
@@ -521,20 +525,20 @@ void solve_instance(const vector<Monster *> & heroes_available, Army target, siz
             }
             
             // now we expand to add the next monster to all non-dominated armies
-            debugOutput(tempTime, "  Expanding Lineups by one... ", time_it, true, false);
+            debugOutput(tempTime, "  Expanding Lineups by one... ", debugInfo, true, false);
             tempTime = time(NULL);
             
-            vector<Army> next_optimal;
-            expand(next_optimal, result, monsterList, false);
-            vector<Army> next_optimal_heroes;
-            expand(next_optimal_heroes, result_heroes, monsterList, false);
-            expand(next_optimal_heroes, result, heroes_available, false);
-            expand(next_optimal_heroes, result_heroes, heroes_available, true);
-            debugOutput(tempTime, "  Moving Data... ", time_it, true, false);
+            vector<Army> nextPureArmies;
+            expand(nextPureArmies, pureResults, monsterList, false);
+            vector<Army> nextHeroArmies;
+            expand(nextHeroArmies, heroResults, monsterList, false);
+            expand(nextHeroArmies, pureResults, availableHeroes, false);
+            expand(nextHeroArmies, heroResults, availableHeroes, true);
+            debugOutput(tempTime, "  Moving Data... ", debugInfo, true, false);
             tempTime = time(NULL);
             
-            pureMonsterArmies = move(next_optimal);
-            heroMonsterArmies = move(next_optimal_heroes);
+            pureMonsterArmies = move(nextPureArmies);
+            heroMonsterArmies = move(nextHeroArmies);
         }
         debugOutput(tempTime, "", true, true, true);
     }
@@ -731,7 +735,7 @@ int main(int argc, char** argv) {
     int limit = 6;                                      // Set this to how many Monsters should be in the solution (f.e 4 for X-3 Quests) 
     hostileLineup = makeMonstersFromStrings(test2);     // Choose against which lineup you want to fight use one from above or make your own and then change the name accordingly
     bool individual = false;                            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
-    bool time_it = true;                                // Set this to true if you want to see how far the execution is and how lone the execution took altogether
+    bool debugInfo = true;                              // Set this to true if you want to see how far the execution is and how lone the execution took altogether
     bool manualInput = false;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
     
     if (!ignoreConsole) {
@@ -765,9 +769,9 @@ int main(int argc, char** argv) {
             cout << "Hostile Lineup" << endl;
             hostileLineup = takeLineupInput();
             
-            FightResult custom_result;
-            simulate_fight(custom_result, Army(friendLineup), Army(hostileLineup), true);
-            cout << custom_result.rightWon << " " << Army(friendLineup).followerCost << " " << Army(hostileLineup).followerCost << endl;
+            FightResult customResult;
+            simulateFight(customResult, Army(friendLineup), Army(hostileLineup), true);
+            cout << customResult.rightWon << " " << Army(friendLineup).followerCost << " " << Army(hostileLineup).followerCost << endl;
             
             if (!askYesNoQuestion("Simulate another Fight?")) {
                 break;
@@ -778,13 +782,14 @@ int main(int argc, char** argv) {
     
     int startTime = time(NULL);
     Army hostileArmy = Army(hostileLineup);
-    solve_instance(availableHeroes, hostileArmy, limit, time_it);
+    solveInstance(availableHeroes, hostileArmy, limit, debugInfo);
     // Last check to see if winning combination wins:
     if (followerUpperBound < numeric_limits<int>::max()) {
         best.precomputedFight.valid = false;
-        FightResult final_result;
-        simulate_fight(final_result, best, hostileArmy);
-        if (final_result.rightWon) {
+        FightResult finalResult;
+        simulateFight(finalResult, best, hostileArmy, true);
+        if (finalResult.rightWon) {
+            best.print();
             for (int i = 1; i <= 10; i++) {
                 cout << "ERROR";
             }
