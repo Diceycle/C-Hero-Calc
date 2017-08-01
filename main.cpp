@@ -152,7 +152,6 @@ void simulateFight(FightResult & result, const Army & left, const Army & right, 
     bool rightBerserkActive = false;
     
     // If no heroes are in the army the result from the smaller army is still valid
-    // TODO: Fix bug: if aoe kills the 'new arrival' but it was a draw before then it is not checked cause of tehe while condition
     if (left.precomputedFight.valid && !verbose) { 
         // Set pre-computed values to pick up where we left off
         leftLost = leftArmySize-1;
@@ -350,6 +349,8 @@ void getQuickSolutions(const vector<Monster *> & availableHeroes, Army target, s
         } else {
             cout << "  Could not find valid solution while being greedy" << endl;
         }
+    } else {
+        cout << "  Could not find valid solution while being greedy" << endl;
     }
 }
 
@@ -576,36 +577,24 @@ int main(int argc, char** argv) {
     vector<int> yourHeroLevels;
     
     // Additional convienience Strings
-    vector<string> daily {"e10", "e10", "f10", "a10", "nebra:22"};
-    vector<string> test {"a10", "tiny:92"};
-    vector<string> test2 {"f10","a10","f10","a10","t4urus:99"};
-    vector<string> test3 {"a9", "f8", "a8"}; // soultion should be (e7, w7, ailen:53, rei:1)(274k) or better but gets dominated {0,0,0,0,1,1,0,3,0,0,2,1,1,53,2,0,0,0,0,0,0,0,1,1,0,0,0};
-    
+    vector<string> daily {"w10", "e10", "a10", "w10", "shaman:99"};
+    vector<string> test3 {"a9", "f8", "a8"}; 
     // Declare Hero Levels
     // INPUT YOUR HERO LEVELS HERE (For manual editing: Names tell you which number is the level of which hero)
-//    yourHeroLevels = { 1, 1, 0, 0,      // "lady of twilight","tiny","nebra","james"
-//                      99, 2, 1,         // "hunter","shaman","alpha"
-//                       5, 2, 1,         // "carl","nimue","athos"
-//                       5, 8, 0,         // "jet","geron","rei"
-//                      99, 4, 0,         // "ailen","faefyr","auri"
-//                       1, 0, 0,         // "k41ry", "t4urus", "tr0n1x"
-//                       1, 0, 0,         // "aquortis", "aeris", "geum"
-//                       1, 1, 1, 1, 1,   // "valor","rokka","pyromancer","bewat","nicte"
-//    }; 
-    yourHeroLevels = { 1, 1, 0, 0,      // "lady of twilight","tiny","nebra","james"
-                      99, 0, 1,         // "hunter","shaman","alpha"
-                       0, 0, 1,         // "carl","nimue","athos"
+    yourHeroLevels = { 0, 0, 0, 0,      // "lady of twilight","tiny","nebra","james"
+                       0, 0, 0,         // "hunter","shaman","alpha"
+                       0, 0, 0,         // "carl","nimue","athos"
                        0, 0, 0,         // "jet","geron","rei"
-                      99, 0, 0,         // "ailen","faefyr","auri"
-                       1, 0, 0,         // "k41ry", "t4urus", "tr0n1x"
-                       1, 0, 0,         // "aquortis", "aeris", "geum"
-                       0, 0, 0, 0, 1,   // "valor","rokka","pyromancer","bewat","nicte"
+                       0, 0, 0,         // "ailen","faefyr","auri"
+                       0, 0, 0,         // "k41ry", "t4urus", "tr0n1x"
+                       0, 0, 0,         // "aquortis", "aeris", "geum"
+                       0, 0, 0, 0, 0,   // "valor","rokka","pyromancer","bewat","nicte"
     }; 
     
     // Use these variables to specify the fight
     bool ignoreConsole = false;                         // Disables the console question whether you want to read from file or command line
     int limit = 6;                                      // Set this to how many Monsters should be in the solution (f.e 4 for X-3 Quests) 
-    hostileLineup = makeMonstersFromStrings(test2);     // Choose against which lineup you want to fight use one from above or make your own and then change the name accordingly
+    hostileLineup = makeMonstersFromStrings(quests[0]); // Choose against which lineup you want to fight use one from above or make your own and then change the name accordingly
     bool individual = false;                            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
     bool debugInfo = true;                              // Set this to true if you want to see how far the execution is and how lone the execution took altogether
     bool manualInput = false;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
