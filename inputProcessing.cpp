@@ -1,5 +1,12 @@
 #include "inputProcessing.h"
 
+// Wait for user input before continuing. Used to stop program from colsing outside of a command line.
+void haltExecution() {
+    cout << "Press enter to continue...";
+    cin.sync();
+    cin.get();
+}
+
 // Ask the user a question that they can answer via command line
 bool askYesNoQuestion(string question) {
     string inputString;
@@ -51,8 +58,7 @@ vector<int> takeHerolevelInput() {
             heroFile.close();
         } catch (const exception & e) {
             cout << "Could not open File. Make sure you input the hero Levels manually at least once." << endl;
-            system("pause");
-            exit(EXIT_FAILURE);
+            throw runtime_error("Hero File not found");
         }
     } else {
         cout << "Enter the level of the hero, whose name is shown (Enter 0 if you don't own the Hero)" << endl;

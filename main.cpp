@@ -604,7 +604,12 @@ int main(int argc, char** argv) {
     }
     // Collect the Data via Command Line if the user wants
     if (manualInput) {
-        yourHeroLevels = takeHerolevelInput();
+        try {
+            yourHeroLevels = takeHerolevelInput();
+        } catch (const exception & e) {
+            haltExecution();
+            return EXIT_FAILURE;
+        }
         hostileLineup = takeLineupInput();
         cout << "Enter how many monsters are allowed in the solution" << endl;
         cin >> inputString;
@@ -655,8 +660,9 @@ int main(int argc, char** argv) {
             for (int i = 1; i <= 10; i++) {
                 cout << "ERROR";
             }
-            system("pause");
-            return -1;
+            haltExecution();
+            return EXIT_FAILURE;
+            
         } else {
             // Print the winning combination!
             cout << endl << "The optimal combination is:" << endl << "  ";
@@ -670,6 +676,6 @@ int main(int argc, char** argv) {
     cout << endl;
     cout << totalFightsSimulated << " Fights simulated." << endl;
     cout << "Total Calculation Time: " << time(NULL) - startTime << endl;
-    system("pause");
-    return 0;
+    haltExecution();
+    return EXIT_SUCCESS;
 }

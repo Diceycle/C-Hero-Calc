@@ -12,6 +12,9 @@
 
 using namespace std;
 
+// Wait for user input before continuing. Used to stop program from colsing outside of a command line.
+void haltExecution();
+
 // Ask the user a question that they can answer via command line
 bool askYesNoQuestion(string question);
 
