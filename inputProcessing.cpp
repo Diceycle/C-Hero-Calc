@@ -8,21 +8,38 @@ void haltExecution() {
 }
 
 // Ask the user a question that they can answer via command line
-bool askYesNoQuestion(string question) {
+bool askYesNoQuestion(string question, string autoc) {
     string inputString;
     while (true) {
-        cout << question << " (y/n): ";
-        cin >> inputString;
-        if (inputString == "n") {
+		cout << question;
+		if (autoc == "n" || autoc == "N") {
+            cout  << " ( y/[N] ) : ";
+			}
+		if (autoc == "y" || autoc == "Y") {
+            cout << " ( [Y]/n ) : ";
+			}
+		getline(cin, inputString);
+
+        if (inputString.size() == 0)
+			inputString = autoc;
+		if (inputString == "n" || inputString == "N") {
             return false;
         }
-        if (inputString == "y") {
+        if (inputString == "y" || inputString == "Y") {
             return true;
         }
     }
     return false;
 }
 
+string askQuestion(string question, string autoc) {
+    string inputString;
+	cout << question << " [" << autoc << "] : ";
+	getline(cin, inputString);
+	if (inputString.size() == 0)
+		inputString = autoc;
+	return inputString;
+}
 // Output things on the command line. Using shouldOutput this can be easily controlled globally
 void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLastOutput, bool finishLine) {
     if (shouldOutput) { 
@@ -64,7 +81,7 @@ vector<int> takeHerolevelInput() {
         cout << "Enter the level of the hero, whose name is shown (Enter 0 if you don't own the Hero)" << endl;
         for (size_t i = 0; i < baseHeroes.size(); i++) {
             cout << baseHeroes[i].name << ": ";
-            cin >> input;
+            getline(cin, input);
             levels.push_back(stoi(input));
         }
         
@@ -88,7 +105,7 @@ vector<Monster *> takeLineupInput() {
     string input;
     cout << "Enter desired Lineup separated with commas (no spaces!)" << endl;
     cout << "Alternatively: type f.e. quest17 to get the lineup for quest 17." << endl;
-    cin >> input;
+    getline(cin, input);
     
     if (input.compare(0, questString.length(), questString) == 0) {
         int questNumber = stoi(input.substr(questString.length(), 2));
