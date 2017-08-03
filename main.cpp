@@ -686,11 +686,12 @@ int main(int argc, char** argv) {
             
         } else {
             // Print the winning combination!
-			cout << endl << "Hostile LineUp was : " ;
-			for (size_t i = 0; i < Army(hostileLineup).monsters.size(); i++) {
-                cout << Army(hostileLineup).monsters[Army(hostileLineup).monsters.size() - 1 - i]->name << " "; // backwards
+	    cout << endl << "Hostile LineUp was : " ;
+	    for (size_t i = 0; i < Army(hostileLineup).monsters.size(); i++) {
+            cout << Army(hostileLineup).monsters[Army(hostileLineup).monsters.size() - 1 - i]->name << " "; // backwards
             }
-			cout << endl << "The minimum amount of followers is : " << best.followerCost << endl;
+	    cout << " (left-most fights first)." << endl;
+	    cout << "The minimum amount of followers is : " << best.followerCost << endl;
             cout << "The optimal combination is: " << endl << "         ";
             for (size_t i = 0; i < best.monsters.size(); i++) {
                 cout << best.monsters[best.monsters.size() - 1 - i]->name << "   "; // backwards
