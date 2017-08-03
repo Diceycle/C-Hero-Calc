@@ -3,8 +3,9 @@
 // Wait for user input before continuing. Used to stop program from colsing outside of a command line.
 void haltExecution() {
     cout << "Press enter to continue...";
-    cin.sync();
-    cin.get();
+    //cin.sync();
+    //cin.get();
+    while (cin.get() != '\n') { }  //another way
 }
 
 // Ask the user a question that they can answer via command line
