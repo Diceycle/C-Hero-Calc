@@ -190,9 +190,25 @@ void simulateFight(FightResult & result, const Army & left, const Army & right, 
             rightBerserk = 1;
             rightLost++;
         }
+        
         // healing - does not take effect on death
-        leftDamageTaken = max(0, leftDamageTaken - turnSimulation[1]);
-        rightDamageTaken = max(0, rightDamageTaken - turnSimulation[5]);
+        leftDamageTaken -= turnSimulation[1];
+        leftCumAoeDamage -= turnSimulation[1];
+        rightDamageTaken -= turnSimulation[5];
+        rightCumAoeDamage -= turnSimulation[5];
+        if (leftDamageTaken < 0) {
+            leftDamageTaken = 0;
+        }
+        if (leftCumAoeDamage < 0) {
+            leftCumAoeDamage = 0;
+        }
+        if (rightDamageTaken < 0) {
+            rightDamageTaken = 0;
+        }
+        if (rightCumAoeDamage < 0) {
+            rightCumAoeDamage = 0;
+        }
+        
         
         // deal with berserkers
         if (leftBerserkActive) {
