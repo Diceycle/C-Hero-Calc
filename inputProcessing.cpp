@@ -64,7 +64,7 @@ vector<int> takeHerolevelInput() {
     fstream heroFile;
     heroFile.exceptions(fstream::failbit);
     
-    if (askYesNoQuestion("Do you want to load hero levels from file?")) {
+    if (askYesNoQuestion("Do you want to load hero levels from file?","y")) {
         try {
             heroFile.open("heroLevels", fstream::in);
             heroFile >> input;
