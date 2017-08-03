@@ -16,7 +16,8 @@ using namespace std;
 void haltExecution();
 
 // Ask the user a question that they can answer via command line
-bool askYesNoQuestion(string question);
+bool askYesNoQuestion(string question, string autoc);
+string askQuestion(string question, string autoc);
 
 // Output things on the command line. Using shouldOutput this can be easily controlled globally
 void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLastOutput, bool finishLine);
