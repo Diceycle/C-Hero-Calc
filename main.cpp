@@ -373,11 +373,12 @@ void getQuickSolutions(const vector<Monster *> & availableHeroes, Army target, s
 void solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t limit, bool debugInfo) {
     Army tempArmy = Army();
     FightResult tempResult;
-    int startTime = time(NULL);
-    int tempTime = startTime;
+    int startTime;
+    int tempTime;
     
     size_t i, j, sj, si, c;
 
+    // Get first Upper limit on followers
     getQuickSolutions(availableHeroes, target, limit);
     if (!askYesNoQuestion("Continue calculation?")) {return;}
     cout << endl;
@@ -420,6 +421,8 @@ void solveInstance(const vector<Monster *> & availableHeroes, Army target, size_
     }
 
     // Run the Bruteforce Loop
+    startTime = time(NULL);
+    tempTime = startTime;
     size_t armySize = 0;
     size_t targetSize = target.monsters.size();
     size_t fightResultAmount, herofightResultAmount;
