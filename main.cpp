@@ -618,6 +618,8 @@ int main(int argc, char** argv) {
     bool debugInfo = true;                              // Set this to true if you want to see how far the execution is and how lone the execution took altogether
     bool manualInput = false;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
     
+    cout << "Welcome to Diceycle's PvE Instance Solver!" << endl;
+    
     if (!ignoreConsole) {
         manualInput = askYesNoQuestion("Do you want to input everything via command line?");
     }
