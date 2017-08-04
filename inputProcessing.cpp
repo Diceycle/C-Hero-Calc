@@ -79,11 +79,22 @@ vector<int> takeHerolevelInput() {
             throw runtime_error("Hero File not found");
         }
     } else {
+        try {
+            heroFile.open("heroLevels", fstream::in);
+            heroFile >> input;
+            stringLevels = split(input, ",");
+            for (size_t i = 0; i < stringLevels.size(); i++) {
+                levels.push_back(stoi(stringLevels[i]));
+            }
+            heroFile.close();
+        } catch (const exception & e) {
+            for (size_t i = 0; i < baseHeroes.size(); i++) {
+                levels.push_back(0);
+            }
+        }
         cout << "Enter the level of the hero, whose name is shown (Enter 0 if you don't own the Hero)" << endl;
         for (size_t i = 0; i < baseHeroes.size(); i++) {
-            cout << baseHeroes[i].name << ": ";
-            getline(cin, input);
-            levels.push_back(stoi(input));
+		levels[i] = stoi(askQuestion(baseHeroes[i].name, to_string(levels[i])));
         }
         
         // Write Hero Levels to file to use next time
