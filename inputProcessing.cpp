@@ -3,7 +3,7 @@
 // Wait for user input before continuing. Used to stop program from colsing outside of a command line.
 void haltExecution() {
     cout << "Press enter to continue...";
-    cin.sync();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cin.get();
 }
 
