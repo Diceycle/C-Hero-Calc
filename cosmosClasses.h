@@ -9,15 +9,22 @@
 using namespace std;
 
 // Define types of HeroSkills and Elements
-enum SkillType {nothing, buff, protect, aoe, pAoe, heal, berserk};
-enum Element {earth, air, water, fire, all, self}; // also used for hero skill targets
+enum SkillType {nothing, buff, protect, aoe, pAoe, heal, berserk, friends};
+enum Element {
+    earth = 0,
+    air = 1, 
+    water = 2, 
+    fire = 3, 
+    all, 
+    self
+}; // also used for hero skill targets
 
 // Defines Skills of Heros
 struct HeroSkill {
     SkillType type;
     Element target;
     Element sourceElement;
-    int amount;
+    float amount;
 };
 static HeroSkill none = HeroSkill({nothing, air, air, 1}); // base skill used for normal monsters
 

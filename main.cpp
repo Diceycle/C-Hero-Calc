@@ -79,6 +79,9 @@ void simulateTurn(vector<int> & result, const vector<Monster *> & left, size_t l
     SkillType skillType;
     Element skillTarget;
     
+    damageLeft += currentLeft->damage;
+    damageRight += currentRight->damage;
+    
     for (size_t i = rightIndex; i < rightArmySize; i++) {
         skill = &right[i]->skill;
         skillType = skill->type;
@@ -92,8 +95,10 @@ void simulateTurn(vector<int> & result, const vector<Monster *> & left, size_t l
             aoeDamageRight += skill->amount;
         } else if (skillType == pAoe && i == rightIndex) {
             paoeDamageRight += right[i]->damage;
-        } else if (skillType== buff && (skillTarget == all || skillTarget == rightElement)) {
+        } else if (skillType == buff && (skillTarget == all || skillTarget == rightElement)) {
             damageRight += skill->amount;
+        } else if (skillType == friends && i == rightIndex) {
+            damageRight *= pow(skill->amount, rightArmySize-rightIndex-1);
         }
     }
     for (size_t i = leftIndex; i < leftArmySize; i++) {
@@ -109,18 +114,33 @@ void simulateTurn(vector<int> & result, const vector<Monster *> & left, size_t l
             aoeDamageLeft += skill->amount;
         } else if (skillType == pAoe && i == leftIndex) {
             paoeDamageLeft += left[i]->damage;
-        } else if (skillType== buff && (skillTarget == all || skillTarget == leftElement)) {
+        } else if (skillType == buff && (skillTarget == all || skillTarget == leftElement)) {
             damageLeft += skill->amount;
+        } else if (skillType == friends && i == leftIndex) {
+            damageLeft *= pow(skill->amount, leftArmySize-leftIndex-1);
         }
     }
     
-    damageLeft = getElementalAdvantage(currentLeft->damage + damageLeft, currentLeft->element, currentRight->element);
+//    damageLeft = getElementalAdvantage(currentLeft->damage + damageLeft, currentLeft->element, currentRight->element);
+    if ((leftElement == earth && rightElement == air) || 
+        (leftElement == air && rightElement == water) ||
+        (leftElement == water && rightElement == fire) ||
+        (leftElement == fire && rightElement == earth)) {
+        damageLeft *= elementalBoost;
+    }
     if (damageLeft > protectionRight) {
         damageLeft -= protectionRight;
     } else {
         damageLeft = 0;
     }
-    damageRight = getElementalAdvantage(currentRight->damage + damageRight, currentRight->element, currentLeft->element);
+    
+//    damageRight = getElementalAdvantage(currentRight->damage + damageRight, currentRight->element, currentLeft->element);
+    if ((rightElement == earth && leftElement == air) || 
+        (rightElement == air && leftElement == water) ||
+        (rightElement == water && leftElement == fire) ||
+        (rightElement == fire && leftElement == earth)) {
+        damageRight *= elementalBoost;
+    } 
     if (damageRight > protectionLeft) {
         damageRight -= protectionLeft;
     } else {
@@ -611,7 +631,9 @@ int main(int argc, char** argv) {
                        0, 0, 0,         // "ailen","faefyr","auri"
                        0, 0, 0,         // "k41ry", "t4urus", "tr0n1x"
                        0, 0, 0,         // "aquortis", "aeris", "geum"
-                       0, 0, 0, 0, 0,   // "valor","rokka","pyromancer","bewat","nicte"
+                       0, 0, 0,         // "rudean","aural","geror"
+                       0, 0, 0, 0,      // "valor","rokka","pyromancer","bewat"
+                       0, 0, 0, 0       // "nicte", "forest druid","ignitor","undine"
     }; 
     
     // Use these variables to specify the fight
