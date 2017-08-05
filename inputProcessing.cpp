@@ -92,7 +92,7 @@ vector<Monster *> takeLineupInput() {
     
     if (input.compare(0, questString.length(), questString) == 0) {
         int questNumber = stoi(input.substr(questString.length(), 2));
-        lineup = makeMonstersFromStrings(quests[questNumber-1]);
+        lineup = makeMonstersFromStrings(quests[questNumber]);
     } else {
         vector<string> stringLineup = split(input, ",");
         lineup = makeMonstersFromStrings(stringLineup);
