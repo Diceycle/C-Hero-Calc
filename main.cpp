@@ -45,7 +45,7 @@ int getElementalAdvantage(int damage, Element sourceElement, Element targetEleme
         (sourceElement == air && targetElement == water) ||
         (sourceElement == water && targetElement == fire) ||
         (sourceElement == fire && targetElement == earth)) {
-        return damage * 1.5;
+        return damage * elementalBoost;
     }
     return damage;
 }
@@ -53,59 +53,63 @@ int getElementalAdvantage(int damage, Element sourceElement, Element targetEleme
 void simulateTurn(vector<int> & result, const vector<Monster *> & left, size_t leftIndex, const vector<Monster *> & right, size_t rightIndex) {
     // simulates one turn (left attacks right and right attacks left)
     // returns all the damage values
-    // may seem unelegant to do both side in one function but it probably saves about 10 million function calls even on small problems
+    // may seem unelegant to do both side in one function but it saves millions of function calls even on small problems
     // expects a vector of size 8 to write the results of the simulation
     
     Monster * currentLeft = left[leftIndex];
+    size_t leftArmySize = left.size();
     int damageLeft = 0;
     int protectionLeft = 0;
     int aoeDamageLeft = 0;
     int paoeDamageLeft = 0;
     int healingLeft = 0;
+    Element leftElement = currentLeft->element;
     
     Monster * currentRight = right[rightIndex];
+    size_t rightArmySize = right.size();
     int damageRight = 0;
     int protectionRight = 0;
     int aoeDamageRight = 0;
     int paoeDamageRight = 0;
     int healingRight = 0;
+    Element rightElement = currentRight->element;
     
     //hero stuff
     HeroSkill * skill;
     SkillType skillType;
     Element skillTarget;
     
-    for (size_t i = rightIndex; i < right.size(); i++) {
+    for (size_t i = rightIndex; i < rightArmySize; i++) {
         skill = &right[i]->skill;
         skillType = skill->type;
         skillTarget = skill->target;
         if (skillType == nothing) {
-        } else if (skillType == protect && (skillTarget == all || skillTarget == currentRight->element)) {
+        } else if (skillType == protect && (skillTarget == all || skillTarget == rightElement)) {
             protectionRight += skill->amount;
-        } else if (skillType == heal && (skillTarget == all || skillTarget == currentRight->element)) {
+        } else if (skillType == heal && (skillTarget == all || skillTarget == rightElement)) {
             healingRight += skill->amount;
-        } else if (skillType == aoe && (skillTarget == all || skillTarget == currentLeft->element)) {
+        } else if (skillType == aoe && (skillTarget == all || skillTarget == leftElement)) {
             aoeDamageRight += skill->amount;
         } else if (skillType == pAoe && i == rightIndex) {
             paoeDamageRight += right[i]->damage;
-        } else if (skillType== buff && (skillTarget == all || skillTarget == currentRight->element)) {
+        } else if (skillType== buff && (skillTarget == all || skillTarget == rightElement)) {
             damageRight += skill->amount;
         }
     }
-    for (size_t i = leftIndex; i < left.size(); i++) {
+    for (size_t i = leftIndex; i < leftArmySize; i++) {
         skill = &left[i]->skill;
         skillType = skill->type;
         skillTarget = skill->target;
         if (skillType == nothing) {
-        } else if (skillType == protect && (skillTarget == all || skillTarget == currentLeft->element)) {
+        } else if (skillType == protect && (skillTarget == all || skillTarget == leftElement)) {
             protectionLeft += skill->amount;
-        } else if (skillType == heal && (skillTarget == all || skillTarget == currentLeft->element)) {
+        } else if (skillType == heal && (skillTarget == all || skillTarget == leftElement)) {
             healingLeft += skill->amount;
-        } else if (skillType == aoe && (skillTarget == all || skillTarget == currentRight->element)) {
+        } else if (skillType == aoe && (skillTarget == all || skillTarget == rightElement)) {
             aoeDamageLeft += skill->amount;
         } else if (skillType == pAoe && i == leftIndex) {
             paoeDamageLeft += left[i]->damage;
-        } else if (skillType== buff && (skillTarget == all || skillTarget == currentLeft->element)) {
+        } else if (skillType== buff && (skillTarget == all || skillTarget == leftElement)) {
             damageLeft += skill->amount;
         }
     }

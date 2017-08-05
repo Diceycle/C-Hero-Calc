@@ -9,6 +9,8 @@
 
 using namespace std;
 
+const float elementalBoost = 1.5;
+
 extern int totalFightsSimulated;
 
 // Define global variables used to track the best result
