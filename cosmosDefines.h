@@ -128,6 +128,7 @@ static map<string, int> rarities { // hero rarities
 };
 
 static vector<vector<string>> quests { // Contains all quest lineups for easy referencing
+	{""},
 	{"w5"},
 	{"f1", "a1", "f1", "a1", "f1", "a1"},
 	{"f5", "a5"},
