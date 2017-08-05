@@ -659,7 +659,7 @@ int main(int argc, char** argv) {
         }
         hostileLineup = takeLineupInput();
         cout << "Enter how many monsters are allowed in the solution" << endl;
-        cin >> inputString;
+        getline(cin, inputString);
         limit = stoi(inputString);
     } else {
         cout << "Taking data from script" << endl;

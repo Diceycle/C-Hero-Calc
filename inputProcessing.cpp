@@ -12,7 +12,7 @@ bool askYesNoQuestion(string question) {
     string inputString;
     while (true) {
         cout << question << " (y/n): ";
-        cin >> inputString;
+        getline(cin, inputString);
         if (inputString == "n") {
             return false;
         }
@@ -64,7 +64,7 @@ vector<int> takeHerolevelInput() {
         cout << "Enter the level of the hero, whose name is shown (Enter 0 if you don't own the Hero)" << endl;
         for (size_t i = 0; i < baseHeroes.size(); i++) {
             cout << baseHeroes[i].name << ": ";
-            cin >> input;
+            getline(cin, input);
             levels.push_back(stoi(input));
         }
         
@@ -88,7 +88,7 @@ vector<Monster *> takeLineupInput() {
     string input;
     cout << "Enter desired Lineup separated with commas (no spaces!)" << endl;
     cout << "Alternatively: type f.e. quest17 to get the lineup for quest 17." << endl;
-    cin >> input;
+    getline(cin, input);
     
     if (input.compare(0, questString.length(), questString) == 0) {
         int questNumber = stoi(input.substr(questString.length(), 2));
@@ -163,7 +163,6 @@ vector<string> split(string s, string to_split) {
     size_t limit = 0;
     while(limit != s.npos){
         limit = s.find(to_split, x);
-        
         output.push_back(s.substr(x, limit-x));
         x = limit + to_split.length();
     }
