@@ -198,7 +198,7 @@ void simulateFight(FightResult & result, Army & left, Army & right, bool verbose
             leftBerserkMult = 1;
         }
         if (currentMonsterLeft->skill.type == friends) {
-            damageLeft *= pow(damageLeft, pureMonstersLeft);
+            damageLeft *= pow(currentMonsterLeft->skill.amount, pureMonstersLeft);
         }
         
         damageRight = currentMonsterRight->damage;
@@ -209,7 +209,7 @@ void simulateFight(FightResult & result, Army & left, Army & right, bool verbose
             rightBerserkMult = 1;
         }
         if (currentMonsterRight->skill.type == friends) {
-            damageRight *= pow(damageRight, pureMonstersRight);
+            damageRight *= pow(currentMonsterRight->skill.amount, pureMonstersRight);
         }
         
         // Add Buff Damage
