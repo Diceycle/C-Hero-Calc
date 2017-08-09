@@ -652,7 +652,7 @@ int main(int argc, char** argv) {
     // Use these variables to specify the fight
     bool ignoreConsole = false;                         // Disables the console question whether you want to read from file or command line
     int limit = 6;                                      // Set this to how many Monsters should be in the solution (f.e 4 for X-3 Quests) 
-    hostileLineup = makeMonstersFromStrings(quests[0]); // Choose against which lineup you want to fight use one from above or make your own and then change the name accordingly
+    hostileLineup = makeMonstersFromStrings(quests[1]); // Choose against which lineup you want to fight use one from above or make your own and then change the name accordingly
     bool individual = false;                            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
     bool debugInfo = true;                              // Set this to true if you want to see how far the execution is and how lone the execution took altogether
     bool manualInput = false;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
