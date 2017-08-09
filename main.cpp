@@ -39,233 +39,246 @@ bool isCheaper(Monster * a, Monster * b) {
     return a->cost < b->cost;
 }
 
-// Returns damage done depending on the elements of the fighting monsters
-int getElementalAdvantage(int damage, Element sourceElement, Element targetElement) {
-    if ((sourceElement == earth && targetElement == air) || 
-        (sourceElement == air && targetElement == water) ||
-        (sourceElement == water && targetElement == fire) ||
-        (sourceElement == fire && targetElement == earth)) {
-        return damage * elementalBoost;
     }
-    return damage;
 }
 
-void simulateTurn(vector<int> & result, const vector<Monster *> & left, size_t leftIndex, const vector<Monster *> & right, size_t rightIndex) {
-    // simulates one turn (left attacks right and right attacks left)
-    // returns all the damage values
-    // may seem unelegant to do both side in one function but it saves millions of function calls even on small problems
-    // expects a vector of size 8 to write the results of the simulation
-    
-    Monster * currentLeft = left[leftIndex];
-    size_t leftArmySize = left.size();
-    int damageLeft = 0;
-    int protectionLeft = 0;
-    int aoeDamageLeft = 0;
-    int paoeDamageLeft = 0;
-    int healingLeft = 0;
-    Element leftElement = currentLeft->element;
-    
-    Monster * currentRight = right[rightIndex];
-    size_t rightArmySize = right.size();
-    int damageRight = 0;
-    int protectionRight = 0;
-    int aoeDamageRight = 0;
-    int paoeDamageRight = 0;
-    int healingRight = 0;
-    Element rightElement = currentRight->element;
-    
-    //hero stuff
-    HeroSkill * skill;
-    SkillType skillType;
-    Element skillTarget;
-    
-    damageLeft += currentLeft->damage;
-    damageRight += currentRight->damage;
-    
-    for (size_t i = rightIndex; i < rightArmySize; i++) {
-        skill = &right[i]->skill;
-        skillType = skill->type;
-        skillTarget = skill->target;
-        if (skillType == nothing) {
-        } else if (skillType == protect && (skillTarget == all || skillTarget == rightElement)) {
-            protectionRight += skill->amount;
-        } else if (skillType == heal && (skillTarget == all || skillTarget == rightElement)) {
-            healingRight += skill->amount;
-        } else if (skillType == aoe && (skillTarget == all || skillTarget == leftElement)) {
-            aoeDamageRight += skill->amount;
-        } else if (skillType == pAoe && i == rightIndex) {
-            paoeDamageRight += right[i]->damage;
-        } else if (skillType == buff && (skillTarget == all || skillTarget == rightElement)) {
-            damageRight += skill->amount;
-        } else if (skillType == friends && i == rightIndex) {
-            damageRight *= pow(skill->amount, rightArmySize-rightIndex-1);
-        }
-    }
-    for (size_t i = leftIndex; i < leftArmySize; i++) {
-        skill = &left[i]->skill;
-        skillType = skill->type;
-        skillTarget = skill->target;
-        if (skillType == nothing) {
-        } else if (skillType == protect && (skillTarget == all || skillTarget == leftElement)) {
-            protectionLeft += skill->amount;
-        } else if (skillType == heal && (skillTarget == all || skillTarget == leftElement)) {
-            healingLeft += skill->amount;
-        } else if (skillType == aoe && (skillTarget == all || skillTarget == rightElement)) {
-            aoeDamageLeft += skill->amount;
-        } else if (skillType == pAoe && i == leftIndex) {
-            paoeDamageLeft += left[i]->damage;
-        } else if (skillType == buff && (skillTarget == all || skillTarget == leftElement)) {
-            damageLeft += skill->amount;
-        } else if (skillType == friends && i == leftIndex) {
-            damageLeft *= pow(skill->amount, leftArmySize-leftIndex-1);
-        }
-    }
-    
-//    damageLeft = getElementalAdvantage(currentLeft->damage + damageLeft, currentLeft->element, currentRight->element);
-    if ((leftElement == earth && rightElement == air) || 
-        (leftElement == air && rightElement == water) ||
-        (leftElement == water && rightElement == fire) ||
-        (leftElement == fire && rightElement == earth)) {
-        damageLeft *= elementalBoost;
-    }
-    if (damageLeft > protectionRight) {
-        damageLeft -= protectionRight;
-    } else {
-        damageLeft = 0;
-    }
-    
-//    damageRight = getElementalAdvantage(currentRight->damage + damageRight, currentRight->element, currentLeft->element);
-    if ((rightElement == earth && leftElement == air) || 
-        (rightElement == air && leftElement == water) ||
-        (rightElement == water && leftElement == fire) ||
-        (rightElement == fire && leftElement == earth)) {
-        damageRight *= elementalBoost;
-    } 
-    if (damageRight > protectionLeft) {
-        damageRight -= protectionLeft;
-    } else {
-        damageRight = 0; 
-    }
-
-    result[0] = damageLeft; 
-    result[1] = healingLeft;
-    result[2] = aoeDamageLeft;
-    result[3] = paoeDamageLeft;
-    result[4] = damageRight;
-    result[5] = healingRight;
-    result[6] = aoeDamageRight;
-    result[7] = paoeDamageRight;
-}
-
-// TODO: Check and potentially implement hero death - skill interaction
-void simulateFight(FightResult & result, const Army & left, const Army & right, bool verbose = false) {
+// TODO: Implement MAX AOE DAmage to make sure nothing gets revived
+void simulateFight(FightResult & result, Army & left, Army & right, bool verbose = false) {
     //fights left to right, so left[0] and right[0] are the first to fight
-    totalFightsSimulated++;
-    int leftLost = 0;
-    int leftArmySize = left.monsters.size();
-    int leftDamageTaken = 0;
-    int leftCumAoeDamage = 0;
-    int leftBerserk = 1;
-    bool leftBerserkActive = false;
+    // Damage Application Order:
+    //  1. Base Damage of creature
+    //  2. Multiplicators of self       (friends, berserk)
+    //  3. Buffs from heroes            (Hunter, Rei, etc.)
+    //  4. Elemental Advantage          (f.e. Fire vs. Earth)
+    //  5. Protection of enemy Side     (Nimue, Athos, etc.)
+    //  6. AOE of friendly Side         (Tiny, Alpha, etc.)
+    //  7. Healing of enemy Side        (Auri, Aeris, etc.)
     
-    int rightLost = 0;
-    int rightArmySize = right.monsters.size();
-    int rightDamageTaken = 0;
-    int rightCumAoeDamage = 0;
-    int rightBerserk = 1;
-    bool rightBerserkActive = false;
+    totalFightsSimulated++;
+    
+    size_t leftLost = 0;
+    size_t leftArmySize = left.monsters.size();
+    vector<Monster *> & leftLineup = left.monsters;
+    
+    int leftFrontDamageTaken = 0;
+    int leftHealing = 0;
+    int leftCumAoeDamageTaken = 0;
+    float leftBerserkMult = 1;
+    
+    size_t rightLost = 0;
+    size_t rightArmySize = right.monsters.size();
+    vector<Monster *> & rightLineup = right.monsters;
+    
+    int rightFrontDamageTaken = 0;
+    int rightHealing = 0;
+    int rightCumAoeDamageTaken = 0;
+    float rightBerserkMult = 1;
     
     // If no heroes are in the army the result from the smaller army is still valid
     if (left.precomputedFight.valid && !verbose) { 
         // Set pre-computed values to pick up where we left off
-        leftLost = leftArmySize-1;
-        leftDamageTaken = left.precomputedFight.leftAoeDamage;
-        leftCumAoeDamage = left.precomputedFight.leftAoeDamage;
-        rightLost = left.precomputedFight.monstersLost;
-        rightDamageTaken = left.precomputedFight.damage;
-        rightCumAoeDamage = left.precomputedFight.rightAoeDamage;
-        rightBerserk = left.precomputedFight.berserk;
-        if (left.monsters[leftLost]->hp <= leftCumAoeDamage) {
-            leftLost++;
-        }
+        leftLost                = leftArmySize-1; // All monsters of left died last fight only the new one counts
+        leftFrontDamageTaken    = left.precomputedFight.leftAoeDamage;
+        leftCumAoeDamageTaken   = left.precomputedFight.leftAoeDamage;
+        rightLost               = left.precomputedFight.monstersLost;
+        rightFrontDamageTaken   = left.precomputedFight.damage;
+        rightCumAoeDamageTaken  = left.precomputedFight.rightAoeDamage;
+        rightBerserkMult        = left.precomputedFight.berserk;
     }
-      
-    vector<int> turnSimulation; turnSimulation.reserve(8);
-    while (leftLost < leftArmySize && rightLost < rightArmySize) {
-        //attack once
-        leftBerserkActive = left.monsters[leftLost]->skill.type == berserk;
-        rightBerserkActive = right.monsters[rightLost]->skill.type == berserk;
+    
+    // Values for skills  
+    int damageLeft, damageRight;
+    int damageBuffLeft, damageBuffRight;
+    int protectionLeft, protectionRight;
+    int aoeDamageLeft, aoeDamageRight;
+    int paoeDamageLeft, paoeDamageRight;
+    int healingLeft, healingRight;
+    int pureMonstersLeft, pureMonstersRight;
+    int elementalDifference;
+    
+    // hero temp Variables
+    Monster * currentMonsterLeft;
+    Monster * currentMonsterRight;
+    HeroSkill * skill;
+    SkillType skillType;
+    Element skillTarget;
+    
+    while (true) {
+        // Get all hero influences
+        damageBuffLeft = 0;
+        protectionLeft = 0;
+        aoeDamageLeft = 0;
+        paoeDamageLeft = 0;
+        healingLeft = 0;
+        pureMonstersLeft = 0;
+        for (size_t i = leftLost; i < leftArmySize; i++) {
+            if (leftCumAoeDamageTaken >= leftLineup[i]->hp) {
+                leftLost += (leftLost == i);
+            } else {
+                skill = &leftLineup[i]->skill;
+                skillType = skill->type;
+                skillTarget = skill->target;
+                if (skillType == nothing) {
+                    pureMonstersLeft++;
+                } else if (skillType == protect && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
+                    protectionLeft += skill->amount;
+                } else if (skillType == buff && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
+                    damageBuffLeft += skill->amount;
+                } else if (skillType == heal) {
+                    healingLeft += skill->amount;
+                } else if (skillType == aoe) {
+                    aoeDamageLeft += skill->amount;
+                } else if (skillType == pAoe && i == leftLost) {
+                    paoeDamageLeft += leftLineup[i]->damage;
+                }
+            }
+        }
         
-        simulateTurn(turnSimulation, left.monsters, leftLost, right.monsters, rightLost);
-        rightDamageTaken += turnSimulation[0] * leftBerserk + turnSimulation[2]; // first mob takes normal damage and aoe
-        rightCumAoeDamage += turnSimulation[2] + turnSimulation[3]; // normal aoe + piercing aoe
-        leftDamageTaken += turnSimulation[4] * rightBerserk + turnSimulation[6]; // same values for the other side
-        leftCumAoeDamage += turnSimulation[6] + turnSimulation[7];
-        //check for deaths
-        while (leftLost < leftArmySize && leftDamageTaken >= left.monsters[leftLost]->hp) {
-            leftDamageTaken = leftCumAoeDamage;
-            leftBerserkActive = false;
-            leftBerserk = 1;
+        damageBuffRight = 0;
+        protectionRight = 0;
+        aoeDamageRight = 0;
+        paoeDamageRight = 0;
+        healingRight = 0;
+        pureMonstersRight = 0;
+        for (size_t i = rightLost; i < rightArmySize; i++) {
+            if (rightCumAoeDamageTaken >= rightLineup[i]->hp) {
+                rightLost += (i == rightLost);
+            } else {
+                skill = &rightLineup[i]->skill;
+                skillType = skill->type;
+                skillTarget = skill->target;
+                if (skillType == nothing) {
+                    pureMonstersRight++;
+                } else if (skillType == protect && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
+                    protectionRight += skill->amount;
+                } else if (skillType == buff && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
+                    damageBuffRight += skill->amount;
+                } else if (skillType == heal) {
+                    healingRight += skill->amount;
+                } else if (skillType == aoe) {
+                    aoeDamageRight += skill->amount;
+                } else if (skillType == pAoe && i == rightLost) {
+                    paoeDamageRight += rightLineup[i]->damage;
+                }
+            }
+        }
+        
+        // Add last effects of abilities and start resolving the turn
+        if (leftLost >= leftArmySize || rightLost >= rightArmySize) {
+            break; // At least One army was beaten
+        }
+        
+        // Heal everything that hasnt died
+        leftFrontDamageTaken -= leftHealing; // these values are from the last iteration
+        leftCumAoeDamageTaken -= leftHealing;
+        rightFrontDamageTaken -= rightHealing;
+        rightCumAoeDamageTaken -= rightHealing;
+        if (leftFrontDamageTaken < 0) {
+            leftFrontDamageTaken = 0;
+        }
+        if (leftCumAoeDamageTaken < 0) {
+            leftCumAoeDamageTaken = 0;
+        }
+        if (rightFrontDamageTaken < 0) {
+            rightFrontDamageTaken = 0;
+        }
+        if (rightCumAoeDamageTaken < 0) {
+            rightCumAoeDamageTaken = 0;
+        }
+        
+        currentMonsterLeft = leftLineup[leftLost];
+        currentMonsterRight = rightLineup[rightLost];
+        
+        // Handle Monsters with skills berserk or friends
+        damageLeft = currentMonsterLeft->damage;
+        if (currentMonsterLeft->skill.type == berserk) {
+            damageLeft *= leftBerserkMult;
+            leftBerserkMult *= currentMonsterLeft->skill.amount;
+        } else {
+            leftBerserkMult = 1;
+        }
+        if (currentMonsterLeft->skill.type == friends) {
+            damageLeft *= pow(damageLeft, pureMonstersLeft);
+        }
+        
+        damageRight = currentMonsterRight->damage;
+        if (currentMonsterRight->skill.type == berserk) {
+            damageRight *= rightBerserkMult;
+            rightBerserkMult *= currentMonsterRight->skill.amount;
+        } else {
+            rightBerserkMult = 1;
+        }
+        if (currentMonsterRight->skill.type == friends) {
+            damageRight *= pow(damageRight, pureMonstersRight);
+        }
+        
+        // Add Buff Damage
+        damageLeft += damageBuffLeft;
+        damageRight += damageBuffRight;
+        
+        // Handle Elemental advantage
+        elementalDifference = (currentMonsterLeft->element - currentMonsterRight->element);
+        if (elementalDifference == -1 || elementalDifference == 3) {
+            damageLeft *= elementalBoost;
+        } else if (elementalDifference == 1 || elementalDifference == -3) {
+            damageRight *= elementalBoost;
+        }
+        
+        // Handle Protection on the enemy Side
+        if (damageLeft > protectionRight) {
+            damageLeft -= protectionRight;
+        } else {
+            damageLeft = 0;
+        }
+        
+        if (damageRight > protectionLeft) {
+            damageRight -= protectionLeft;
+        } else {
+            damageRight = 0; 
+        }
+        
+        rightFrontDamageTaken += damageLeft + aoeDamageLeft;
+        rightCumAoeDamageTaken += aoeDamageLeft + paoeDamageLeft;
+        rightHealing = healingRight;
+        leftFrontDamageTaken += damageRight + aoeDamageRight;
+        leftCumAoeDamageTaken += aoeDamageRight + paoeDamageRight;
+        leftHealing = healingLeft;
+        
+        if (currentMonsterLeft->hp <= leftFrontDamageTaken) {
             leftLost++;
+            leftBerserkMult = 1;
+            leftFrontDamageTaken = leftCumAoeDamageTaken;
         }
-        while (rightLost < rightArmySize && rightDamageTaken >= right.monsters[rightLost]->hp) {
-            rightDamageTaken = rightCumAoeDamage;
-            rightBerserkActive = false;
-            rightBerserk = 1;
+        if (currentMonsterRight->hp <= rightFrontDamageTaken) {
             rightLost++;
-        }
-        
-        // healing - does not take effect on death
-        leftDamageTaken -= turnSimulation[1];
-        leftCumAoeDamage -= turnSimulation[1];
-        rightDamageTaken -= turnSimulation[5];
-        rightCumAoeDamage -= turnSimulation[5];
-        if (leftDamageTaken < 0) {
-            leftDamageTaken = 0;
-        }
-        if (leftCumAoeDamage < 0) {
-            leftCumAoeDamage = 0;
-        }
-        if (rightDamageTaken < 0) {
-            rightDamageTaken = 0;
-        }
-        if (rightCumAoeDamage < 0) {
-            rightCumAoeDamage = 0;
-        }
-        
-        
-        // deal with berserkers
-        if (leftBerserkActive) {
-            leftBerserk *= left.monsters[leftLost]->skill.amount;
-        }
-        if (rightBerserkActive) {
-            rightBerserk *= right.monsters[rightLost]->skill.amount;
+            rightBerserkMult = 1;
+            rightFrontDamageTaken = rightCumAoeDamageTaken;
         }
         
         // Output detailed fight Data for debugging
         if (verbose) {
-            cout << setw(3) << leftLost << " " << setw(3) << leftDamageTaken << " " << setw(3) << rightLost << " " << setw(3) << rightDamageTaken << endl;
+            cout << setw(3) << leftLost << " " << setw(3) << leftFrontDamageTaken << " " << setw(3) << rightLost << " " << setw(3) << rightFrontDamageTaken << endl;
         }
     }
     
     result.dominated = false;
-    result.leftAoeDamage = leftCumAoeDamage;
-    result.rightAoeDamage = rightCumAoeDamage;
+    result.leftAoeDamage = leftCumAoeDamageTaken;
+    result.rightAoeDamage = rightCumAoeDamageTaken;
     
-    if (leftLost == leftArmySize) { //draws count as right wins. 
+    if (leftLost >= leftArmySize) { //draws count as right wins. 
         result.rightWon = true;
         result.monstersLost = rightLost; 
-        result.damage = rightDamageTaken;
-        result.berserk = rightBerserk;
+        result.damage = rightFrontDamageTaken;
+        result.berserk = rightBerserkMult;
     } else {
         result.rightWon = false;
         result.monstersLost = leftLost; 
-        result.damage = leftDamageTaken;
-        result.berserk = leftBerserk;
+        result.damage = leftFrontDamageTaken;
+        result.berserk = leftBerserkMult;
     }
 }
 
-void simulateMultipleFights(vector<FightResult> & results, vector<Army> & armies, const Army & target) {
+void simulateMultipleFights(vector<FightResult> & results, vector<Army> & armies, Army & target) {
     //simulates all of the fights from armies and puts it into a vector of fightResults.
     results.reserve(armies.size());
     FightResult currentResult;
@@ -683,8 +696,10 @@ int main(int argc, char** argv) {
             hostileLineup = takeLineupInput();
             
             FightResult customResult;
-            simulateFight(customResult, Army(friendLineup), Army(hostileLineup), true);
-            cout << customResult.rightWon << " " << Army(friendLineup).followerCost << " " << Army(hostileLineup).followerCost << endl;
+            Army left = Army(friendLineup);
+            Army right = Army(hostileLineup);
+            simulateFight(customResult, left, right, true);
+            cout << customResult.rightWon << " " << left.followerCost << " " << right.followerCost << endl;
             
             if (!askYesNoQuestion("Simulate another Fight?")) {
                 break;
