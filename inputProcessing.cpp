@@ -49,7 +49,7 @@ vector<int> takeHerolevelInput() {
     
     if (askYesNoQuestion("Do you want to load hero levels from file?")) {
         try {
-            heroFile.open("heroLevels", fstream::in);
+            heroFile.open("heroLevels" + heroVersion, fstream::in);
             heroFile >> input;
             stringLevels = split(input, ",");
             for (size_t i = 0; i < stringLevels.size(); i++) {
@@ -57,7 +57,8 @@ vector<int> takeHerolevelInput() {
             }
             heroFile.close();
         } catch (const exception & e) {
-            cout << "Could not open File. Make sure you input the hero Levels manually at least once." << endl;
+            cout << "Could not find Hero File of Hero File is deprecated. (Were there new Heroes added recently?)" << endl;
+            cout << "Make sure you input the hero Levels manually at least once." << endl;
             throw runtime_error("Hero File not found");
         }
     } else {
@@ -69,7 +70,7 @@ vector<int> takeHerolevelInput() {
         }
         
         // Write Hero Levels to file to use next time
-        heroFile.open("heroLevels", fstream::out);
+        heroFile.open("heroLevels" + heroVersion, fstream::out);
         for (size_t i = 0; i < levels.size()-1; i++) {
             heroFile << levels[i] << ',';
 		}
