@@ -81,13 +81,13 @@ vector<int> takeHerolevelInput() {
 }
 
 // Promt the user via command Line to input a monster lineup and return them as a vector of pointers to those monster
-vector<Monster *> takeLineupInput() {
+vector<Monster *> takeLineupInput(string prompt) {
     vector<Monster *> lineup {};
     string questString = "quest";
     
     string input;
-    cout << "Enter desired Lineup separated with commas (no spaces!)" << endl;
-    cout << "Alternatively: type f.e. quest17 to get the lineup for quest 17." << endl;
+    cout << prompt << endl;
+    cout << "Enter Monsters separated with commas or type f.e. quest17 to get the lineup for quest 17." << endl;
     getline(cin, input);
     
     if (input.compare(0, questString.length(), questString) == 0) {
