@@ -3,23 +3,42 @@
 // Wait for user input before continuing. Used to stop program from colsing outside of a command line.
 void haltExecution() {
     cout << "Press enter to continue...";
-    cin.get();
+    //cin.get();
+	while (cin.get() != '\n') { }  //another way
 }
 
 // Ask the user a question that they can answer via command line
-bool askYesNoQuestion(string question) {
+bool askYesNoQuestion(string question, string autoc) {
     string inputString;
     while (true) {
-        cout << question << " (y/n): ";
-        getline(cin, inputString);
-        if (inputString == "n") {
+		cout << question;
+		if (autoc == "n" || autoc == "N") {
+            cout  << " ( y/[N] ) : ";
+			}
+		if (autoc == "y" || autoc == "Y") {
+            cout << " ( [Y]/n ) : ";
+			}
+		getline(cin, inputString);
+
+        if (inputString.size() == 0)
+			inputString = autoc;
+		if (inputString == "n" || inputString == "N") {
             return false;
         }
-        if (inputString == "y") {
+        if (inputString == "y" || inputString == "Y") {
             return true;
         }
     }
     return false;
+}
+
+string askQuestion(string question, string autoc) {
+    string inputString;
+	cout << question << " [" << autoc << "] : ";
+	getline(cin, inputString);
+	if (inputString.size() == 0)
+		inputString = autoc;
+	return inputString;
 }
 
 // Output things on the command line. Using shouldOutput this can be easily controlled globally
@@ -46,7 +65,7 @@ vector<int> takeHerolevelInput() {
     fstream heroFile;
     heroFile.exceptions(fstream::failbit);
     
-    if (askYesNoQuestion("Do you want to load hero levels from file?")) {
+    if (askYesNoQuestion("Do you want to load hero levels from file?","y")) {
         try {
             heroFile.open("heroLevels" + heroVersion, fstream::in);
             heroFile >> input;
@@ -61,11 +80,27 @@ vector<int> takeHerolevelInput() {
             throw runtime_error("Hero File not found");
         }
     } else {
+        /*cout << "Enter the level of the hero, whose name is shown (Enter 0 if you don't own the Hero)" << endl;
+        for (size_t i = 0; i < baseHeroes.size(); i++) {
+            /*cout << baseHeroes[i].name << ": ";
+            getline(cin, input);
+            levels.push_back(stoi(input));*/
+        try {
+            heroFile.open("heroLevels" + heroVersion, fstream::in);
+            heroFile >> input;
+            stringLevels = split(input, ",");
+            for (size_t i = 0; i < stringLevels.size(); i++) {
+                levels.push_back(stoi(stringLevels[i]));
+            }
+            heroFile.close();
+        } catch (const exception & e) {
+            for (size_t i = 0; i < baseHeroes.size(); i++) {
+                levels.push_back(0);
+            }
+        }
         cout << "Enter the level of the hero, whose name is shown (Enter 0 if you don't own the Hero)" << endl;
         for (size_t i = 0; i < baseHeroes.size(); i++) {
-            cout << baseHeroes[i].name << ": ";
-            getline(cin, input);
-            levels.push_back(stoi(input));
+			levels[i] = stoi(askQuestion(baseHeroes[i].name, to_string(levels[i])));
         }
         
         // Write Hero Levels to file to use next time
