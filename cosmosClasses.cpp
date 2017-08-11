@@ -20,9 +20,28 @@ bool isCheaper(Monster * a, Monster * b) {
     return a->cost < b->cost;
 }
 
+FightResult::FightResult() {
+    this->valid = false;
+}
+
+bool FightResult::operator <=(FightResult & toCompare) { // both results are expected to not have won
+    if(this->leftAoeDamage < toCompare.leftAoeDamage || this->rightAoeDamage > toCompare.rightAoeDamage) {
+        return false; // left is not certainly worse thn right
+    }
+    if (this->monstersLost == toCompare.monstersLost) {
+        return this->damage <= toCompare.damage; // less damage dealt to the enemy -> left is worse
+    } else {
+        return this->monstersLost < toCompare.monstersLost; // less monsters destroyed on the enemy side -> left is worse
+    }
+}
+
+bool FightResult::operator >=(FightResult & toCompare) {
+    return toCompare <= *this;
+}
+
 Army::Army(vector<Monster*> monsters) {
     this->followerCost = 0;
-    this->precomputedFight = {0,0,0,0,0,false};
+    this->lastFightData = FightResult();
     this->monsters.clear();
     
     for(size_t i = 0; i < monsters.size(); i++) {
@@ -42,24 +61,7 @@ void Army::print() {
     } cout << ")" << endl; 
 }
 
-FightResult::FightResult() {}
-
-bool FightResult::operator <=(FightResult & toCompare) { // both results are expected to not have won
-    if(this->leftAoeDamage < toCompare.leftAoeDamage || this->rightAoeDamage > toCompare.rightAoeDamage) {
-        return false; // left is not certainly worse thn right
-    }
-    if (this->monstersLost == toCompare.monstersLost) {
-        return this->damage <= toCompare.damage; // less damage dealt to the enemy -> left is worse
-    } else {
-        return this->monstersLost < toCompare.monstersLost; // less monsters destroyed on the enemy side -> left is worse
-    }
-}
-
-bool FightResult::operator >=(FightResult & toCompare) {
-    return toCompare <= *this;
-}
-
 // Function for sorting FightResults by followers (ascending)
-bool hasFewerFollowers(FightResult & a, FightResult & b) {
-    return (a.source->followerCost < b.source->followerCost);
+bool hasFewerFollowers(const Army & a, const Army & b) {
+    return (a.followerCost < b.followerCost);
 }

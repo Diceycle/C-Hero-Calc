@@ -11,10 +11,10 @@ bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
     }
 }
 
-// TODO: Implement MAX AOE DAmage to make sure nothing gets revived
-// Simulates One fight between 2 Armies
+// TODO: Implement MAX AOE Damage to make sure nothing gets revived
+// Simulates One fight between 2 Armies and writes results into left's LastFightData
 // Yes, I know this method is unelegant as fuck but it's much faster this way I promise. Should be readable still too
-void simulateFight(FightResult & result, Army & left, Army & right, bool verbose) {
+void simulateFight(Army & left, Army & right, bool verbose) {
     // left[0] and right[0] are the first to fight
     // Damage Application Order:
     //  1. Base Damage of creature
@@ -46,15 +46,15 @@ void simulateFight(FightResult & result, Army & left, Army & right, bool verbose
     float rightBerserkMult = 1;
     
     // If no heroes are in the army the result from the smaller army is still valid
-    if (left.precomputedFight.valid && !verbose) { 
+    if (left.lastFightData.valid && !verbose) { 
         // Set pre-computed values to pick up where we left off
         leftLost                = leftArmySize-1; // All monsters of left died last fight only the new one counts
-        leftFrontDamageTaken    = left.precomputedFight.leftAoeDamage;
-        leftCumAoeDamageTaken   = left.precomputedFight.leftAoeDamage;
-        rightLost               = left.precomputedFight.monstersLost;
-        rightFrontDamageTaken   = left.precomputedFight.damage;
-        rightCumAoeDamageTaken  = left.precomputedFight.rightAoeDamage;
-        rightBerserkMult        = left.precomputedFight.berserk;
+        leftFrontDamageTaken    = left.lastFightData.leftAoeDamage;
+        leftCumAoeDamageTaken   = left.lastFightData.leftAoeDamage;
+        rightLost               = left.lastFightData.monstersLost;
+        rightFrontDamageTaken   = left.lastFightData.damage;
+        rightCumAoeDamageTaken  = left.lastFightData.rightAoeDamage;
+        rightBerserkMult        = left.lastFightData.berserk;
     }
     
     // Values for skills  
@@ -236,19 +236,19 @@ void simulateFight(FightResult & result, Army & left, Army & right, bool verbose
     }
     
     // write all the results into a FightResult
-    result.dominated = false;
-    result.leftAoeDamage = leftCumAoeDamageTaken;
-    result.rightAoeDamage = rightCumAoeDamageTaken;
+    left.lastFightData.dominated = false;
+    left.lastFightData.leftAoeDamage = leftCumAoeDamageTaken;
+    left.lastFightData.rightAoeDamage = rightCumAoeDamageTaken;
     
     if (leftLost >= leftArmySize) { //draws count as right wins. 
-        result.rightWon = true;
-        result.monstersLost = rightLost; 
-        result.damage = rightFrontDamageTaken;
-        result.berserk = rightBerserkMult;
+        left.lastFightData.rightWon = true;
+        left.lastFightData.monstersLost = rightLost; 
+        left.lastFightData.damage = rightFrontDamageTaken;
+        left.lastFightData.berserk = rightBerserkMult;
     } else {
-        result.rightWon = false;
-        result.monstersLost = leftLost; 
-        result.damage = leftFrontDamageTaken;
-        result.berserk = leftBerserkMult;
+        left.lastFightData.rightWon = false;
+        left.lastFightData.monstersLost = leftLost; 
+        left.lastFightData.damage = leftFrontDamageTaken;
+        left.lastFightData.berserk = leftBerserkMult;
     }
 }

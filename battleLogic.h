@@ -13,6 +13,6 @@ extern int totalFightsSimulated;
 bool isBetter(Monster * a, Monster * b, bool considerAbilities = false);
 
 // Simulates One fight between 2 Armies
-void simulateFight(FightResult & result, Army & left, Army & right, bool verbose = false);
+void simulateFight(Army & left, Army & right, bool verbose = false);
 
 #endif
