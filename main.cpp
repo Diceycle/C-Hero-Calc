@@ -47,49 +47,80 @@ void simulateMultipleFights(vector<FightResult> & results, vector<Army> & armies
     }
 }
 
-void expand(vector<Army> & newArmies, vector<FightResult> & fightResults, const vector<Monster *> & toExpandWith, bool checkHeroRepeat) {
-    // expand stuff directly onto source, does not expand dominated or winning or too costly armies
-    // if the bool is true, we check if we repeat any heroes
-    FightResult * currentResult;
-    bool heroUseable;
-    size_t i, j, k;
+// TODO: FIx Bug that might causes geror to be undervalued because of precomputed fights
+void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
+            vector<FightResult> & pureFightResults, vector<FightResult> & heroFightResults, 
+            const vector<Monster *> & availableMonsters, const vector<Monster *> & availableHeroes,
+            size_t currentArmySize, size_t maxArmySize) {
     
-    for (i = 0; i < fightResults.size(); i++) {
-        currentResult = &fightResults[i]; 
-        if (!currentResult->dominated) { // if this setup isn't worse than another and hasn't won yet
-            for (j = 0; j < toExpandWith.size(); j++) { // expand this setup with all available mobs
-                if (currentResult->source->followerCost + toExpandWith[j]->cost < followerUpperBound) {
-                    
-                    heroUseable = true;
-                    if (checkHeroRepeat) { // check if a hero has been used before
-                        for (k = 0; k < currentResult->source->monsters.size(); k++) {
-                            if (currentResult->source->monsters[k] == toExpandWith[j]) { // since were only expanding with heroes in this case we can compare normal mobs too
-                                heroUseable = false;
-                                break;
-                            }
-                        }
+    Army * currentArmy;
+    Army newArmy;
+    int remainingFollowers;
+    size_t availableMonstersSize = availableMonsters.size();
+    size_t availableHeroesSize = availableHeroes.size();
+    size_t i, j, m;
+    bool heroUsed;
+    
+    for (i = 0; i < pureFightResults.size(); i++) {
+        if (!pureFightResults[i].dominated) {
+            currentArmy = pureFightResults[i].source;
+            remainingFollowers = followerUpperBound - currentArmy->followerCost;
+            for (m = 0; m < availableMonstersSize && availableMonsters[m]->cost < remainingFollowers; m++) {
+                newPureArmies.push_back(*currentArmy);
+                newPureArmies.back().add(availableMonsters[m]);
+                // Do PF Stuff
+                newPureArmies.back().precomputedFight = KnownFight({
+                    pureFightResults[i].monstersLost,
+                    pureFightResults[i].damage, 
+                    pureFightResults[i].berserk, 
+                    pureFightResults[i].leftAoeDamage, 
+                    pureFightResults[i].rightAoeDamage, 
+                    true
+                }); // pre-computed fight
+            }
+            for (m = 0; m < availableHeroesSize; m++) {
+                newHeroArmies.push_back(*currentArmy);
+                newHeroArmies.back().add(availableHeroes[m]);
+                newHeroArmies.back().precomputedFight.valid = false; // Refine PF Stuff
+            }
+        }
+    }
+    
+    for (i = 0; i < heroFightResults.size(); i++) {
+        if (!heroFightResults[i].dominated) {
+            currentArmy = heroFightResults[i].source;
+            remainingFollowers = followerUpperBound - currentArmy->followerCost;
+            for (m = 0; m < availableMonstersSize && availableMonsters[m]->cost < remainingFollowers; m++) {
+                newHeroArmies.push_back(*currentArmy);
+                newHeroArmies.back().add(availableMonsters[m]);
+                // Do PF Stuff
+                newHeroArmies.back().precomputedFight = KnownFight({
+                    heroFightResults[i].monstersLost,
+                    heroFightResults[i].damage, 
+                    heroFightResults[i].berserk, 
+                    heroFightResults[i].leftAoeDamage, 
+                    heroFightResults[i].rightAoeDamage, 
+                    true
+                }); // pre-computed fight
+            }
+            for (m = 0; m < availableHeroesSize; m++) {
+                heroUsed = false;
+                for (j = 0; j < currentArmySize; j++) {
+                    if (currentArmy->monsters[j] == availableHeroes[m]) {
+                        heroUsed = true;
+                        break;
                     }
-                    if (heroUseable) {
-                        newArmies.push_back(*(currentResult->source));
-                        newArmies[newArmies.size() - 1].add(toExpandWith[j]);
-                        if (!toExpandWith[j]->isHero) {
-                            newArmies[newArmies.size()-1].precomputedFight = KnownFight({currentResult->monstersLost, 
-                                                                                         currentResult->damage, 
-                                                                                         currentResult->berserk, 
-                                                                                         currentResult->leftAoeDamage, 
-                                                                                         currentResult->rightAoeDamage, 
-                                                                                         true}); // pre-computed fight
-                        } else {
-                            newArmies[newArmies.size()-1].precomputedFight.valid = false;
-                        }
-                    }
-                } else {
-                    break; // since list is sorted by follower cost (and heroes don't cost anything)
+                }
+                if (!heroUsed) {
+                    newHeroArmies.push_back(*currentArmy);
+                    newHeroArmies.back().add(availableHeroes[m]);
+                    newHeroArmies.back().precomputedFight.valid = false; // Refine PF Stuff
                 }
             }
         }
     }
 }
+
 
 // Use a greedy method to get a first upper bound on follower cost for the solution
 // TODO: Think of an algorithm that works on limit < targetsize semi-reliable
@@ -336,11 +367,10 @@ void solveInstance(const vector<Monster *> & availableHeroes, Army target, size_
             tempTime = time(NULL);
             
             vector<Army> nextPureArmies;
-            expand(nextPureArmies, pureResults, monsterList, false);
             vector<Army> nextHeroArmies;
-            expand(nextHeroArmies, heroResults, monsterList, false);
-            expand(nextHeroArmies, pureResults, availableHeroes, false);
-            expand(nextHeroArmies, heroResults, availableHeroes, true);
+            expand(nextPureArmies, nextHeroArmies, pureResults, heroResults,
+                    monsterList, availableHeroes, armySize, limit);
+
             debugOutput(tempTime, "  Moving Data... ", debugInfo, true, false);
             tempTime = time(NULL);
             
