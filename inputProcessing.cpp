@@ -86,7 +86,7 @@ vector<int> takeHerolevelInput() {
             getline(cin, input);
             levels.push_back(stoi(input));*/
         try {
-            heroFile.open("heroLevels", fstream::in);
+            heroFile.open("heroLevels" + heroVersion, fstream::in);
             heroFile >> input;
             stringLevels = split(input, ",");
             for (size_t i = 0; i < stringLevels.size(); i++) {
