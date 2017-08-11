@@ -11,10 +11,10 @@ using namespace std;
 // Define types of HeroSkills and Elements
 enum SkillType {nothing, buff, protect, aoe, pAoe, heal, berserk, friends};
 enum Element {
-    earth = 0,
-    air = 1, 
-    water = 2, 
-    fire = 3, 
+    earth   = 0,
+    air     = 1, 
+    water   = 2, 
+    fire    = 3, 
     all, 
     self
 }; // also used for hero skill targets
@@ -39,7 +39,7 @@ struct KnownFight {
 };
 
 // Defines a Monster or Hero
-class Monster{
+class Monster {
     public :
         int hp;
         int damage;
@@ -52,6 +52,9 @@ class Monster{
         Monster(int hp, int damage, int cost, string name, Element element, HeroSkill skill = none);
         Monster();
 };
+
+// Function for sorting Monsters by cost (ascending)
+bool isCheaper(Monster * a, Monster * b);
 
 // Defines a single lineup of monsters
 class Army {
@@ -83,5 +86,8 @@ class FightResult {
     bool operator <= (FightResult & toCompare);
     bool operator >= (FightResult & toCompare);
 };
+
+// Function for sorting FightResults by followers (ascending)
+bool hasFewerFollowers(FightResult & a, FightResult & b);
 
 #endif

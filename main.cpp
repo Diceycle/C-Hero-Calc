@@ -10,282 +10,20 @@
 #include <map>
 #include <algorithm>
 #include <ctime>
-#include <cmath>
 #include <limits>
 
 #include "inputProcessing.h"
 #include "cosmosDefines.h"
+#include "battleLogic.h"
 
 using namespace std;
-
-int totalFightsSimulated;
 
 // Define global variables used to track the best result
 int followerUpperBound;
 Army best;
 
-vector<Monster> heroReference; // Will be filled with leveled heroes if needed (determined by input)
-
-vector<Monster *> monsterList; // Contains pointers to raw Monster Data from a1 to f10
-map<string, Monster *> monsterMap; // Maps monster Names to their pointers (includes heroes)
-
-// Function for sorting FightResults by followers (ascending)
-bool hasFewerFollowers(FightResult & a, FightResult & b) { // used for sorting.
-    return (a.source->followerCost < b.source->followerCost);
-}
-
-// Function for sorting Monsters by cost (ascending)
-bool isCheaper(Monster * a, Monster * b) {
-    return a->cost < b->cost;
-}
-
-// Function determining if a monster is strictly better than another
-bool isBetter(Monster * a, Monster * b, bool considerAbilities = false) {
-    if (a->element == b->element) {
-        return (a->damage >= b->damage) && (a->hp >= b->hp);
-    } else { // a needs to be better than b even when b has elemental advantage, or a is at disadvantage
-        return !considerAbilities && (a->damage >= b->damage * elementalBoost) && (a->hp >= b->hp * elementalBoost);
-    }
-}
-
-// TODO: Implement MAX AOE DAmage to make sure nothing gets revived
-void simulateFight(FightResult & result, Army & left, Army & right, bool verbose = false) {
-    //fights left to right, so left[0] and right[0] are the first to fight
-    // Damage Application Order:
-    //  1. Base Damage of creature
-    //  2. Multiplicators of self       (friends, berserk)
-    //  3. Buffs from heroes            (Hunter, Rei, etc.)
-    //  4. Elemental Advantage          (f.e. Fire vs. Earth)
-    //  5. Protection of enemy Side     (Nimue, Athos, etc.)
-    //  6. AOE of friendly Side         (Tiny, Alpha, etc.)
-    //  7. Healing of enemy Side        (Auri, Aeris, etc.)
-    
-    totalFightsSimulated++;
-    
-    size_t leftLost = 0;
-    size_t leftArmySize = left.monsters.size();
-    vector<Monster *> & leftLineup = left.monsters;
-    
-    int leftFrontDamageTaken = 0;
-    int leftHealing = 0;
-    int leftCumAoeDamageTaken = 0;
-    float leftBerserkMult = 1;
-    
-    size_t rightLost = 0;
-    size_t rightArmySize = right.monsters.size();
-    vector<Monster *> & rightLineup = right.monsters;
-    
-    int rightFrontDamageTaken = 0;
-    int rightHealing = 0;
-    int rightCumAoeDamageTaken = 0;
-    float rightBerserkMult = 1;
-    
-    // If no heroes are in the army the result from the smaller army is still valid
-    if (left.precomputedFight.valid && !verbose) { 
-        // Set pre-computed values to pick up where we left off
-        leftLost                = leftArmySize-1; // All monsters of left died last fight only the new one counts
-        leftFrontDamageTaken    = left.precomputedFight.leftAoeDamage;
-        leftCumAoeDamageTaken   = left.precomputedFight.leftAoeDamage;
-        rightLost               = left.precomputedFight.monstersLost;
-        rightFrontDamageTaken   = left.precomputedFight.damage;
-        rightCumAoeDamageTaken  = left.precomputedFight.rightAoeDamage;
-        rightBerserkMult        = left.precomputedFight.berserk;
-    }
-    
-    // Values for skills  
-    int damageLeft, damageRight;
-    int damageBuffLeft, damageBuffRight;
-    int protectionLeft, protectionRight;
-    int aoeDamageLeft, aoeDamageRight;
-    int paoeDamageLeft, paoeDamageRight;
-    int healingLeft, healingRight;
-    int pureMonstersLeft, pureMonstersRight;
-    int elementalDifference;
-    
-    // hero temp Variables
-    Monster * currentMonsterLeft;
-    Monster * currentMonsterRight;
-    HeroSkill * skill;
-    SkillType skillType;
-    Element skillTarget;
-    
-    while (true) {
-        // Get all hero influences
-        damageBuffLeft = 0;
-        protectionLeft = 0;
-        aoeDamageLeft = 0;
-        paoeDamageLeft = 0;
-        healingLeft = 0;
-        pureMonstersLeft = 0;
-        for (size_t i = leftLost; i < leftArmySize; i++) {
-            if (leftCumAoeDamageTaken >= leftLineup[i]->hp) {
-                leftLost += (leftLost == i);
-            } else {
-                skill = &leftLineup[i]->skill;
-                skillType = skill->type;
-                skillTarget = skill->target;
-                if (skillType == nothing) {
-                    pureMonstersLeft++;
-                } else if (skillType == protect && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
-                    protectionLeft += skill->amount;
-                } else if (skillType == buff && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
-                    damageBuffLeft += skill->amount;
-                } else if (skillType == heal) {
-                    healingLeft += skill->amount;
-                } else if (skillType == aoe) {
-                    aoeDamageLeft += skill->amount;
-                } else if (skillType == pAoe && i == leftLost) {
-                    paoeDamageLeft += leftLineup[i]->damage;
-                }
-            }
-        }
-        
-        damageBuffRight = 0;
-        protectionRight = 0;
-        aoeDamageRight = 0;
-        paoeDamageRight = 0;
-        healingRight = 0;
-        pureMonstersRight = 0;
-        for (size_t i = rightLost; i < rightArmySize; i++) {
-            if (rightCumAoeDamageTaken >= rightLineup[i]->hp) {
-                rightLost += (i == rightLost);
-            } else {
-                skill = &rightLineup[i]->skill;
-                skillType = skill->type;
-                skillTarget = skill->target;
-                if (skillType == nothing) {
-                    pureMonstersRight++;
-                } else if (skillType == protect && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
-                    protectionRight += skill->amount;
-                } else if (skillType == buff && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
-                    damageBuffRight += skill->amount;
-                } else if (skillType == heal) {
-                    healingRight += skill->amount;
-                } else if (skillType == aoe) {
-                    aoeDamageRight += skill->amount;
-                } else if (skillType == pAoe && i == rightLost) {
-                    paoeDamageRight += rightLineup[i]->damage;
-                }
-            }
-        }
-        
-        // Add last effects of abilities and start resolving the turn
-        if (leftLost >= leftArmySize || rightLost >= rightArmySize) {
-            break; // At least One army was beaten
-        }
-        
-        // Heal everything that hasnt died
-        leftFrontDamageTaken -= leftHealing; // these values are from the last iteration
-        leftCumAoeDamageTaken -= leftHealing;
-        rightFrontDamageTaken -= rightHealing;
-        rightCumAoeDamageTaken -= rightHealing;
-        if (leftFrontDamageTaken < 0) {
-            leftFrontDamageTaken = 0;
-        }
-        if (leftCumAoeDamageTaken < 0) {
-            leftCumAoeDamageTaken = 0;
-        }
-        if (rightFrontDamageTaken < 0) {
-            rightFrontDamageTaken = 0;
-        }
-        if (rightCumAoeDamageTaken < 0) {
-            rightCumAoeDamageTaken = 0;
-        }
-        
-        currentMonsterLeft = leftLineup[leftLost];
-        currentMonsterRight = rightLineup[rightLost];
-        
-        // Handle Monsters with skills berserk or friends
-        damageLeft = currentMonsterLeft->damage;
-        if (currentMonsterLeft->skill.type == berserk) {
-            damageLeft *= leftBerserkMult;
-            leftBerserkMult *= currentMonsterLeft->skill.amount;
-        } else {
-            leftBerserkMult = 1;
-        }
-        if (currentMonsterLeft->skill.type == friends) {
-            damageLeft *= pow(currentMonsterLeft->skill.amount, pureMonstersLeft);
-        }
-        
-        damageRight = currentMonsterRight->damage;
-        if (currentMonsterRight->skill.type == berserk) {
-            damageRight *= rightBerserkMult;
-            rightBerserkMult *= currentMonsterRight->skill.amount;
-        } else {
-            rightBerserkMult = 1;
-        }
-        if (currentMonsterRight->skill.type == friends) {
-            damageRight *= pow(currentMonsterRight->skill.amount, pureMonstersRight);
-        }
-        
-        // Add Buff Damage
-        damageLeft += damageBuffLeft;
-        damageRight += damageBuffRight;
-        
-        // Handle Elemental advantage
-        elementalDifference = (currentMonsterLeft->element - currentMonsterRight->element);
-        if (elementalDifference == -1 || elementalDifference == 3) {
-            damageLeft *= elementalBoost;
-        } else if (elementalDifference == 1 || elementalDifference == -3) {
-            damageRight *= elementalBoost;
-        }
-        
-        // Handle Protection on the enemy Side
-        if (damageLeft > protectionRight) {
-            damageLeft -= protectionRight;
-        } else {
-            damageLeft = 0;
-        }
-        
-        if (damageRight > protectionLeft) {
-            damageRight -= protectionLeft;
-        } else {
-            damageRight = 0; 
-        }
-        
-        rightFrontDamageTaken += damageLeft + aoeDamageLeft;
-        rightCumAoeDamageTaken += aoeDamageLeft + paoeDamageLeft;
-        rightHealing = healingRight;
-        leftFrontDamageTaken += damageRight + aoeDamageRight;
-        leftCumAoeDamageTaken += aoeDamageRight + paoeDamageRight;
-        leftHealing = healingLeft;
-        
-        if (currentMonsterLeft->hp <= leftFrontDamageTaken) {
-            leftLost++;
-            leftBerserkMult = 1;
-            leftFrontDamageTaken = leftCumAoeDamageTaken;
-        }
-        if (currentMonsterRight->hp <= rightFrontDamageTaken) {
-            rightLost++;
-            rightBerserkMult = 1;
-            rightFrontDamageTaken = rightCumAoeDamageTaken;
-        }
-        
-        // Output detailed fight Data for debugging
-        if (verbose) {
-            cout << setw(3) << leftLost << " " << setw(3) << leftFrontDamageTaken << " " << setw(3) << rightLost << " " << setw(3) << rightFrontDamageTaken << endl;
-        }
-    }
-    
-    result.dominated = false;
-    result.leftAoeDamage = leftCumAoeDamageTaken;
-    result.rightAoeDamage = rightCumAoeDamageTaken;
-    
-    if (leftLost >= leftArmySize) { //draws count as right wins. 
-        result.rightWon = true;
-        result.monstersLost = rightLost; 
-        result.damage = rightFrontDamageTaken;
-        result.berserk = rightBerserkMult;
-    } else {
-        result.rightWon = false;
-        result.monstersLost = leftLost; 
-        result.damage = leftFrontDamageTaken;
-        result.berserk = leftBerserkMult;
-    }
-}
-
+// Simulates all of the fights from armies and puts it into a vector of fightResults.
 void simulateMultipleFights(vector<FightResult> & results, vector<Army> & armies, Army & target) {
-    //simulates all of the fights from armies and puts it into a vector of fightResults.
     results.reserve(armies.size());
     FightResult currentResult;
     
@@ -615,26 +353,13 @@ void solveInstance(const vector<Monster *> & availableHeroes, Army target, size_
 
 int main(int argc, char** argv) {
     // Initialize global Data
-    totalFightsSimulated = 0;
     followerUpperBound = numeric_limits<int>::max();
     best = Army();
-    
-    // Initialize Monster Data
-    for (size_t i = 0; i < monsterBaseList.size(); i++) {
-        monsterList.push_back(&monsterBaseList[i]);
-        monsterMap.insert(pair<string, Monster *>(monsterBaseList[i].name, &monsterBaseList[i]));
-    }
-    
-    // Sort MonsterList by followers
-    sort(monsterList.begin(), monsterList.end(), isCheaper);
-    
-    // Reserve some space for heroes, otherwise pointers will become invalid (Important!)
-    heroReference.reserve(baseHeroes.size()*2);
+    initMonsterData();
     
     // Declare Variables
     vector<Monster *> friendLineup {};
     vector<Monster *> hostileLineup {};
-    vector<Monster *> availableHeroes {};
     string inputString;
     vector<int> yourHeroLevels;
     
@@ -683,14 +408,9 @@ int main(int argc, char** argv) {
     } else {
         cout << "Taking data from script" << endl;
     }
-
-    // Initialize Hero Data
-    for (size_t i = 0; i < baseHeroes.size(); i++) {
-        if (yourHeroLevels[i] > 0) {
-            addLeveledHero(baseHeroes[i], yourHeroLevels[i]);
-            availableHeroes.push_back(monsterMap.at(baseHeroes[i].name + ":" + to_string(yourHeroLevels[i])));
-        }
-    }
+    
+    initializeUserHeroes(yourHeroLevels);
+    
     
     if (individual) { // custom input mode
         cout << "Simulating individual Figths" << endl;

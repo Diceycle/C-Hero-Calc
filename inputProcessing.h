@@ -35,12 +35,6 @@ vector<Monster *> makeMonstersFromStrings(vector<string> stringLineup);
 
 // Parse hero input from a string into its name and level
 pair<Monster, int> parseHeroString(string heroString);
-    
-// Add a leveled hero to the databse 
-void addLeveledHero(Monster hero, int level);
-
-// Create a new hero with leveled stats and return it
-Monster getLeveledHero(const Monster & m, int rarity, int level);
 
 // Splits strings into a vector of strings. No need to optimize, only used for input.
 vector<string> split(string s, string to_split);

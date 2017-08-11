@@ -4,20 +4,14 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #include "cosmosClasses.h"
 
 using namespace std;
 
-const float elementalBoost = 1.5;
-
-extern int totalFightsSimulated;
-
-// Define global variables used to track the best result
-extern int followerUpperBound;
-extern Army best;
-
 extern vector<Monster> heroReference; // Will be filled with leveled heroes if needed (determined by input)
+extern vector<Monster *> availableHeroes; // Contains all User Heroes, readily Leveled
 
 extern vector<Monster *> monsterList; // Contains pointers to raw Monster Data from a1 to f10, will be sorted by follower cost
 extern map<string, Monster *> monsterMap; // Maps monster Names to their pointers (includes heroes)
@@ -200,5 +194,17 @@ static vector<vector<string>> quests { // Contains all quest lineups for easy re
 	{"w9", "a10", "w10", "e10", "a10", "a10"},
 	{"w10", "a10", "w10", "a10", "w10", "a10"}, //40
 };
+
+// Make sure all the values are set
+void initMonsterData();
+
+// Initialize Hero Data
+void initializeUserHeroes(vector<int> levels);
+
+// Add a leveled hero to the databse 
+void addLeveledHero(Monster hero, int level);
+
+// Create a new hero with leveled stats and return it
+Monster getLeveledHero(const Monster & m, int rarity, int level);
 
 #endif

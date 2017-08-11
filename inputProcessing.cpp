@@ -129,33 +129,6 @@ pair<Monster, int> parseHeroString(string heroString) {
     return pair<Monster, int>(hero, level);
 }
 
-// Add a leveled hero to the databse 
-void addLeveledHero(Monster hero, int level) {
-    Monster m = getLeveledHero(hero, rarities.at(hero.name), level);
-    heroReference.emplace_back(m);
-    
-    monsterMap.insert(pair<string, Monster *>(m.name, &(heroReference[heroReference.size() -1])));
-}
-
-// Create a new hero with leveled stats and return it
-Monster getLeveledHero(const Monster & m, int rarity, int level) {
-    int points = level-1;
-    if (rarity == 1) {
-        points = 2 * points;
-    } else if (rarity == 2) {
-        points = 6 * points;
-    }
-    int value = m.hp + m.damage;
-    return Monster(
-        round(m.hp + points * ((double)m.hp) / value),
-        m.damage + round(points * ((double)m.damage) / value),
-        m.cost,
-        m.name + ":" + to_string(level),
-        m.element,
-        m.skill
-    );
-}
-
 // Splits strings into a vector of strings. No need to optimize, only used for input.
 vector<string> split(string s, string to_split) {
     vector<string> output;

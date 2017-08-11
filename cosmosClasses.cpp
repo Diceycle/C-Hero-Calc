@@ -15,6 +15,11 @@ Monster::Monster() {
     isHero = false;
 }
 
+// Function for sorting Monsters by cost (ascending)
+bool isCheaper(Monster * a, Monster * b) {
+    return a->cost < b->cost;
+}
+
 Army::Army(vector<Monster*> monsters) {
     this->followerCost = 0;
     this->precomputedFight = {0,0,0,0,0,false};
@@ -52,4 +57,9 @@ bool FightResult::operator <=(FightResult & toCompare) { // both results are exp
 
 bool FightResult::operator >=(FightResult & toCompare) {
     return toCompare <= *this;
+}
+
+// Function for sorting FightResults by followers (ascending)
+bool hasFewerFollowers(FightResult & a, FightResult & b) {
+    return (a.source->followerCost < b.source->followerCost);
 }
