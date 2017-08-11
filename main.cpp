@@ -15,6 +15,8 @@
 
 #include "inputProcessing.h"
 #include "cosmosDefines.h"
+#include "inputProcessing.cpp"
+#include "cosmosClasses.cpp"
 
 using namespace std;
 
@@ -423,7 +425,7 @@ void solveInstance(const vector<Monster *> & availableHeroes, Army target, size_
 
     // Get first Upper limit on followers
     getQuickSolutions(availableHeroes, target, limit);
-    if (!askYesNoQuestion("Continue calculation?")) {return;}
+    if (!askYesNoQuestion("Continue calculation?","y")) {return;}
     cout << endl;
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
@@ -666,7 +668,7 @@ int main(int argc, char** argv) {
     cout << "Welcome to Diceycle's PvE Instance Solver!" << endl;
     
     if (!ignoreConsole) {
-        manualInput = askYesNoQuestion("Do you want to input everything via command line?");
+        manualInput = askYesNoQuestion("Do you want to input everything via command line?","y");
     }
     // Collect the Data via Command Line if the user wants
     if (manualInput) {
@@ -677,9 +679,10 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         }
         hostileLineup = takeLineupInput();
-        cout << "Enter how many monsters are allowed in the solution" << endl;
+        /*cout << "Enter how many monsters are allowed in the solution" << endl;
         getline(cin, inputString);
-        limit = stoi(inputString);
+        limit = stoi(inputString);*/
+		limit = stoi(askQuestion("Enter how many monsters are allowed in the solution","6"));
     } else {
         cout << "Taking data from script" << endl;
     }
@@ -707,7 +710,7 @@ int main(int argc, char** argv) {
             simulateFight(customResult, left, right, true);
             cout << customResult.rightWon << " " << left.followerCost << " " << right.followerCost << endl;
             
-            if (!askYesNoQuestion("Simulate another Fight?")) {
+            if (!askYesNoQuestion("Simulate another Fight?","n")) {
                 break;
             }
         }
@@ -733,8 +736,19 @@ int main(int argc, char** argv) {
             
         } else {
             // Print the winning combination!
-            cout << endl << "The optimal combination is:" << endl << "  ";
+            /*cout << endl << "The optimal combination is:" << endl << "  ";
             best.print();
+            cout << "  (Right-most fights first)" << endl;*/
+			cout << endl << "Hostile LineUp was : " ;
+			for (size_t i = 0; i < Army(hostileLineup).monsters.size(); i++) {
+                cout << Army(hostileLineup).monsters[Army(hostileLineup).monsters.size() - 1 - i]->name << " "; // backwards
+            }
+			cout << " (left-most fights first)." << endl;
+			cout << "The minimum amount of followers is : " << best.followerCost << endl;
+            cout << "The optimal combination is: " << endl << "         ";
+            for (size_t i = 0; i < best.monsters.size(); i++) {
+                cout << best.monsters[best.monsters.size() - 1 - i]->name << "   "; // backwards
+            } cout << endl;
             cout << "  (Right-most fights first)" << endl;
         }
     } else {
