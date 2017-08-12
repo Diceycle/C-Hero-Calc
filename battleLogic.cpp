@@ -34,7 +34,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     int leftFrontDamageTaken = 0;
     int leftHealing = 0;
     int leftCumAoeDamageTaken = 0;
-    float leftBerserkMult = 1;
+    float leftBerserkProcs = 1;
     
     size_t rightLost = 0;
     size_t rightArmySize = right.monsters.size();
@@ -43,7 +43,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     int rightFrontDamageTaken = 0;
     int rightHealing = 0;
     int rightCumAoeDamageTaken = 0;
-    float rightBerserkMult = 1;
+    float rightBerserkProcs = 1;
     
     // If no heroes are in the army the result from the smaller army is still valid
     if (left.lastFightData.valid && !verbose) { 
@@ -54,7 +54,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         rightLost               = left.lastFightData.monstersLost;
         rightFrontDamageTaken   = left.lastFightData.damage;
         rightCumAoeDamageTaken  = left.lastFightData.rightAoeDamage;
-        rightBerserkMult        = left.lastFightData.berserk;
+        rightBerserkProcs       = left.lastFightData.berserk;
     }
     
     // Values for skills  
@@ -165,20 +165,20 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         
         // Handle Monsters with skills berserk or friends
         if (currentMonsterLeft->skill.type == berserk) {
-            damageLeft *= leftBerserkMult;
-            leftBerserkMult *= currentMonsterLeft->skill.amount;
+            damageLeft *= pow(currentMonsterLeft->skill.amount, leftBerserkProcs);
+            leftBerserkProcs++;
         } else {
-            leftBerserkMult = 1;
+            leftBerserkProcs = 1;
         }
         if (currentMonsterLeft->skill.type == friends) {
             damageLeft *= pow(currentMonsterLeft->skill.amount, pureMonstersLeft);
         }
         
         if (currentMonsterRight->skill.type == berserk) {
-            damageRight *= rightBerserkMult;
-            rightBerserkMult *= currentMonsterRight->skill.amount;
+            damageRight *= pow(currentMonsterRight->skill.amount, rightBerserkProcs);
+            rightBerserkProcs++; 
         } else {
-            rightBerserkMult = 1;
+            rightBerserkProcs = 1;
         }
         if (currentMonsterRight->skill.type == friends) {
             damageRight *= pow(currentMonsterRight->skill.amount, pureMonstersRight);
@@ -220,12 +220,12 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         // Check if the first Monster died (Neccessary cause of the AOE-Piercing-Heal-Interaction)
         if (currentMonsterLeft->hp <= leftFrontDamageTaken) {
             leftLost++;
-            leftBerserkMult = 1;
+            leftBerserkProcs = 1;
             leftFrontDamageTaken = leftCumAoeDamageTaken;
         }
         if (currentMonsterRight->hp <= rightFrontDamageTaken) {
             rightLost++;
-            rightBerserkMult = 1;
+            rightBerserkProcs = 1;
             rightFrontDamageTaken = rightCumAoeDamageTaken;
         }
         
@@ -244,11 +244,11 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         left.lastFightData.rightWon = true;
         left.lastFightData.monstersLost = rightLost; 
         left.lastFightData.damage = rightFrontDamageTaken;
-        left.lastFightData.berserk = rightBerserkMult;
+        left.lastFightData.berserk = rightBerserkProcs;
     } else {
         left.lastFightData.rightWon = false;
         left.lastFightData.monstersLost = leftLost; 
         left.lastFightData.damage = leftFrontDamageTaken;
-        left.lastFightData.berserk = leftBerserkMult;
+        left.lastFightData.berserk = leftBerserkProcs;
     }
 }
