@@ -151,7 +151,7 @@ void getQuickSolutions(const vector<Monster *> & availableHeroes, Army target, s
     }
 }
 
-void solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t limit, bool debugInfo) {
+int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t limit, bool debugInfo) {
     Army tempArmy = Army();
     int startTime;
     int tempTime;
@@ -160,7 +160,7 @@ void solveInstance(const vector<Monster *> & availableHeroes, Army target, size_
 
     // Get first Upper limit on followers
     getQuickSolutions(availableHeroes, target, limit);
-    if (!askYesNoQuestion("Continue calculation?")) {return;}
+    if (!askYesNoQuestion("Continue calculation?")) {return 0;}
     cout << endl;
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
@@ -346,6 +346,7 @@ void solveInstance(const vector<Monster *> & availableHeroes, Army target, size_
         }
         debugOutput(tempTime, "", true, true, true);
     }
+    return time(NULL) - startTime;
 }
 
 int main(int argc, char** argv) {
@@ -427,9 +428,9 @@ int main(int argc, char** argv) {
         return 0;
     }
     
-    int startTime = time(NULL);
+    int totalTime;
     Army hostileArmy = Army(hostileLineup);
-    solveInstance(availableHeroes, hostileArmy, limit, debugInfo);
+    totalTime = solveInstance(availableHeroes, hostileArmy, limit, debugInfo);
     // Last check to see if winning combination wins:
     if (followerUpperBound < numeric_limits<int>::max()) {
         best.lastFightData.valid = false;
@@ -455,7 +456,7 @@ int main(int argc, char** argv) {
     
     cout << endl;
     cout << totalFightsSimulated << " Fights simulated." << endl;
-    cout << "Total Calculation Time: " << time(NULL) - startTime << endl;
+    cout << "Total Calculation Time: " << totalTime << endl;
     haltExecution();
     return EXIT_SUCCESS;
 }
