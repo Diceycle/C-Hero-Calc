@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <iomanip>
+#include <cstdint>
 
 using namespace std;
 
@@ -49,11 +50,11 @@ bool isCheaper(Monster * a, Monster * b);
 // Defines the results of a fight between two armies; monstersLost and damage desribe the condition of the winning side
 class FightResult {
     public :
-        size_t monstersLost;    // how many mobs lost on the winning side (the other side lost all)
-        int damage;             // how much damage dealt to the current leading mob of the winning side
-        int berserk;            // berserk multiplier, if there is a berserker in the front
-        int leftAoeDamage;      // how much aoe damage left took
-        int rightAoeDamage;     // how much aoe damage right took
+        int16_t damage;             // how much damage dealt to the current leading mob of the winning side
+        int16_t leftAoeDamage;      // how much aoe damage left took
+        int16_t rightAoeDamage;     // how much aoe damage right took
+        int8_t berserk;            // berserk multiplier, if there is a berserker in the front
+        int8_t monstersLost;    // how many mobs lost on the winning side (the other side lost all)
         bool valid;             // If the result is valid
         bool rightWon;          // false -> left win, true -> right win.
         bool dominated;         // If the result is worse than another
@@ -70,7 +71,7 @@ class Army {
     public:
         vector<Monster *> monsters;
         FightResult lastFightData;
-        int followerCost;
+        int32_t followerCost;
         
         void add(Monster * m);
         void print();
