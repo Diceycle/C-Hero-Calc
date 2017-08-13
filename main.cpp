@@ -29,7 +29,7 @@ void simulateMultipleFights(vector<Army> & armies, Army & target) {
         if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
             if (armies[i].followerCost < followerUpperBound) {
                 followerUpperBound = armies[i].followerCost;
-                best = Army(armies[i].monsters);
+                best = armies[i];//Army(armies[i].monsters);
 //                cout << endl << "    New Solution: " << endl << "  "; 
 //                best.print();
             }
@@ -106,7 +106,7 @@ void getQuickSolutions(const vector<Monster *> & availableHeroes, Army target, s
     vector<Monster *> greedy {};
     vector<Monster *> greedyHeroes {};
     vector<Monster *> greedyTemp {};
-    size_t targetSize = target.monsters.size();
+    size_t targetSize = target.monsterAmount;
     bool invalid = false;
     
     cout << "Trying to find solutions greedily..." << endl;
@@ -182,9 +182,9 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
     }
     
     // Check if a single monster can beat the last two monsters of the target. If not, solutions that can only beat n-2 monsters need not be expanded later
-    bool optimizable = (target.monsters.size() >= 3);
+    bool optimizable = (target.monsterAmount >= 3);
     if (optimizable) {
-        tempArmy = Army({target.monsters[target.monsters.size() - 2], target.monsters[target.monsters.size() - 1]}); // Make an army from the last two monsters
+        tempArmy = Army({target.monsters[target.monsterAmount - 2], target.monsters[target.monsterAmount - 1]}); // Make an army from the last two monsters
     }
     
     if (optimizable) { // Check with normal Mobs
@@ -210,7 +210,7 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
     // Run the Bruteforce Loop
     startTime = time(NULL);
     tempTime = startTime;
-    size_t targetSize = target.monsters.size();
+    size_t targetSize = target.monsterAmount;
     size_t pureMonsterArmiesSize, heroMonsterArmiesSize;
     for (size_t armySize = 1; armySize <= limit; armySize++) {
     
@@ -242,7 +242,7 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
             
             int leftFollowerCost;
             FightResult * currentFightResult;
-            vector<Monster *> leftHeroList {};
+            Monster* leftHeroList[6];
             size_t leftHeroListSize;
             Monster * rightMonster;
             Monster * leftMonster;

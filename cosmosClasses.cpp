@@ -41,8 +41,8 @@ bool FightResult::operator >=(FightResult & toCompare) {
 
 Army::Army(vector<Monster*> monsters) {
     this->followerCost = 0;
+    this->monsterAmount = 0;
     this->lastFightData = FightResult();
-    this->monsters.clear();
     
     for(size_t i = 0; i < monsters.size(); i++) {
         this->add(monsters[i]);
@@ -50,14 +50,15 @@ Army::Army(vector<Monster*> monsters) {
 }
 
 void Army::add(Monster * m) {
-    this->monsters.push_back(m);
+    this->monsters[monsterAmount] = m;
     this->followerCost += m->cost;
+    this->monsterAmount++;
 }
 
 void Army::print() {
     cout << "(Followers: " << setw(7) << this->followerCost << " | ";
-    for (size_t i = 0; i < this->monsters.size() ; i++) {
-        cout << this->monsters[this->monsters.size() -1-i]->name << " "; // Print in reversed Order
+    for (int i = this->monsterAmount-1; i >= 0; i--) {
+        cout << this->monsters[i]->name << " "; // Print in reversed Order
     } cout << ")" << endl; 
 }
 

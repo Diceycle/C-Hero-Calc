@@ -61,7 +61,6 @@ class FightResult {
             
         FightResult();
         
-    // Comparator for fightResults. Heavily used TODO: Optimize
     bool operator <= (FightResult & toCompare);
     bool operator >= (FightResult & toCompare);
 };
@@ -69,9 +68,10 @@ class FightResult {
 // Defines a single lineup of monsters
 class Army {
     public:
-        vector<Monster *> monsters;
+        Monster* monsters[6];
         FightResult lastFightData;
         int32_t followerCost;
+        int8_t monsterAmount;
         
         void add(Monster * m);
         void print();

@@ -28,8 +28,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     totalFightsSimulated++;
     
     size_t leftLost = 0;
-    size_t leftArmySize = left.monsters.size();
-    vector<Monster *> & leftLineup = left.monsters;
+    size_t leftArmySize = left.monsterAmount;
+    Monster** leftLineup = left.monsters;
     
     int leftFrontDamageTaken = 0;
     int leftHealing = 0;
@@ -37,8 +37,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     float leftBerserkProcs = 1;
     
     size_t rightLost = 0;
-    size_t rightArmySize = right.monsters.size();
-    vector<Monster *> & rightLineup = right.monsters;
+    size_t rightArmySize = right.monsterAmount;
+    Monster** rightLineup = right.monsters;
     
     int rightFrontDamageTaken = 0;
     int rightHealing = 0;
