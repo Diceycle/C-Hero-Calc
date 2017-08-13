@@ -37,7 +37,6 @@ void simulateMultipleFights(vector<Army> & armies, Army & target) {
     }
 }
 
-// TODO: Fix Bug that might causes geror to be undervalued because of precomputed fights
 void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
             vector<Army> & oldPureArmies, vector<Army> & oldHeroArmies, 
             const vector<Monster *> & availableMonsters, const vector<Monster *> & availableHeroes,
@@ -46,8 +45,10 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     int remainingFollowers;
     size_t availableMonstersSize = availableMonsters.size();
     size_t availableHeroesSize = availableHeroes.size();
+    vector<bool> usedHeroes; usedHeroes.reserve(availableHeroesSize);
     size_t i, j, m;
-    bool heroUsed;
+    SkillType currentSkill;
+    bool friendsActive;
     
     for (i = 0; i < oldPureArmies.size(); i++) {
         if (!oldPureArmies[i].lastFightData.dominated) {
@@ -58,34 +59,40 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 newPureArmies.back().lastFightData.valid = true;
             }
             for (m = 0; m < availableHeroesSize; m++) {
+                currentSkill = availableHeroes[m]->skill.type;
                 newHeroArmies.push_back(oldPureArmies[i]);
                 newHeroArmies.back().add(availableHeroes[m]);
-                newHeroArmies.back().lastFightData.valid = false; // Refine PF Stuff
+                newHeroArmies.back().lastFightData.valid = (currentSkill == pAoe || currentSkill == friends || currentSkill == berserk); // These skills are self centered
             }
         }
     }
     
     for (i = 0; i < oldHeroArmies.size(); i++) {
         if (!oldHeroArmies[i].lastFightData.dominated) {
+            friendsActive = false;
             remainingFollowers = followerUpperBound - oldHeroArmies[i].followerCost;
-            for (m = 0; m < availableMonstersSize && availableMonsters[m]->cost < remainingFollowers; m++) {
-                newHeroArmies.push_back(oldHeroArmies[i]);
-                newHeroArmies.back().add(availableMonsters[m]);
-                newHeroArmies.back().lastFightData.valid = true;
-            }
-            for (m = 0; m < availableHeroesSize; m++) {
-                heroUsed = false;
-                for (j = 0; j < currentArmySize; j++) {
+            for (j = 0; j < currentArmySize; j++) {
+                for (m = 0; m < availableHeroesSize; m++) {
                     if (oldHeroArmies[i].monsters[j] == availableHeroes[m]) {
-                        heroUsed = true;
+                        friendsActive |= oldHeroArmies[i].monsters[j]->skill.type == friends;
+                        usedHeroes[m] = true;
                         break;
                     }
                 }
-                if (!heroUsed) {
+            }
+            for (m = 0; m < availableMonstersSize && availableMonsters[m]->cost < remainingFollowers; m++) {
+                newHeroArmies.push_back(oldHeroArmies[i]);
+                newHeroArmies.back().add(availableMonsters[m]);
+                newHeroArmies.back().lastFightData.valid = !friendsActive;
+            }
+            for (m = 0; m < availableHeroesSize; m++) {
+                if (!usedHeroes[m]) {
+                    currentSkill = availableHeroes[m]->skill.type;
                     newHeroArmies.push_back(oldHeroArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = false; // Refine PF Stuff
+                    newHeroArmies.back().lastFightData.valid = (currentSkill == pAoe || currentSkill == friends || currentSkill == berserk); // These skills are self centered
                 }
+                usedHeroes[m] = false;
             }
         }
     }
