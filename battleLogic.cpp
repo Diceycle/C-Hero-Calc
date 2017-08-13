@@ -34,7 +34,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     int leftFrontDamageTaken = 0;
     int leftHealing = 0;
     int leftCumAoeDamageTaken = 0;
-    float leftBerserkProcs = 1;
+    float leftBerserkProcs = 0;
     
     size_t rightLost = 0;
     size_t rightArmySize = right.monsterAmount;
@@ -43,7 +43,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     int rightFrontDamageTaken = 0;
     int rightHealing = 0;
     int rightCumAoeDamageTaken = 0;
-    float rightBerserkProcs = 1;
+    float rightBerserkProcs = 0;
     
     // If no heroes are in the army the result from the smaller army is still valid
     if (left.lastFightData.valid && !verbose) { 
@@ -168,7 +168,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
             damageLeft *= pow(currentMonsterLeft->skill.amount, leftBerserkProcs);
             leftBerserkProcs++;
         } else {
-            leftBerserkProcs = 1;
+            leftBerserkProcs = 0;
         }
         if (currentMonsterLeft->skill.type == friends) {
             damageLeft *= pow(currentMonsterLeft->skill.amount, pureMonstersLeft);
@@ -178,7 +178,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
             damageRight *= pow(currentMonsterRight->skill.amount, rightBerserkProcs);
             rightBerserkProcs++; 
         } else {
-            rightBerserkProcs = 1;
+            rightBerserkProcs = 0;
         }
         if (currentMonsterRight->skill.type == friends) {
             damageRight *= pow(currentMonsterRight->skill.amount, pureMonstersRight);
@@ -220,12 +220,12 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         // Check if the first Monster died (Neccessary cause of the AOE-Piercing-Heal-Interaction)
         if (currentMonsterLeft->hp <= leftFrontDamageTaken) {
             leftLost++;
-            leftBerserkProcs = 1;
+            leftBerserkProcs = 0;
             leftFrontDamageTaken = leftCumAoeDamageTaken;
         }
         if (currentMonsterRight->hp <= rightFrontDamageTaken) {
             rightLost++;
-            rightBerserkProcs = 1;
+            rightBerserkProcs = 0;
             rightFrontDamageTaken = rightCumAoeDamageTaken;
         }
         
