@@ -286,14 +286,14 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
             for (i = 0; i < heroMonsterArmiesSize; i++) {
                 leftFollowerCost = heroMonsterArmies[i].followerCost;
                 currentFightResult = &heroMonsterArmies[i].lastFightData;
-                leftHeroList.clear();
+                leftHeroListSize = 0;
                 for (si = 0; si < armySize; si++) {
                     leftMonster = heroMonsterArmies[i].monsters[si];
                     if (leftMonster->isHero) {
-                        leftHeroList.push_back(leftMonster);
+                        leftHeroList[leftHeroListSize] = leftMonster;
+                        leftHeroListSize++;
                     }
                 }
-                leftHeroListSize = leftHeroList.size();
                 
                 // A result is obsolete if only one expansion is left but no single mob can beat the last two enemy mobs alone (optimizable)
                 if (armySize == (limit-1) && optimizable && currentFightResult->rightAoeDamage == 0) {
