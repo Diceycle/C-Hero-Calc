@@ -5,9 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <iomanip>
-#include <cmath>
 #include <fstream>
-#include <limits>
 
 #include "cosmosDefines.h"
 
