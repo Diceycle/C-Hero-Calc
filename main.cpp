@@ -389,10 +389,10 @@ int main(int argc, char** argv) {
     }; 
     
     // Flow Control Variables
-    bool ignoreConsole = true;                         // Disables the console question whether you want to read from file or command line
+    bool ignoreConsole = false;                         // Disables the console question whether you want to read from file or command line
     bool individual = false;                            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
     bool debugInfo = true;                              // Set this to true if you want to see how far the execution is and how lone the execution took altogether
-    bool manualInput = true;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
+    bool manualInput = false;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
     
     int totalTime;
     
@@ -437,6 +437,7 @@ int main(int argc, char** argv) {
         
         filterMonsterData(minimumMonsterCost);
         initializeUserHeroes(yourHeroLevels);
+        
         if (individual) { // custom input mode
             cout << "Simulating individual Figths" << endl;
             while (true) {
