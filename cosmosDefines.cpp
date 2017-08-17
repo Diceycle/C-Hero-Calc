@@ -10,6 +10,8 @@ vector<Monster *> availableHeroes {};
 // Make sure all the values are set
 void initMonsterData() {
     // Initialize Monster Data
+    monsterList.clear();
+    monsterMap.clear();
     for (size_t i = 0; i < monsterBaseList.size(); i++) {
         monsterList.push_back(&monsterBaseList[i]);
         monsterMap.insert(pair<string, Monster *>(monsterBaseList[i].name, &monsterBaseList[i]));
@@ -19,7 +21,19 @@ void initMonsterData() {
     sort(monsterList.begin(), monsterList.end(), isCheaper);
     
     // Reserve some space for heroes, otherwise pointers will become invalid (Important!)
+    heroReference.clear();
+    availableHeroes.clear();
     heroReference.reserve(baseHeroes.size()*2);
+}
+
+// Filter MonsterList by cost. User can specify if he wants to exclude cheap monsters
+void filterMonsterData(int minimumMonsterCost) {
+    while (monsterList.size() > 0 && monsterList[0]->cost <= minimumMonsterCost) {
+        monsterList.erase(monsterList.begin());
+    }
+    if (minimumMonsterCost == -1) {
+        monsterList = {};
+    }
 }
 
 // Initialize Hero Data

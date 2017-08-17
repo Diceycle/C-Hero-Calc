@@ -18,17 +18,22 @@
 using namespace std;
 
 // Define global variables used to track the best result
+int minimumMonsterCost;
+size_t maxMonstersAllowed;
+Army targetArmy;
+size_t targetArmySize;
+
 int followerUpperBound;
 Army best;
 
 // Simulates fights with all armies against the target. armies will contain armies with the results written in.
-void simulateMultipleFights(vector<Army> & armies, Army & target) {
+void simulateMultipleFights(vector<Army> & armies) {
     for (size_t i = 0; i < armies.size(); i++) {
-        simulateFight(armies[i], target);
+        simulateFight(armies[i], targetArmy);
         if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
             if (armies[i].followerCost < followerUpperBound) {
                 followerUpperBound = armies[i].followerCost;
-                best = armies[i];//Army(armies[i].monsters);
+                best = armies[i];
 //                cout << endl << "    New Solution: " << endl << "  "; 
 //                best.print();
             }
@@ -38,8 +43,8 @@ void simulateMultipleFights(vector<Army> & armies, Army & target) {
 
 void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
             vector<Army> & oldPureArmies, vector<Army> & oldHeroArmies, 
-            const vector<Monster *> & availableMonsters, const vector<Monster *> & availableHeroes,
-            size_t currentArmySize, size_t maxArmySize) {
+            const vector<Monster *> & availableMonsters,
+            size_t currentArmySize) {
 
     int remainingFollowers;
     size_t availableMonstersSize = availableMonsters.size();
@@ -52,7 +57,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     for (i = 0; i < oldPureArmies.size(); i++) {
         if (!oldPureArmies[i].lastFightData.dominated) {
             remainingFollowers = followerUpperBound - oldPureArmies[i].followerCost;
-            for (m = 0; m < availableMonstersSize && availableMonsters[m]->cost < remainingFollowers; m++) {
+            for (m = 0; m < availableMonstersSize && availableMonsters[m]->cost < remainingFollowers && availableMonsters[m]->cost > minimumMonsterCost; m++) {
                 newPureArmies.push_back(oldPureArmies[i]);
                 newPureArmies.back().add(availableMonsters[m]);
                 newPureArmies.back().lastFightData.valid = true;
@@ -79,7 +84,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                     }
                 }
             }
-            for (m = 0; m < availableMonstersSize && availableMonsters[m]->cost < remainingFollowers; m++) {
+            for (m = 0; m < availableMonstersSize && availableMonsters[m]->cost < remainingFollowers && availableMonsters[m]->cost > minimumMonsterCost; m++) {
                 newHeroArmies.push_back(oldHeroArmies[i]);
                 newHeroArmies.back().add(availableMonsters[m]);
                 newHeroArmies.back().lastFightData.valid = !friendsActive;
@@ -100,7 +105,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
 
 // Use a greedy method to get a first upper bound on follower cost for the solution
 // TODO: Think of an algorithm that works on limit < targetsize semi-reliable
-void getQuickSolutions(const vector<Monster *> & availableHeroes, Army target, size_t limit) {
+void getQuickSolutions(Army target, size_t limit) {
     Army tempArmy = Army();
     vector<Monster *> greedy {};
     vector<Monster *> greedyHeroes {};
@@ -157,7 +162,7 @@ void getQuickSolutions(const vector<Monster *> & availableHeroes, Army target, s
     }
 }
 
-int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t limit, bool debugInfo) {
+int solveInstance(bool debugInfo) {
     Army tempArmy = Army();
     int startTime;
     int tempTime;
@@ -165,7 +170,7 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
     size_t i, j, sj, si;
 
     // Get first Upper limit on followers
-    getQuickSolutions(availableHeroes, target, limit);
+    getQuickSolutions(targetArmy, maxMonstersAllowed);
     if (!askYesNoQuestion("Continue calculation?")) {return 0;}
     cout << endl;
     
@@ -181,9 +186,9 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
     }
     
     // Check if a single monster can beat the last two monsters of the target. If not, solutions that can only beat n-2 monsters need not be expanded later
-    bool optimizable = (target.monsterAmount >= 3);
+    bool optimizable = (targetArmySize >= 3);
     if (optimizable) {
-        tempArmy = Army({target.monsters[target.monsterAmount - 2], target.monsters[target.monsterAmount - 1]}); // Make an army from the last two monsters
+        tempArmy = Army({targetArmy.monsters[targetArmySize - 2], targetArmy.monsters[targetArmySize - 1]}); // Make an army from the last two monsters
     }
     
     if (optimizable) { // Check with normal Mobs
@@ -209,9 +214,8 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
     // Run the Bruteforce Loop
     startTime = time(NULL);
     tempTime = startTime;
-    size_t targetSize = target.monsterAmount;
     size_t pureMonsterArmiesSize, heroMonsterArmiesSize;
-    for (size_t armySize = 1; armySize <= limit; armySize++) {
+    for (size_t armySize = 1; armySize <= maxMonstersAllowed; armySize++) {
     
         pureMonsterArmiesSize = pureMonsterArmies.size();
         heroMonsterArmiesSize = heroMonsterArmies.size();
@@ -221,14 +225,14 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
         // Run Fights for non-Hero setups
         debugOutput(tempTime, "  Simulating " + to_string(pureMonsterArmiesSize) + " non-hero Fights... ", debugInfo, false, false);
         tempTime = time(NULL);
-        simulateMultipleFights(pureMonsterArmies, target);
+        simulateMultipleFights(pureMonsterArmies);
         
         // Run fights for setups with heroes
         debugOutput(tempTime, "  Simulating " + to_string(heroMonsterArmiesSize) + " hero Fights... ", debugInfo, true, false);
         tempTime = time(NULL);
-        simulateMultipleFights(heroMonsterArmies, target);
+        simulateMultipleFights(heroMonsterArmies);
         
-        if (armySize < limit) { 
+        if (armySize < maxMonstersAllowed) { 
             // Sort the results by follower cost for some optimization
             debugOutput(tempTime, "  Sorting List... ", debugInfo, true, false);
             tempTime = time(NULL);
@@ -250,9 +254,9 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
                 leftFollowerCost = pureMonsterArmies[i].followerCost;
                 currentFightResult = &pureMonsterArmies[i].lastFightData;
                 // A result is obsolete if only one expansion is left but no single mob can beat the last two enemy mobs alone (optimizable)
-                if (armySize == (limit - 1) && optimizable) {
+                if (armySize == (maxMonstersAllowed - 1) && optimizable) {
                     // TODO: Investigate whether this is truly correct: What if the second-to-last mob is already damaged (not from aoe) i.e. it defeated the last mob of left?
-                    if (currentFightResult->rightWon && currentFightResult->monstersLost < targetSize - 2 && currentFightResult->rightAoeDamage == 0) {
+                    if (currentFightResult->rightWon && currentFightResult->monstersLost < targetArmySize - 2 && currentFightResult->rightAoeDamage == 0) {
                         currentFightResult->dominated = true;
                     }
                 }
@@ -295,9 +299,9 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
                 }
                 
                 // A result is obsolete if only one expansion is left but no single mob can beat the last two enemy mobs alone (optimizable)
-                if (armySize == (limit-1) && optimizable && currentFightResult->rightAoeDamage == 0) {
+                if (armySize == (maxMonstersAllowed - 1) && optimizable && currentFightResult->rightAoeDamage == 0) {
                     // TODO: Investigate whether this is truly correct: What if the second-to-last mob is already damaged (not from aoe) i.e. it defeated the last mob of left?
-                    if (currentFightResult->rightWon && currentFightResult->monstersLost < targetSize - 2){
+                    if (currentFightResult->rightWon && currentFightResult->monstersLost < targetArmySize - 2){
                         currentFightResult->dominated = true;
                     }
                 }
@@ -342,7 +346,7 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
             vector<Army> nextPureArmies;
             vector<Army> nextHeroArmies;
             expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies,
-                    monsterList, availableHeroes, armySize, limit);
+                    monsterList, armySize);
 
             debugOutput(tempTime, "  Moving Data... ", debugInfo, true, false);
             tempTime = time(NULL);
@@ -356,14 +360,11 @@ int solveInstance(const vector<Monster *> & availableHeroes, Army target, size_t
 }
 
 int main(int argc, char** argv) {
-    // Initialize global Data
-    followerUpperBound = numeric_limits<int>::max();
-    best = Army();
-    initMonsterData();
     
     // Declare Variables
     vector<Monster *> friendLineup {};
     vector<Monster *> hostileLineup {};
+    vector<string> stringLineup {};
     string inputString;
     vector<int> yourHeroLevels;
     
@@ -371,98 +372,122 @@ int main(int argc, char** argv) {
     vector<string> daily {"w10", "e10", "a10", "w10", "shaman:99"};
     vector<string> test3 {"a9", "f8", "a8"}; 
     // Declare Hero Levels
-    // INPUT YOUR HERO LEVELS HERE (For manual editing: Names tell you which number is the level of which hero)
-    yourHeroLevels = { 0, 0, 0, 0,      // "lady of twilight","tiny","nebra","james"
-                       0, 0, 0,         // "hunter","shaman","alpha"
-                       0, 0, 0,         // "carl","nimue","athos"
-                       0, 0, 0,         // "jet","geron","rei"
-                       0, 0, 0,         // "ailen","faefyr","auri"
-                       0, 0, 0,         // "k41ry", "t4urus", "tr0n1x"
-                       0, 0, 0,         // "aquortis", "aeris", "geum"
-                       0, 0, 0,         // "rudean","aural","geror"
-                       0, 0, 0, 0,      // "valor","rokka","pyromancer","bewat"
-                       0, 0, 0, 0       // "nicte", "forest druid","ignitor","undine"
+    maxMonstersAllowed = 6;         // Set this to how many Monsters should be in the solution (f.e 4 for X-3 Quests) 
+    minimumMonsterCost = 0;         // Minimum amount a monster used in the soluiton should cost. Useful for reducing the amount of monsters when you are sure you wont need them (f.e. a1 in dq20)
+    stringLineup = daily;           // Choose against which lineup you want to fight use one from above or make your own and then change the name accordingly
+    yourHeroLevels = {    // INPUT YOUR HERO LEVELS HERE (For manual editing: Names tell you which number is the level of which hero)
+         0, 0, 0, 0,      // "lady of twilight","tiny","nebra","james"
+         0, 0, 0,         // "hunter","shaman","alpha"
+         0, 0, 0,         // "carl","nimue","athos"
+         0, 0, 0,         // "jet","geron","rei"
+         0, 0, 0,         // "ailen","faefyr","auri"
+         0, 0, 0,         // "k41ry", "t4urus", "tr0n1x"
+         0, 0, 0,         // "aquortis", "aeris", "geum"
+         0, 0, 0,         // "rudean","aural","geror"
+         0, 0, 0, 0,      // "valor","rokka","pyromancer","bewat"
+         0, 0, 0, 0       // "nicte", "forest druid","ignitor","undine"
     }; 
     
-    // Use these variables to specify the fight
-    bool ignoreConsole = false;                         // Disables the console question whether you want to read from file or command line
-    int limit = 6;                                      // Set this to how many Monsters should be in the solution (f.e 4 for X-3 Quests) 
-    hostileLineup = makeMonstersFromStrings(quests[1]); // Choose against which lineup you want to fight use one from above or make your own and then change the name accordingly
+    // Flow Control Variables
+    bool ignoreConsole = true;                         // Disables the console question whether you want to read from file or command line
     bool individual = false;                            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
     bool debugInfo = true;                              // Set this to true if you want to see how far the execution is and how lone the execution took altogether
-    bool manualInput = false;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
+    bool manualInput = true;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
+    
+    int totalTime;
+    
+    // --------------------------------------------- Actual Program Starts here --------------------------------------------
     
     cout << "Welcome to Diceycle's PvE Instance Solver!" << endl;
     
     if (!ignoreConsole) {
         manualInput = askYesNoQuestion("Do you want to input everything via command line?");
     }
-    // Collect the Data via Command Line if the user wants
-    if (manualInput) {
-        try {
-            yourHeroLevels = takeHerolevelInput();
-        } catch (const exception & e) {
-            haltExecution();
-            return EXIT_FAILURE;
-        }
-        hostileLineup = takeLineupInput("Enter Enemy Lineup");
-        cout << "Enter how many monsters are allowed in the solution" << endl;
-        getline(cin, inputString);
-        limit = stoi(inputString);
-    } else {
-        cout << "Taking data from script" << endl;
-    }
     
-    initializeUserHeroes(yourHeroLevels);
-    
-    
-    if (individual) { // custom input mode
-        cout << "Simulating individual Figths" << endl;
-        while (true) {
-            friendLineup = takeLineupInput("Enter friendly lineup:");
-            hostileLineup = takeLineupInput("Enter hostile lineup");
-            
-            Army left = Army(friendLineup);
-            Army right = Army(hostileLineup);
-            simulateFight(left, right, true);
-            cout << left.lastFightData.rightWon << " " << left.followerCost << " " << right.followerCost << endl;
-            
-            if (!askYesNoQuestion("Simulate another Fight?")) {
-                break;
+    bool userWantsContinue = true;
+    while (userWantsContinue) {
+        // Initialize global Data
+        followerUpperBound = numeric_limits<int>::max();
+        best = Army();
+        initMonsterData();
+        
+        // Collect the Data via Command Line if the user wants
+        if (manualInput) {
+            try {
+                yourHeroLevels = takeHerolevelInput();
+            } catch (const exception & e) {
+                haltExecution();
+                return EXIT_FAILURE;
             }
-        }
-        return 0;
-    }
-    
-    int totalTime;
-    Army hostileArmy = Army(hostileLineup);
-    totalTime = solveInstance(availableHeroes, hostileArmy, limit, debugInfo);
-    // Last check to see if winning combination wins:
-    if (followerUpperBound < numeric_limits<int>::max()) {
-        best.lastFightData.valid = false;
-        simulateFight(best, hostileArmy);
-        if (best.lastFightData.rightWon) {
-            best.print();
-            cout << "This does not beat the lineup!!!" << endl;
-            for (int i = 1; i <= 10; i++) {
-                cout << "ERROR";
-            }
-            haltExecution();
-            return EXIT_FAILURE;
-            
+            targetArmy = takeLineupInput("Enter Enemy Lineup");
+            targetArmySize = targetArmy.monsterAmount;
+            cout << "Enter how many monsters are allowed in the solution" << endl;
+            getline(cin, inputString);
+            maxMonstersAllowed = stoi(inputString);
+            cout << "Set a lower follower limit on monsters used:" << endl;
+            cout << "  (f.e. 215000 will exclude e8 and cheaper in the solution)" << endl;
+            cout << "  0 for ALL monsters; -1 for NO monsters" << endl;
+            getline(cin, inputString);
+            minimumMonsterCost = stoi(inputString);
         } else {
-            // Print the winning combination!
-            cout << endl << "The optimal combination is:" << endl << "  ";
-            best.print();
-            cout << "  (Right-most fights first)" << endl;
+            cout << "Taking data from script" << endl;
+            targetArmy = Army(makeMonstersFromStrings(stringLineup));
+            targetArmySize = targetArmy.monsterAmount;
         }
-    } else {
-        cout << endl << "Could not find a solution that beats this lineup." << endl;
+        
+        filterMonsterData(minimumMonsterCost);
+        initializeUserHeroes(yourHeroLevels);
+        if (individual) { // custom input mode
+            cout << "Simulating individual Figths" << endl;
+            while (true) {
+                friendLineup = takeLineupInput("Enter friendly lineup:");
+                hostileLineup = takeLineupInput("Enter hostile lineup");
+                
+                Army left = Army(friendLineup);
+                Army right = Army(hostileLineup);
+                simulateFight(left, right, true);
+                cout << left.lastFightData.rightWon << " " << left.followerCost << " " << right.followerCost << endl;
+                
+                if (!askYesNoQuestion("Simulate another Fight?")) {
+                    break;
+                }
+            }
+            return 0;
+        }
+        
+        totalTime = solveInstance(debugInfo);
+        // Last check to see if winning combination wins:
+        if (followerUpperBound < numeric_limits<int>::max()) {
+            best.lastFightData.valid = false;
+            simulateFight(best, targetArmy);
+            if (best.lastFightData.rightWon) {
+                best.print();
+                cout << "This does not beat the lineup!!!" << endl;
+                for (int i = 1; i <= 10; i++) {
+                    cout << "ERROR";
+                }
+                haltExecution();
+                return EXIT_FAILURE;
+                
+            } else {
+                // Print the winning combination!
+                cout << endl << "The optimal combination is:" << endl << "  ";
+                best.print();
+                cout << "  (Right-most fights first)" << endl;
+            }
+        } else {
+            cout << endl << "Could not find a solution that beats this lineup." << endl;
+        }
+        
+        cout << endl;
+        cout << totalFightsSimulated << " Fights simulated." << endl;
+        cout << "Total Calculation Time: " << totalTime << endl;
+        if (manualInput) {
+            userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?");
+        } else {
+            userWantsContinue = false;
+            haltExecution();
+        }
     }
-    
-    cout << endl;
-    cout << totalFightsSimulated << " Fights simulated." << endl;
-    cout << "Total Calculation Time: " << totalTime << endl;
-    haltExecution();
     return EXIT_SUCCESS;
 }

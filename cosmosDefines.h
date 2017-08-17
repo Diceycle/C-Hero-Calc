@@ -199,6 +199,9 @@ static vector<vector<string>> quests { // Contains all quest lineups for easy re
 // Make sure all the values are set
 void initMonsterData();
 
+// Filter MonsterList by cost. User can specify if he wants to exclude cheap monsters
+void filterMonsterData(int minimumMonsterCost);
+
 // Initialize Hero Data
 void initializeUserHeroes(vector<int> levels);
 
