@@ -64,7 +64,7 @@ static vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual O
     Monster(128, 120, 1903000, "e12", earth),
     Monster(190, 132, 3971000, "e13", earth),
     Monster(244, 136, 6044000, "e14", earth),
-    Monster(196, 168, 5974000, "e15", earth),
+    Monster(200, 186, 7173000, "e15", earth),
 
     Monster( 16,  10,    1000,  "f1", fire),
     Monster( 18,  16,    3900,  "f2", fire),
@@ -80,7 +80,7 @@ static vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual O
     Monster(156,  92, 1718000, "f12", fire),
     Monster(166, 130, 3169000, "f13", fire),
     Monster(168, 168, 4741000, "f14", fire),
-    Monster(224, 134, 5199000, "f15", fire)
+    Monster(234, 136, 5676000, "f15", fire)
 };
 static vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Objects
     Monster( 45, 20, 0, "lady of twilight",  air,   {protect, all, air, 1}),
