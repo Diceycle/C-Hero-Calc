@@ -23,7 +23,7 @@ void initMonsterData() {
     // Reserve some space for heroes, otherwise pointers will become invalid (Important!)
     heroReference.clear();
     availableHeroes.clear();
-    heroReference.reserve(baseHeroes.size()*2);
+    heroReference.reserve(baseHeroes.size()*5);
 }
 
 // Filter MonsterList by cost. User can specify if he wants to exclude cheap monsters

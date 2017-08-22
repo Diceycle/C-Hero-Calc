@@ -133,7 +133,9 @@ void getQuickSolutions(Army target, size_t limit) {
             cout << "  ";
             tempArmy.print();
             best = tempArmy;
-            followerUpperBound = tempArmy.followerCost;
+            if (followerUpperBound > tempArmy.followerCost) {
+                followerUpperBound = tempArmy.followerCost;
+            }
             
             // Try to replace monsters in the setup with heroes to save followers
             greedyHeroes = greedy;
@@ -151,9 +153,11 @@ void getQuickSolutions(Army target, size_t limit) {
             }
             cout << "  ";
             tempArmy = Army(greedyHeroes);
-            best = tempArmy;
-            followerUpperBound = tempArmy.followerCost;
             tempArmy.print();
+            best = tempArmy;
+            if (followerUpperBound > tempArmy.followerCost) {
+                followerUpperBound = tempArmy.followerCost;
+            }
         } else {
             cout << "  Could not find valid solution while being greedy" << endl;
         }
@@ -171,7 +175,7 @@ int solveInstance(bool debugInfo) {
 
     // Get first Upper limit on followers
     getQuickSolutions(targetArmy, maxMonstersAllowed);
-    if (!askYesNoQuestion("Continue calculation?")) {return 0;}
+    if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
     cout << endl;
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
@@ -398,10 +402,11 @@ int main(int argc, char** argv) {
     
     // --------------------------------------------- Actual Program Starts here --------------------------------------------
     
-    cout << "Welcome to Diceycle's PvE Instance Solver!" << endl;
+    cout << welcomeMessage << endl;
+    cout << helpMessage << endl;
     
     if (!ignoreConsole) {
-        manualInput = askYesNoQuestion("Do you want to input everything via command line?");
+        manualInput = askYesNoQuestion(inputModeQuestion, inputModeHelp);
     }
     
     bool userWantsContinue = true;
@@ -413,22 +418,15 @@ int main(int argc, char** argv) {
         
         // Collect the Data via Command Line if the user wants
         if (manualInput) {
-            try {
-                yourHeroLevels = takeHerolevelInput();
-            } catch (const exception & e) {
-                haltExecution();
-                return EXIT_FAILURE;
-            }
-            targetArmy = takeLineupInput("Enter Enemy Lineup");
+            yourHeroLevels = takeHerolevelInput();
+            targetArmy = takeLineupInput("Enter Enemy Lineup: ");
             targetArmySize = targetArmy.monsterAmount;
-            cout << "Enter how many monsters are allowed in the solution" << endl;
-            getline(cin, inputString);
-            maxMonstersAllowed = stoi(inputString);
-            cout << "Set a lower follower limit on monsters used:" << endl;
-            cout << "  (f.e. 215000 will exclude e8 and cheaper in the solution)" << endl;
-            cout << "  0 for ALL monsters; -1 for NO monsters" << endl;
-            getline(cin, inputString);
-            minimumMonsterCost = stoi(inputString);
+            maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution: ", maxMonstersAllowedHelp, integer));
+            minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
+            followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
+            if (followerUpperBound < 0) {
+                followerUpperBound = numeric_limits<int>::max();
+            }
         } else {
             cout << "Taking data from script" << endl;
             targetArmy = Army(makeMonstersFromStrings(stringLineup));
@@ -441,15 +439,15 @@ int main(int argc, char** argv) {
         if (individual) { // custom input mode
             cout << "Simulating individual Figths" << endl;
             while (true) {
-                friendLineup = takeLineupInput("Enter friendly lineup:");
-                hostileLineup = takeLineupInput("Enter hostile lineup");
+                friendLineup = takeLineupInput("Enter friendly lineup: ");
+                hostileLineup = takeLineupInput("Enter hostile lineup: ");
                 
                 Army left = Army(friendLineup);
                 Army right = Army(hostileLineup);
                 simulateFight(left, right, true);
                 cout << left.lastFightData.rightWon << " " << left.followerCost << " " << right.followerCost << endl;
                 
-                if (!askYesNoQuestion("Simulate another Fight?")) {
+                if (!askYesNoQuestion("Simulate another Fight?", "")) {
                     break;
                 }
             }
@@ -484,7 +482,7 @@ int main(int argc, char** argv) {
         cout << totalFightsSimulated << " Fights simulated." << endl;
         cout << "Total Calculation Time: " << totalTime << endl;
         if (manualInput) {
-            userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?");
+            userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?", "");
         } else {
             userWantsContinue = false;
             haltExecution();

@@ -1,23 +1,43 @@
 #include "inputProcessing.h"
 
-// Wait for user input before continuing. Used to stop program from colsing outside of a command line.
+// Wait for user input before continuing. Used to stop program from closing outside of a command line.
 void haltExecution() {
     cout << "Press enter to continue...";
     cin.get();
 }
 
-// Ask the user a question that they can answer via command line
-bool askYesNoQuestion(string question) {
+string getResistantInput(string query, string help, QueryType queryType) {
     string inputString;
     while (true) {
-        cout << question << " (y/n): ";
+        cout << query;
         getline(cin, inputString);
-        if (inputString == "n") {
-            return false;
+        if (inputString == "help") {
+            cout << help;
+        } else {
+            if (queryType == question && (inputString == "y" || inputString == "n")) {
+                return inputString;
+            }
+            if (queryType == integer) {
+                try {
+                    stoi(inputString);
+                    return inputString;
+                } catch (const exception & e) {}
+            }
+            if (queryType == raw) {
+                return inputString;
+            }
         }
-        if (inputString == "y") {
-            return true;
-        }
+    }
+}
+
+// Ask the user a question that they can answer via command line
+bool askYesNoQuestion(string questionMessage, string help) {
+    string inputString = getResistantInput(questionMessage + " (y/n): ", help, question);
+    if (inputString == "n") {
+        return false;
+    }
+    if (inputString == "y") {
+        return true;
     }
     return false;
 }
@@ -45,10 +65,12 @@ vector<int> takeHerolevelInput() {
     string input;
     fstream heroFile;
     heroFile.exceptions(fstream::failbit);
+    bool fileInput;
     
-    if (askYesNoQuestion("Do you want to load hero levels from file?")) {
+    fileInput = askYesNoQuestion(heroInputModeQuestion, heroInputModeHelp);
+    if (fileInput) {
         try {
-            heroFile.open("heroLevels" + heroVersion, fstream::in);
+            heroFile.open(heroLevelFileName, fstream::in);
             heroFile >> input;
             stringLevels = split(input, ",");
             for (size_t i = 0; i < stringLevels.size(); i++) {
@@ -56,20 +78,19 @@ vector<int> takeHerolevelInput() {
             }
             heroFile.close();
         } catch (const exception & e) {
-            cout << "Could not find Hero File of Hero File is deprecated. (Were there new Heroes added recently?)" << endl;
-            cout << "Make sure you input the hero Levels manually at least once." << endl;
-            throw runtime_error("Hero File not found");
+            cout << heroFileNotFoundErrorMessage;
+            fileInput = false;
         }
-    } else {
-        cout << "Enter the level of the hero, whose name is shown (Enter 0 if you don't own the Hero)" << endl;
+    }
+    if (!fileInput) {
+        cout << "Enter the level of the hero, whose name is shown." << endl;
         for (size_t i = 0; i < baseHeroes.size(); i++) {
-            cout << baseHeroes[i].name << ": ";
-            getline(cin, input);
+            input = getResistantInput(baseHeroes[i].name + ": ", heroInputHelp, integer);
             levels.push_back(stoi(input));
         }
         
         // Write Hero Levels to file to use next time
-        heroFile.open("heroLevels" + heroVersion, fstream::out);
+        heroFile.open(heroLevelFileName, fstream::out);
         for (size_t i = 0; i < levels.size()-1; i++) {
             heroFile << levels[i] << ',';
 		}
@@ -86,19 +107,21 @@ vector<Monster *> takeLineupInput(string prompt) {
     string questString = "quest";
     
     string input;
-    cout << prompt << endl;
-    cout << "Enter Monsters separated with commas or type f.e. quest17 to get the lineup for quest 17." << endl;
-    getline(cin, input);
     
-    if (input.compare(0, questString.length(), questString) == 0) {
-        int questNumber = stoi(input.substr(questString.length(), 2));
-        lineup = makeMonstersFromStrings(quests[questNumber]);
-    } else {
-        vector<string> stringLineup = split(input, ",");
-        lineup = makeMonstersFromStrings(stringLineup);
+    while (true) {
+        input = getResistantInput(prompt, lineupInputHelp, raw);
+        try {
+            if (input.compare(0, questString.length(), questString) == 0) {
+                int questNumber = stoi(input.substr(questString.length(), 2));
+                lineup = makeMonstersFromStrings(quests[questNumber]);
+                return lineup;
+            } else {
+                vector<string> stringLineup = split(input, ",");
+                lineup = makeMonstersFromStrings(stringLineup);
+                return lineup;
+            }
+        } catch (const exception & e) {}
     }
-    
-    return lineup;
 }
 
 // Parse string linup input into actual monsters if there are heroes in the input, a leveled hero is added to the database
