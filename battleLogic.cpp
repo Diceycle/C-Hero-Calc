@@ -134,11 +134,6 @@ void simulateFight(Army & left, Army & right, bool verbose) {
             }
         }
         
-        // Add last effects of abilities and start resolving the turn
-        if (leftLost >= leftArmySize || rightLost >= rightArmySize) {
-            break; // At least One army was beaten
-        }
-        
         // Heal everything that hasnt died
         leftFrontDamageTaken -= leftHealing; // these values are from the last iteration
         leftCumAoeDamageTaken -= leftHealing;
@@ -155,6 +150,11 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         }
         if (rightCumAoeDamageTaken < 0) {
             rightCumAoeDamageTaken = 0;
+        }
+        
+        // Add last effects of abilities and start resolving the turn
+        if (leftLost >= leftArmySize || rightLost >= rightArmySize) {
+            break; // At least One army was beaten
         }
         
         // Get Base Damage for this Turn
