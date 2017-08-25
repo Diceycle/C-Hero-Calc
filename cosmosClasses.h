@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdint>
+#include <sstream>
 
 using namespace std;
 
@@ -74,6 +75,7 @@ class Army {
         int8_t monsterAmount;
         
         void add(Monster * m);
+        string toString();
         void print();
         Army(vector<Monster *> monsters = {});
 };

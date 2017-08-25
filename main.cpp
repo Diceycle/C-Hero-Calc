@@ -34,8 +34,8 @@ void simulateMultipleFights(vector<Army> & armies) {
             if (armies[i].followerCost < followerUpperBound) {
                 followerUpperBound = armies[i].followerCost;
                 best = armies[i];
-//                cout << endl << "    New Solution: " << endl << "  "; 
-//                best.print();
+                cout << endl;
+                debugOutput(time(NULL), "    " + best.toString(), true, false, false);
             }
         }
     }

@@ -55,11 +55,17 @@ void Army::add(Monster * m) {
     this->monsterAmount++;
 }
 
-void Army::print() {
-    cout << "(Followers: " << setw(7) << this->followerCost << " | ";
+string Army::toString() {
+    stringstream s;
+    s << "(Followers: " << setw(7) << this->followerCost << " | ";
     for (int i = this->monsterAmount-1; i >= 0; i--) {
-        cout << this->monsters[i]->name << " "; // Print in reversed Order
-    } cout << ")" << endl; 
+        s << this->monsters[i]->name << " "; // Print in reversed Order
+    } s << ")"; 
+    return s.str();
+}
+
+void Army::print() {
+    cout << this->toString() << endl;
 }
 
 // Function for sorting FightResults by followers (ascending)

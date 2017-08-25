@@ -49,7 +49,7 @@ void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLa
             cout << "Done! (" << right << setw(3) << time(NULL) - timeStamp << " seconds) " << endl; 
         }
         if (message != "") {
-            cout << left << setw(50) << message;
+            cout << left << setw(70) << message;
             if (finishLine) {
                 cout << endl;
             }
