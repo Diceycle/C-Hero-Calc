@@ -24,6 +24,7 @@ Army targetArmy;
 size_t targetArmySize;
 
 int followerUpperBound;
+bool customFollowers;
 Army best;
 
 // Simulates fights with all armies against the target. armies will contain armies with the results written in.
@@ -412,7 +413,6 @@ int main(int argc, char** argv) {
     bool userWantsContinue = true;
     while (userWantsContinue) {
         // Initialize global Data
-        followerUpperBound = numeric_limits<int>::max();
         best = Army();
         initMonsterData();
         
@@ -424,13 +424,18 @@ int main(int argc, char** argv) {
             maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution: ", maxMonstersAllowedHelp, integer));
             minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
             followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
-            if (followerUpperBound < 0) {
-                followerUpperBound = numeric_limits<int>::max();
-            }
         } else {
             cout << "Taking data from script" << endl;
             targetArmy = Army(makeMonstersFromStrings(stringLineup));
             targetArmySize = targetArmy.monsterAmount;
+        }
+        
+        // Set Upper Bound Correctly
+        if (followerUpperBound < 0) {
+            followerUpperBound = numeric_limits<int>::max();
+            customFollowers = false;
+        } else {
+            customFollowers = true;
         }
         
         filterMonsterData(minimumMonsterCost);
@@ -456,7 +461,7 @@ int main(int argc, char** argv) {
         
         totalTime = solveInstance(debugInfo);
         // Last check to see if winning combination wins:
-        if (followerUpperBound < numeric_limits<int>::max()) {
+        if ((customFollowers && best.monsterAmount > 0) || (!customFollowers && followerUpperBound < numeric_limits<int>::max())) {
             best.lastFightData.valid = false;
             simulateFight(best, targetArmy);
             if (best.lastFightData.rightWon) {
