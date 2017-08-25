@@ -372,6 +372,13 @@ int solveInstance(bool debugInfo) {
 
 int main(int argc, char** argv) {
     
+    if (argc == 2) {
+        initConfigFile(argv[1]);
+        useConfigFile = true;
+    } else {
+        useConfigFile = false;
+    }
+    
     // Declare Variables
     vector<Monster *> friendLineup {};
     vector<Monster *> hostileLineup {};
