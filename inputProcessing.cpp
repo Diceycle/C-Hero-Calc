@@ -46,10 +46,10 @@ bool askYesNoQuestion(string questionMessage, string help) {
 void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLastOutput, bool finishLine) {
     if (shouldOutput) { 
         if (finishLastOutput) {
-            cout << "Done! (" << right << setw(3) << time(NULL) - timeStamp << " seconds) " << endl; 
+            cout << "Done! (" << right << setw(3) << time(NULL) - timeStamp << " seconds)" << endl; // Exactly 20 bytes long
         }
         if (message != "") {
-            cout << left << setw(70) << message;
+            cout << left << setw(60) << message; // With 60 there is exactly enough space to fit the finish message in on a windows cmd
             if (finishLine) {
                 cout << endl;
             }

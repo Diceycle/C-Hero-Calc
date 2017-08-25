@@ -29,17 +29,23 @@ Army best;
 
 // Simulates fights with all armies against the target. armies will contain armies with the results written in.
 void simulateMultipleFights(vector<Army> & armies) {
+    bool newFound = false;
+    
     for (size_t i = 0; i < armies.size(); i++) {
         simulateFight(armies[i], targetArmy);
         if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
             if (armies[i].followerCost < followerUpperBound) {
+                if (!newFound) {
+                    cout << endl;
+                }
+                newFound = true;
                 followerUpperBound = armies[i].followerCost;
                 best = armies[i];
-                cout << endl;
-                debugOutput(time(NULL), "    " + best.toString(), true, false, false);
+                debugOutput(time(NULL), "    " + best.toString(), true, false, true);
             }
         }
     }
+    debugOutput(time(NULL), " ", newFound, false, false);
 }
 
 void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
