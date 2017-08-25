@@ -49,7 +49,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     int remainingFollowers;
     size_t availableMonstersSize = availableMonsters.size();
     size_t availableHeroesSize = availableHeroes.size();
-    vector<bool> usedHeroes; usedHeroes.reserve(availableHeroesSize);
+    vector<bool> usedHeroes; usedHeroes.resize(availableHeroesSize, false);
     size_t i, j, m;
     SkillType currentSkill;
     bool friendsActive;
