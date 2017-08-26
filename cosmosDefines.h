@@ -128,7 +128,7 @@ static vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Obj
 };
 
 static map<string, int> rarities { // hero rarities
-    {"lady of twilight",  0},
+    {"ladyoftwilight",  0},
     {"tiny",  1},
     {"nebra",  2},
     {"james",  2},  
@@ -167,7 +167,7 @@ static map<string, int> rarities { // hero rarities
     {"bewat",  0},
     
     {"nicte",  1},
-    {"forest druid", 1},
+    {"forestdruid", 1},
     {"ignitor", 1},
     {"undine",1}
 };
