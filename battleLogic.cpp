@@ -95,6 +95,9 @@ void simulateFight(Army & left, Army & right, bool verbose) {
                     protectionLeft += skill->amount;
                 } else if (skillType == buff && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
                     damageBuffLeft += skill->amount;
+                } else if (skillType == buffpro && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
+                    damageBuffLeft += skill->amount;
+                    protectionLeft += skill->amount;
                 } else if (skillType == heal) {
                     healingLeft += skill->amount;
                 } else if (skillType == aoe) {
@@ -124,6 +127,9 @@ void simulateFight(Army & left, Army & right, bool verbose) {
                     protectionRight += skill->amount;
                 } else if (skillType == buff && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
                     damageBuffRight += skill->amount;
+                } else if (skillType == buffpro && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
+                    damageBuffRight += skill->amount;
+                    protectionRight += skill->amount;
                 } else if (skillType == heal) {
                     healingRight += skill->amount;
                 } else if (skillType == aoe) {
