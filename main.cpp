@@ -402,6 +402,7 @@ int main(int argc, char** argv) {
          0, 0, 0,         // "k41ry", "t4urus", "tr0n1x"
          0, 0, 0,         // "aquortis", "aeris", "geum"
          0, 0, 0,         // "rudean","aural","geror"
+         0, 0, 0,         // "veildur", "brynhildr", "groth"
          0, 0, 0, 0,      // "valor","rokka","pyromancer","bewat"
          0, 0, 0, 0       // "nicte", "forest druid","ignitor","undine"
     }; 
