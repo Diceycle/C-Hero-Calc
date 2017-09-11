@@ -60,9 +60,10 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     size_t i, j, m;
     SkillType currentSkill;
     bool friendsActive;
+    bool stillValid = currentArmySize <= 3;
     
     for (i = 0; i < oldPureArmies.size(); i++) {
-        if (!oldPureArmies[i].lastFightData.dominated) {
+        if (!oldPureArmies[i].lastFightData.dominated || stillValid) {
             remainingFollowers = followerUpperBound - oldPureArmies[i].followerCost;
             for (m = 0; m < availableMonstersSize && availableMonsters[m]->cost < remainingFollowers && availableMonsters[m]->cost > minimumMonsterCost; m++) {
                 newPureArmies.push_back(oldPureArmies[i]);
@@ -79,7 +80,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     }
     
     for (i = 0; i < oldHeroArmies.size(); i++) {
-        if (!oldHeroArmies[i].lastFightData.dominated) {
+        if (!oldHeroArmies[i].lastFightData.dominated || stillValid) {
             friendsActive = false;
             remainingFollowers = followerUpperBound - oldHeroArmies[i].followerCost;
             for (j = 0; j < currentArmySize; j++) {
