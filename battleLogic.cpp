@@ -91,10 +91,13 @@ void simulateFight(Army & left, Army & right, bool verbose) {
                 skillTarget = skill->target;
                 if (skillType == nothing) {
                     pureMonstersLeft++; // count for friends ability
-                } else if (skillType == (protect || champion) && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
+                } else if (skillType == protect && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
                     protectionLeft += skill->amount;
-                } else if (skillType == (buff || champion) && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
+                } else if (skillType == buff && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
                     damageBuffLeft += skill->amount;
+                } else if (skillType == champion && (skillTarget == all || skillTarget == leftLineup[leftLost]->element)) {
+                    damageBuffLeft += skill->amount;
+                    protectionLeft += skill->amount;
                 } else if (skillType == heal) {
                     healingLeft += skill->amount;
                 } else if (skillType == aoe) {
@@ -120,10 +123,13 @@ void simulateFight(Army & left, Army & right, bool verbose) {
                 skillTarget = skill->target;
                 if (skillType == nothing) {
                     pureMonstersRight++;  // count for friends ability
-                } else if (skillType == (protect || champion) && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
+                } else if (skillType == protect && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
                     protectionRight += skill->amount;
-                } else if (skillType == (buff || champion) && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
+                } else if (skillType == buff && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
                     damageBuffRight += skill->amount;
+                } else if (skillType == champion && (skillTarget == all || skillTarget == rightLineup[rightLost]->element)) {
+                    damageBuffRight += skill->amount;
+                    protectionRight += skill->amount;
                 } else if (skillType == heal) {
                     healingRight += skill->amount;
                 } else if (skillType == aoe) {
