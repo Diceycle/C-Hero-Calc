@@ -1,7 +1,4 @@
 n // Make Sure not to load Heroes from File
-0 // ladyoftwilight
-0 // tiny
-0 // nebra
 0 // james
 0 // hunter
 0 // shaman
@@ -24,6 +21,12 @@ n // Make Sure not to load Heroes from File
 0 // rudean
 0 // aural
 0 // geror
+0 // ourea
+0 // erebus
+0 // pontus
+0 // ladyoftwilight
+0 // tiny
+0 // nebra
 0 // veildur
 0 // brynhildr
 0 // groth
@@ -35,6 +38,9 @@ n // Make Sure not to load Heroes from File
 0 // forestdruid
 0 // ignitor
 0 // undine
+0 // chroma
+0 // petry
+0 // zaytus
 a1,a2,a3,a4,a5,a6 // Enemy Lineup goes here
 6 // Monster Maximum
 0 // Lower Follower Limit

@@ -13,7 +13,6 @@ bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
 
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
-// Yes, I know this method is unelegant as fuck but it's much faster this way I promise. Should be readable still too
 void simulateFight(Army & left, Army & right, bool verbose) {
     // left[0] and right[0] are the first to fight
     // Damage Application Order:
@@ -170,24 +169,22 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         damageRight = currentMonsterRight->damage;
         
         // Handle Monsters with skills berserk or friends
-        if (currentMonsterLeft->skill.type == berserk) {
-            damageLeft *= pow(currentMonsterLeft->skill.amount, leftBerserkProcs);
-            leftBerserkProcs++;
-        } else {
-            leftBerserkProcs = 0;
-        }
         if (currentMonsterLeft->skill.type == friends) {
             damageLeft *= pow(currentMonsterLeft->skill.amount, pureMonstersLeft);
+        } else if (currentMonsterLeft->skill.type == adapt && currentMonsterLeft->element == currentMonsterRight->element) {
+            damageLeft *= currentMonsterLeft->skill.amount;
+        } else if (currentMonsterLeft->skill.type == berserk) {
+            damageLeft *= pow(currentMonsterLeft->skill.amount, leftBerserkProcs);
+            leftBerserkProcs++;
         }
         
-        if (currentMonsterRight->skill.type == berserk) {
-            damageRight *= pow(currentMonsterRight->skill.amount, rightBerserkProcs);
-            rightBerserkProcs++; 
-        } else {
-            rightBerserkProcs = 0;
-        }
         if (currentMonsterRight->skill.type == friends) {
             damageRight *= pow(currentMonsterRight->skill.amount, pureMonstersRight);
+        } else if (currentMonsterLeft->skill.type == adapt && currentMonsterRight->element == currentMonsterLeft->element) {
+            damageRight *= currentMonsterRight->skill.amount;
+        } else if (currentMonsterRight->skill.type == berserk) {
+            damageRight *= pow(currentMonsterRight->skill.amount, rightBerserkProcs);
+            rightBerserkProcs++; 
         }
         
         // Add Buff Damage

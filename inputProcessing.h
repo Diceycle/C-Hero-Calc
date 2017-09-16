@@ -11,7 +11,7 @@
 
 using namespace std;
 
-const string heroVersion = "2.6.0";
+const string heroVersion = "2.6.1";
 const string heroLevelFileName = "heroLevels" + heroVersion;
 
 extern bool useConfigFile;
