@@ -1,54 +1,77 @@
 #include "inputProcessing.h"
 
-// Wait for user input before continuing. Used to stop program from colsing outside of a command line.
+bool useConfigFile;
+ifstream configFile;
+
+// Initialize a config file provided by filename
+void initConfigFile(string configFileName) {
+    configFile = ifstream(configFileName);
+}
+
+// Wait for user input before continuing. Used to stop program from closing outside of a command line.
 void haltExecution() {
     cout << "Press enter to continue...";
-    //cin.get();
-	while (cin.get() != '\n') { }  //another way
+    cin.get();
+}
+
+// Method for handling ALL input. Gives access to help, error resistance and config file for input.
+string getResistantInput(string query, string help, QueryType queryType) {
+    string inputString;
+    while (true) {
+        cout << query;
+        if (useConfigFile) {
+            useConfigFile = (bool) getline(configFile, inputString);
+        } 
+        if (!useConfigFile) {
+            getline(cin, inputString);
+        }
+        inputString = split(inputString, " ")[0];
+        if (useConfigFile) {
+            cout << inputString << endl;
+        }
+        if (inputString == "help") {
+            cout << help;
+        } else {
+            if (queryType == question && (inputString == "y" || inputString == "n" || inputString.size() == 0)) {
+                return inputString;
+            }
+            if (queryType == integer) {
+                try {
+					if (inputString.size() == 0)
+						return inputString;
+                    stoi(inputString);
+                    return inputString;
+                } catch (const exception & e) {}
+            }
+            if (queryType == raw) {
+                return inputString;
+            }
+        }
+    }
 }
 
 // Ask the user a question that they can answer via command line
-bool askYesNoQuestion(string question, string autoc) {
-    string inputString;
-    while (true) {
-		cout << question;
-		if (autoc == "n" || autoc == "N") {
-            cout  << " ( y/[N] ) : ";
-			}
-		if (autoc == "y" || autoc == "Y") {
-            cout << " ( [Y]/n ) : ";
-			}
-		getline(cin, inputString);
-
-        if (inputString.size() == 0)
-			inputString = autoc;
-		if (inputString == "n" || inputString == "N") {
-            return false;
-        }
-        if (inputString == "y" || inputString == "Y") {
-            return true;
-        }
+bool askYesNoQuestion(string questionMessage, string autoc, string help) {
+    string inputString = getResistantInput(questionMessage + " (y/n) (default = " + autoc + ") : ", help, question);
+    if (inputString.size() == 0)
+		inputString = autoc;
+	if (inputString == "n") {
+        return false;
+    }
+    if (inputString == "y") {
+        return true;
     }
     return false;
-}
-
-string askQuestion(string question, string autoc) {
-    string inputString;
-	cout << question << " [" << autoc << "] : ";
-	getline(cin, inputString);
-	if (inputString.size() == 0)
-		inputString = autoc;
-	return inputString;
 }
 
 // Output things on the command line. Using shouldOutput this can be easily controlled globally
 void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLastOutput, bool finishLine) {
     if (shouldOutput) { 
         if (finishLastOutput) {
-            cout << "Done! (" << right << setw(3) << time(NULL) - timeStamp << " seconds) " << endl; 
+            cout << "Done! (" << right << setw(3) << time(NULL) - timeStamp << " seconds)" << endl; // Exactly 20 bytes long
         }
         if (message != "") {
-            cout << left << setw(50) << message;
+            cout << left << setw(60) << message; // With 60 there is exactly enough space to fit the finish message in on a windows cmd
             if (finishLine) {
                 cout << endl;
             }
@@ -64,10 +87,13 @@ vector<int> takeHerolevelInput() {
     string input;
     fstream heroFile;
     heroFile.exceptions(fstream::failbit);
+    bool fileInput;
+	string defaultLevel;
     
-    if (askYesNoQuestion("Do you want to load hero levels from file?","y")) {
+    fileInput = askYesNoQuestion(heroInputModeQuestion, heroInputDefault, heroInputModeHelp);
+    if (fileInput) {
         try {
-            heroFile.open("heroLevels" + heroVersion, fstream::in);
+            heroFile.open(heroLevelFileName, fstream::in);
             heroFile >> input;
             stringLevels = split(input, ",");
             for (size_t i = 0; i < stringLevels.size(); i++) {
@@ -75,18 +101,13 @@ vector<int> takeHerolevelInput() {
             }
             heroFile.close();
         } catch (const exception & e) {
-            cout << "Could not find Hero File of Hero File is deprecated. (Were there new Heroes added recently?)" << endl;
-            cout << "Make sure you input the hero Levels manually at least once." << endl;
-            throw runtime_error("Hero File not found");
+            cout << heroFileNotFoundErrorMessage;
+            fileInput = false;
         }
-    } else {
-        /*cout << "Enter the level of the hero, whose name is shown (Enter 0 if you don't own the Hero)" << endl;
-        for (size_t i = 0; i < baseHeroes.size(); i++) {
-            /*cout << baseHeroes[i].name << ": ";
-            getline(cin, input);
-            levels.push_back(stoi(input));*/
-        try {
-            heroFile.open("heroLevels" + heroVersion, fstream::in);
+    }
+    if (!fileInput) {
+		try {
+            heroFile.open(heroLevelFileName, fstream::in);
             heroFile >> input;
             stringLevels = split(input, ",");
             for (size_t i = 0; i < stringLevels.size(); i++) {
@@ -98,13 +119,18 @@ vector<int> takeHerolevelInput() {
                 levels.push_back(0);
             }
         }
-        cout << "Enter the level of the hero, whose name is shown (Enter 0 if you don't own the Hero)" << endl;
+		
+        cout << "Enter the level of the hero, whose name is shown." << endl;
         for (size_t i = 0; i < baseHeroes.size(); i++) {
-			levels[i] = stoi(askQuestion(baseHeroes[i].name, to_string(levels[i])));
+            input = getResistantInput(baseHeroes[i].name + " (default = " + to_string(levels[i]) + ") : ", heroInputHelp, integer);
+            try {
+			levels[i] = stoi(input);
+			cout << levels[i] << endl;
+			} catch (const exception & e) { }
         }
         
         // Write Hero Levels to file to use next time
-        heroFile.open("heroLevels" + heroVersion, fstream::out);
+        heroFile.open(heroLevelFileName, fstream::out);
         for (size_t i = 0; i < levels.size()-1; i++) {
             heroFile << levels[i] << ',';
 		}
@@ -116,24 +142,26 @@ vector<int> takeHerolevelInput() {
 }
 
 // Promt the user via command Line to input a monster lineup and return them as a vector of pointers to those monster
-vector<Monster *> takeLineupInput() {
+vector<Monster *> takeLineupInput(string prompt) {
     vector<Monster *> lineup {};
     string questString = "quest";
     
     string input;
-    cout << "Enter desired Lineup separated with commas (no spaces!)" << endl;
-    cout << "Alternatively: type f.e. quest17 to get the lineup for quest 17." << endl;
-    getline(cin, input);
     
-    if (input.compare(0, questString.length(), questString) == 0) {
-        int questNumber = stoi(input.substr(questString.length(), 2));
-        lineup = makeMonstersFromStrings(quests[questNumber]);
-    } else {
-        vector<string> stringLineup = split(input, ",");
-        lineup = makeMonstersFromStrings(stringLineup);
+    while (true) {
+        input = getResistantInput(prompt, lineupInputHelp, raw);
+        try {
+            if (input.compare(0, questString.length(), questString) == 0) {
+                int questNumber = stoi(input.substr(questString.length(), 2));
+                lineup = makeMonstersFromStrings(quests[questNumber]);
+                return lineup;
+            } else {
+                vector<string> stringLineup = split(input, ",");
+                lineup = makeMonstersFromStrings(stringLineup);
+                return lineup;
+            }
+        } catch (const exception & e) {}
     }
-    
-    return lineup;
 }
 
 // Parse string linup input into actual monsters if there are heroes in the input, a leveled hero is added to the database
@@ -162,33 +190,6 @@ pair<Monster, int> parseHeroString(string heroString) {
 	}
     int level = stoi(heroString.substr(heroString.find(':')+1));
     return pair<Monster, int>(hero, level);
-}
-
-// Add a leveled hero to the databse 
-void addLeveledHero(Monster hero, int level) {
-    Monster m = getLeveledHero(hero, rarities.at(hero.name), level);
-    heroReference.emplace_back(m);
-    
-    monsterMap.insert(pair<string, Monster *>(m.name, &(heroReference[heroReference.size() -1])));
-}
-
-// Create a new hero with leveled stats and return it
-Monster getLeveledHero(const Monster & m, int rarity, int level) {
-    int points = level-1;
-    if (rarity == 1) {
-        points = 2 * points;
-    } else if (rarity == 2) {
-        points = 6 * points;
-    }
-    int value = m.hp + m.damage;
-    return Monster(
-        round(m.hp + points * ((double)m.hp) / value),
-        m.damage + round(points * ((double)m.damage) / value),
-        m.cost,
-        m.name + ":" + to_string(level),
-        m.element,
-        m.skill
-    );
 }
 
 // Splits strings into a vector of strings. No need to optimize, only used for input.
