@@ -212,7 +212,7 @@ static vector<vector<string>> quests { // Contains all quest lineups for easy re
 	{"a10", "a8", "a9", "a10", "a9"},
 	{"a10", "w7", "f7", "e8", "a9", "a9"},
 	{"e10", "e10", "e10", "f10"},               //30
-	{"e9", "f10", "f9", "f9", "a10", "a8"},
+	{"e9", "f10", "f9", "f9", "a10", "a7"},
 	{"w1", "a9", "f10", "e9", "a10", "w10"},
 	{"e9", "a9", "a9", "f9", "a9", "f10"},
 	{"f8", "e9", "w9", "a9", "a10", "a10"},
