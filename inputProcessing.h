@@ -23,12 +23,9 @@ const string helpMessage = "If you don't know what to do you can type help at an
 enum QueryType {question, integer, raw};
 
 const string inputModeQuestion = "Do you want to input everything via command line?";
-<<<<<<< HEAD
 
 const string inputModeDefault = "y";
 
-=======
->>>>>>> upstream/master
 const string inputModeHelp =
     "  If YES is selected all necessary data will be asked of you here.\n" 
     "  Note that selecting NO only makes sense if you have edited the data in the script and compiled the program for yourself! \n";
@@ -37,12 +34,9 @@ const string heroFileNotFoundErrorMessage =
     "  Switching to manual input mode...\n";
     
 const string heroInputModeQuestion = "Do you want to load hero levels from file?";
-<<<<<<< HEAD
 
 const string heroInputDefault = "y";
 
-=======
->>>>>>> upstream/master
 const string heroInputModeHelp =
     "  If YES is selected the hero levels will be loaded from the " + heroLevelFileName + " -file in this folder.\n"
     "  If this is your first time using this calculator then that file will be created for you when you select NO.\n";
@@ -60,21 +54,13 @@ const string lineupInputHelp =
 const string maxMonstersAllowedHelp =
     "  This determines the maximum size of your lineup.\n"
     "  The most common input here is 6 with the exception of doing quests where it can also be 5 or 4.\n";
-<<<<<<< HEAD
 	
-=======
-    
->>>>>>> upstream/master
 const string minimumMonsterCostHelp = 
     "  This determines how expensive a monster needs to be in order for the calculator to consider it for a solution.\n"
     "  This feature is intended for users with a lot of followers or good heroes to ignore monsters like a1.\n"
     "  Example: Entering 215000 will exclude e8 and cheaper monsters in the solution.\n"
     "  Special Values are: 0 for ALL monsters considered and -1 for NO monsters considered.\n";
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> upstream/master
 const string maxFollowerHelp = 
     "  This determines how expensive the entire solution is allowed to be.\n"
     "  I only reluctantly put this option in because a lot of people asked for it. "
@@ -83,7 +69,7 @@ const string maxFollowerHelp =
     "But then you won't be able to know how many followers you are missing to beat the lineup. Your choice.\n"
     "  Enter -1 if you don't want to set the limit yourself.\n";
     
-// Initialize a config file provided by filename
+// Initialize a config file provided by filename 
 void initConfigFile(string configFileName);
 
 // Wait for user input before continuing. Used to stop program from colsing outside of a command line.
@@ -92,11 +78,7 @@ void haltExecution();
 string getResistantInput(string query, string help, QueryType queryType = raw);
 
 // Ask the user a question that they can answer via command line
-<<<<<<< HEAD
 bool askYesNoQuestion(string question, string autoc, string help);
-=======
-bool askYesNoQuestion(string question, string help);
->>>>>>> upstream/master
 
 // Output things on the command line. Using shouldOutput this can be easily controlled globally
 void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLastOutput, bool finishLine);
