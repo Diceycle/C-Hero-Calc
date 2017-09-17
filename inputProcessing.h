@@ -69,7 +69,7 @@ const string maxFollowerHelp =
     "But then you won't be able to know how many followers you are missing to beat the lineup. Your choice.\n"
     "  Enter -1 if you don't want to set the limit yourself.\n";
     
-// Initialize a config file provided by filename 
+// Initialize a config file provided by filename
 void initConfigFile(string configFileName);
 
 // Wait for user input before continuing. Used to stop program from colsing outside of a command line.

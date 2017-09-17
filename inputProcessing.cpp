@@ -3,7 +3,7 @@
 bool useConfigFile;
 ifstream configFile;
 
-// Initialize a config file provided by filename 
+// Initialize a config file provided by filename
 void initConfigFile(string configFileName) {
     configFile = ifstream(configFileName);
 }
