@@ -28,6 +28,7 @@ string getResistantInput(string query, string help, QueryType queryType) {
         inputString = split(inputString, " ")[0];
         if (useConfigFile) {
             cout << inputString << endl;
+<<<<<<< HEAD
         }
         if (inputString == "help") {
             cout << help;
@@ -46,7 +47,36 @@ string getResistantInput(string query, string help, QueryType queryType) {
             if (queryType == raw) {
                 return inputString;
             }
+=======
+>>>>>>> upstream/master
         }
+        if (inputString == "help") {
+            cout << help;
+        } else {
+            if (queryType == question && (inputString == "y" || inputString == "n")) {
+                return inputString;
+            }
+            if (queryType == integer) {
+                try {
+                    stoi(inputString);
+                    return inputString;
+                } catch (const exception & e) {}
+            }
+            if (queryType == raw) {
+                return inputString;
+            }
+        }
+    }
+}
+
+// Ask the user a question that they can answer via command line
+bool askYesNoQuestion(string questionMessage, string help) {
+    string inputString = getResistantInput(questionMessage + " (y/n): ", help, question);
+    if (inputString == "n") {
+        return false;
+    }
+    if (inputString == "y") {
+        return true;
     }
 }
 
@@ -88,9 +118,14 @@ vector<int> takeHerolevelInput() {
     fstream heroFile;
     heroFile.exceptions(fstream::failbit);
     bool fileInput;
+<<<<<<< HEAD
 	string defaultLevel;
     
     fileInput = askYesNoQuestion(heroInputModeQuestion, heroInputDefault, heroInputModeHelp);
+=======
+    
+    fileInput = askYesNoQuestion(heroInputModeQuestion, heroInputModeHelp);
+>>>>>>> upstream/master
     if (fileInput) {
         try {
             heroFile.open(heroLevelFileName, fstream::in);
@@ -106,6 +141,7 @@ vector<int> takeHerolevelInput() {
         }
     }
     if (!fileInput) {
+<<<<<<< HEAD
 		try {
             heroFile.open(heroLevelFileName, fstream::in);
             heroFile >> input;
@@ -126,6 +162,12 @@ vector<int> takeHerolevelInput() {
             try {
 			levels[i] = stoi(input);
 			} catch (const exception & e) { }
+=======
+        cout << "Enter the level of the hero, whose name is shown." << endl;
+        for (size_t i = 0; i < baseHeroes.size(); i++) {
+            input = getResistantInput(baseHeroes[i].name + ": ", heroInputHelp, integer);
+            levels.push_back(stoi(input));
+>>>>>>> upstream/master
         }
         
         // Write Hero Levels to file to use next time

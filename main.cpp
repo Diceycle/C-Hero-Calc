@@ -17,11 +17,14 @@
 
 using namespace std;
 
+<<<<<<< HEAD
 // Define variable used to default value
 int maxMonstersAllowedDefault = 6;
 int minimumMonsterCostDefault = 0;
 int maxFollowerDefault = -1;
 
+=======
+>>>>>>> upstream/master
 // Define global variables used to track the best result
 size_t firstDominance;
 int minimumMonsterCost;
@@ -188,7 +191,11 @@ int solveInstance(bool debugInfo) {
 
     // Get first Upper limit on followers
     getQuickSolutions(targetArmy, maxMonstersAllowed);
+<<<<<<< HEAD
     if (!askYesNoQuestion("Continue calculation?", "y", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
+=======
+    if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
+>>>>>>> upstream/master
     cout << endl;
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
@@ -434,7 +441,11 @@ int main(int argc, char** argv) {
     cout << helpMessage << endl;
     
     if (!ignoreConsole) {
+<<<<<<< HEAD
         manualInput = askYesNoQuestion(inputModeQuestion, inputModeDefault, inputModeHelp);
+=======
+        manualInput = askYesNoQuestion(inputModeQuestion, inputModeHelp);
+>>>>>>> upstream/master
     }
     
     bool userWantsContinue = true;
@@ -448,6 +459,7 @@ int main(int argc, char** argv) {
             yourHeroLevels = takeHerolevelInput();
             targetArmy = takeLineupInput("Enter Enemy Lineup: ");
             targetArmySize = targetArmy.monsterAmount;
+<<<<<<< HEAD
             try { maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution (default = " + to_string(maxMonstersAllowedDefault) +") : ", maxMonstersAllowedHelp, integer));
 				maxMonstersAllowedDefault = maxMonstersAllowed;
 			} catch (const exception & e) { maxMonstersAllowed = maxMonstersAllowedDefault; }
@@ -458,6 +470,11 @@ int main(int argc, char** argv) {
 				maxFollowerDefault = followerUpperBound ;
 			} catch (const exception & e) { followerUpperBound = maxFollowerDefault; }
 			
+=======
+            maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution: ", maxMonstersAllowedHelp, integer));
+            minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
+            followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
+>>>>>>> upstream/master
         } else {
             cout << "Taking data from script" << endl;
             targetArmy = Army(makeMonstersFromStrings(stringLineup));
@@ -486,7 +503,11 @@ int main(int argc, char** argv) {
                 simulateFight(left, right, true);
                 cout << left.lastFightData.rightWon << " " << left.followerCost << " " << right.followerCost << endl;
                 
+<<<<<<< HEAD
                 if (!askYesNoQuestion("Simulate another Fight?", "y", "")) {
+=======
+                if (!askYesNoQuestion("Simulate another Fight?", "")) {
+>>>>>>> upstream/master
                     break;
                 }
             }
@@ -521,7 +542,11 @@ int main(int argc, char** argv) {
         cout << totalFightsSimulated << " Fights simulated." << endl;
         cout << "Total Calculation Time: " << totalTime << endl;
         if (manualInput) {
+<<<<<<< HEAD
             userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?", "y", "");
+=======
+            userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?", "");
+>>>>>>> upstream/master
         } else {
             userWantsContinue = false;
             haltExecution();
