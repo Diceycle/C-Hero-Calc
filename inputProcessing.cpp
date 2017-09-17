@@ -125,7 +125,6 @@ vector<int> takeHerolevelInput() {
             input = getResistantInput(baseHeroes[i].name + " (default = " + to_string(levels[i]) + ") : ", heroInputHelp, integer);
             try {
 			levels[i] = stoi(input);
-			cout << levels[i] << endl;
 			} catch (const exception & e) { }
         }
         

@@ -17,6 +17,11 @@
 
 using namespace std;
 
+// Define variable used to default value
+int maxMonstersAllowedDefault = 6;
+int minimumMonsterCostDefault = 0;
+int maxFollowerDefault = -1;
+
 // Define global variables used to track the best result
 size_t firstDominance;
 int minimumMonsterCost;
@@ -444,11 +449,15 @@ int main(int argc, char** argv) {
             targetArmy = takeLineupInput("Enter Enemy Lineup: ");
             targetArmySize = targetArmy.monsterAmount;
             try { maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution (default = " + to_string(maxMonstersAllowedDefault) +") : ", maxMonstersAllowedHelp, integer));
+				maxMonstersAllowedDefault = maxMonstersAllowed;
 			} catch (const exception & e) { maxMonstersAllowed = maxMonstersAllowedDefault; }
             try { minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used (default = " + to_string(minimumMonsterCostDefault) +") : ", minimumMonsterCostHelp, integer));
+				minimumMonsterCostDefault = minimumMonsterCost;
 			} catch (const exception & e) { minimumMonsterCost = minimumMonsterCostDefault; }
             try { followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use (default = " + to_string(maxFollowerDefault) +") : ", maxFollowerHelp, integer));
+				maxFollowerDefault = followerUpperBound ;
 			} catch (const exception & e) { followerUpperBound = maxFollowerDefault; }
+			
         } else {
             cout << "Taking data from script" << endl;
             targetArmy = Army(makeMonstersFromStrings(stringLineup));

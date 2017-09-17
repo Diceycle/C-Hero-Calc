@@ -54,16 +54,12 @@ const string lineupInputHelp =
 const string maxMonstersAllowedHelp =
     "  This determines the maximum size of your lineup.\n"
     "  The most common input here is 6 with the exception of doing quests where it can also be 5 or 4.\n";
-
-const int maxMonstersAllowedDefault = 6;
 	
 const string minimumMonsterCostHelp = 
     "  This determines how expensive a monster needs to be in order for the calculator to consider it for a solution.\n"
     "  This feature is intended for users with a lot of followers or good heroes to ignore monsters like a1.\n"
     "  Example: Entering 215000 will exclude e8 and cheaper monsters in the solution.\n"
     "  Special Values are: 0 for ALL monsters considered and -1 for NO monsters considered.\n";
-
-const int minimumMonsterCostDefault = 0;
 
 const string maxFollowerHelp = 
     "  This determines how expensive the entire solution is allowed to be.\n"
@@ -72,8 +68,6 @@ const string maxFollowerHelp =
     "  You can enter your followers here if you think that it speeds up calculation. "
     "But then you won't be able to know how many followers you are missing to beat the lineup. Your choice.\n"
     "  Enter -1 if you don't want to set the limit yourself.\n";
-	
-const int maxFollowerDefault = -1;
     
 // Initialize a config file provided by filename
 void initConfigFile(string configFileName);
