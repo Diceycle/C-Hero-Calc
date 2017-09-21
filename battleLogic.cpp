@@ -183,21 +183,21 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         damageRight = currentMonsterRight->damage;
         
         // Handle Monsters with skills berserk or friends
-        if (currentMonsterLeft->skill.type == friends) {
-            damageLeft *= pow(currentMonsterLeft->skill.amount, pureMonstersLeft);
-        } else if (currentMonsterLeft->skill.type == adapt && currentMonsterLeft->element == currentMonsterRight->element) {
-            damageLeft *= currentMonsterLeft->skill.amount;
-        } else if (currentMonsterLeft->skill.type == berserk) {
-            damageLeft *= pow(currentMonsterLeft->skill.amount, leftBerserkProcs);
+        if (skillTypeLeft[leftLost] == friends) {
+            damageLeft *= pow(skillAmountLeft[leftLost], pureMonstersLeft);
+        } else if (skillTypeLeft[leftLost] == adapt && currentMonsterLeft->element == currentMonsterRight->element) {
+            damageLeft *= skillAmountLeft[leftLost];
+        } else if (skillTypeLeft[leftLost] == berserk) {
+            damageLeft *= pow(skillAmountLeft[leftLost], leftBerserkProcs);
             leftBerserkProcs++;
         }
         
-        if (currentMonsterRight->skill.type == friends) {
-            damageRight *= pow(currentMonsterRight->skill.amount, pureMonstersRight);
-        } else if (currentMonsterRight->skill.type == adapt && currentMonsterRight->element == currentMonsterLeft->element) {
-            damageRight *= currentMonsterRight->skill.amount;
-        } else if (currentMonsterRight->skill.type == berserk) {
-            damageRight *= pow(currentMonsterRight->skill.amount, rightBerserkProcs);
+        if (skillTypeRight[rightLost] == friends) {
+            damageRight *= pow(skillAmountRight[rightLost], pureMonstersRight);
+        } else if (skillTypeRight[rightLost] == adapt && currentMonsterRight->element == currentMonsterLeft->element) {
+            damageRight *= skillAmountRight[rightLost];
+        } else if (skillTypeRight[rightLost] == berserk) {
+            damageRight *= pow(skillAmountRight[rightLost], rightBerserkProcs);
             rightBerserkProcs++; 
         }
         
@@ -234,7 +234,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         leftCumAoeDamageTaken += aoeDamageRight + paoeDamageRight;
         leftHealing = healingLeft;
         
-        // Check if the first Monster died (Neccessary cause of the AOE-Piercing-Heal-Interaction)
+        // Check if the first Monster died (otherwise it will be revived next turn)
         if (currentMonsterLeft->hp <= leftFrontDamageTaken) {
             leftLost++;
             leftBerserkProcs = 0;
