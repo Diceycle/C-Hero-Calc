@@ -26,6 +26,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     
     totalFightsSimulated++;
     
+    size_t i;
+    
     size_t leftLost = 0;
     size_t leftArmySize = left.monsterAmount;
     int8_t* leftLineup = left.monsters;
@@ -70,8 +72,26 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     Monster * currentMonsterLeft;
     Monster * currentMonsterRight;
     HeroSkill * skill;
-    SkillType skillType;
-    Element skillTarget;
+    SkillType skillTypeLeft[6];
+    Element skillTargetLeft[6];
+    float skillAmountLeft[6];
+    SkillType skillTypeRight[6];
+    Element skillTargetRight[6];
+    float skillAmountRight[6];
+    
+    for (i = leftLost; i < leftArmySize; i++) {
+        skill = &monsterReference[leftLineup[i]].skill;
+        skillTypeLeft[i] = skill->type;
+        skillTargetLeft[i] = skill->target;
+        skillAmountLeft[i] = skill->amount;
+    }
+    
+    for (i = rightLost; i < rightArmySize; i++) {
+        skill = &monsterReference[rightLineup[i]].skill;
+        skillTypeRight[i] = skill->type;
+        skillTargetRight[i] = skill->target;
+        skillAmountRight[i] = skill->amount;
+    }
     
     while (true) {
         // Get all hero influences
@@ -81,27 +101,24 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         paoeDamageLeft = 0;
         healingLeft = 0;
         pureMonstersLeft = 0;
-        for (size_t i = leftLost; i < leftArmySize; i++) {
+        for (i = leftLost; i < leftArmySize; i++) {
             if (leftCumAoeDamageTaken >= monsterReference[leftLineup[i]].hp) { // Check for Backline Deaths
                 leftLost += (leftLost == i);
             } else {
-                skill = &monsterReference[leftLineup[i]].skill;
-                skillType = skill->type;
-                skillTarget = skill->target;
-                if (skillType == nothing) {
+                if (skillTypeLeft[i] == nothing) {
                     pureMonstersLeft++; // count for friends ability
-                } else if (skillType == protect && (skillTarget == all || skillTarget == monsterReference[leftLineup[leftLost]].element)) {
-                    protectionLeft += skill->amount;
-                } else if (skillType == buff && (skillTarget == all || skillTarget == monsterReference[leftLineup[leftLost]].element)) {
-                    damageBuffLeft += skill->amount;
-                } else if (skillType == champion && (skillTarget == all || skillTarget == monsterReference[leftLineup[leftLost]].element)) {
-                    damageBuffLeft += skill->amount;
-                    protectionLeft += skill->amount;
-                } else if (skillType == heal) {
-                    healingLeft += skill->amount;
-                } else if (skillType == aoe) {
-                    aoeDamageLeft += skill->amount;
-                } else if (skillType == pAoe && i == leftLost) {
+                } else if (skillTypeLeft[i] == protect && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftLineup[leftLost]].element)) {
+                    protectionLeft += skillAmountLeft[i];
+                } else if (skillTypeLeft[i] == buff && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftLineup[leftLost]].element)) {
+                    damageBuffLeft += skillAmountLeft[i];
+                } else if (skillTypeLeft[i] == champion && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftLineup[leftLost]].element)) {
+                    damageBuffLeft += skillAmountLeft[i];
+                    protectionLeft += skillAmountLeft[i];
+                } else if (skillTypeLeft[i] == heal) {
+                    healingLeft += skillAmountLeft[i];
+                } else if (skillTypeLeft[i] == aoe) {
+                    aoeDamageLeft += skillAmountLeft[i];
+                } else if (skillTypeLeft[i] == pAoe && i == leftLost) {
                     paoeDamageLeft += monsterReference[leftLineup[i]].damage;
                 }
             }
@@ -113,27 +130,24 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         paoeDamageRight = 0;
         healingRight = 0;
         pureMonstersRight = 0;
-        for (size_t i = rightLost; i < rightArmySize; i++) {
+        for (i = rightLost; i < rightArmySize; i++) {
             if (rightCumAoeDamageTaken >= monsterReference[rightLineup[i]].hp) { // Check for Backline Deaths
                 rightLost += (i == rightLost);
             } else {
-                skill = &monsterReference[rightLineup[i]].skill;
-                skillType = skill->type;
-                skillTarget = skill->target;
-                if (skillType == nothing) {
+                if (skillTypeRight[i] == nothing) {
                     pureMonstersRight++;  // count for friends ability
-                } else if (skillType == protect && (skillTarget == all || skillTarget == monsterReference[rightLineup[rightLost]].element)) {
-                    protectionRight += skill->amount;
-                } else if (skillType == buff && (skillTarget == all || skillTarget == monsterReference[rightLineup[rightLost]].element)) {
-                    damageBuffRight += skill->amount;
-                } else if (skillType == champion && (skillTarget == all || skillTarget == monsterReference[rightLineup[rightLost]].element)) {
-                    damageBuffRight += skill->amount;
-                    protectionRight += skill->amount;
-                } else if (skillType == heal) {
-                    healingRight += skill->amount;
-                } else if (skillType == aoe) {
-                    aoeDamageRight += skill->amount;
-                } else if (skillType == pAoe && i == rightLost) {
+                } else if (skillTypeRight[i] == protect && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightLineup[rightLost]].element)) {
+                    protectionRight += skillAmountRight[i];
+                } else if (skillTypeRight[i] == buff && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightLineup[rightLost]].element)) {
+                    damageBuffRight += skillAmountRight[i];
+                } else if (skillTypeRight[i] == champion && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightLineup[rightLost]].element)) {
+                    damageBuffRight += skillAmountRight[i];
+                    protectionRight += skillAmountRight[i];
+                } else if (skillTypeRight[i] == heal) {
+                    healingRight += skillAmountRight[i];
+                } else if (skillTypeRight[i] == aoe) {
+                    aoeDamageRight += skillAmountRight[i];
+                } else if (skillTypeRight[i] == pAoe && i == rightLost) {
                     paoeDamageRight += monsterReference[rightLineup[i]].damage;
                 }
             }
