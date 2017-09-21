@@ -180,7 +180,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         
         if (currentMonsterRight->skill.type == friends) {
             damageRight *= pow(currentMonsterRight->skill.amount, pureMonstersRight);
-        } else if (currentMonsterLeft->skill.type == adapt && currentMonsterRight->element == currentMonsterLeft->element) {
+        } else if (currentMonsterRight->skill.type == adapt && currentMonsterRight->element == currentMonsterLeft->element) {
             damageRight *= currentMonsterRight->skill.amount;
         } else if (currentMonsterRight->skill.type == berserk) {
             damageRight *= pow(currentMonsterRight->skill.amount, rightBerserkProcs);
