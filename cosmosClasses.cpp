@@ -1,5 +1,7 @@
 #include "cosmosClasses.h"
 
+vector<Monster> monsterReference {}; // Will be filled with leveled heroes if needed (determined by input)
+
 Monster::Monster(int hp, int damage, int cost, string name, Element element, HeroSkill skill) {
     this->hp = hp;
     this->damage = damage;
@@ -16,8 +18,8 @@ Monster::Monster() {
 }
 
 // Function for sorting Monsters by cost (ascending)
-bool isCheaper(Monster * a, Monster * b) {
-    return a->cost < b->cost;
+bool isCheaper(Monster & a, Monster & b) {
+    return a.cost < b.cost;
 }
 
 FightResult::FightResult() {
@@ -39,7 +41,7 @@ bool FightResult::operator >=(FightResult & toCompare) {
     return toCompare <= *this;
 }
 
-Army::Army(vector<Monster*> monsters) {
+Army::Army(vector<int8_t> monsters) {
     this->followerCost = 0;
     this->monsterAmount = 0;
     this->lastFightData = FightResult();
@@ -49,9 +51,9 @@ Army::Army(vector<Monster*> monsters) {
     }
 }
 
-void Army::add(Monster * m) {
+void Army::add(int8_t m) {
     this->monsters[monsterAmount] = m;
-    this->followerCost += m->cost;
+    this->followerCost += monsterReference[m].cost;
     this->monsterAmount++;
 }
 
@@ -59,7 +61,7 @@ string Army::toString() {
     stringstream s;
     s << "(Followers: " << setw(7) << this->followerCost << " | ";
     for (int i = this->monsterAmount-1; i >= 0; i--) {
-        s << this->monsters[i]->name << " "; // Print in reversed Order
+        s << monsterReference[this->monsters[i]].name << " "; // Print in reversed Order
     } s << ")"; 
     return s.str();
 }

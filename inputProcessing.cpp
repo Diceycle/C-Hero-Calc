@@ -120,8 +120,8 @@ vector<int> takeHerolevelInput() {
 }
 
 // Promt the user via command Line to input a monster lineup and return them as a vector of pointers to those monster
-vector<Monster *> takeLineupInput(string prompt) {
-    vector<Monster *> lineup {};
+vector<int8_t> takeLineupInput(string prompt) {
+    vector<int8_t> lineup {};
     string questString = "quest";
     
     string input;
@@ -143,16 +143,17 @@ vector<Monster *> takeLineupInput(string prompt) {
 }
 
 // Parse string linup input into actual monsters if there are heroes in the input, a leveled hero is added to the database
-vector<Monster *> makeMonstersFromStrings(vector<string> stringLineup) {
-    vector<Monster *> lineup {};
+vector<int8_t> makeMonstersFromStrings(vector<string> stringLineup) {
+    vector<int8_t> lineup {};
     pair<Monster, int> heroData;
     
     for(size_t i = 0; i < stringLineup.size(); i++) {
         if(stringLineup[i].find(":") != stringLineup[i].npos) {
             heroData = parseHeroString(stringLineup[i]);
-            addLeveledHero(heroData.first, heroData.second);
+            lineup.push_back(addLeveledHero(heroData.first, heroData.second));
+        } else {
+            lineup.push_back(monsterMap.at(stringLineup[i]));
         }
-        lineup.push_back(monsterMap.at(stringLineup[i]));
     }
     return lineup;
 }

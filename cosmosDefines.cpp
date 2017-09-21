@@ -1,34 +1,31 @@
 #include "cosmosDefines.h"
 
-vector<Monster> heroReference {}; // Will be filled with leveled heroes if needed (determined by input)
+vector<int8_t> monsterList {}; // Contains pointers to raw Monster Data from a1 to f10, will be sorted by follower cost
+map<string, int8_t> monsterMap {}; // Maps monster Names to their pointers (includes heroes)
 
-vector<Monster *> monsterList {}; // Contains pointers to raw Monster Data from a1 to f10, will be sorted by follower cost
-map<string, Monster *> monsterMap {}; // Maps monster Names to their pointers (includes heroes)
-
-vector<Monster *> availableHeroes {};
+vector<int8_t> availableHeroes {};
 
 // Make sure all the values are set
 void initMonsterData() {
-    // Initialize Monster Data
-    monsterList.clear();
-    monsterMap.clear();
-    for (size_t i = 0; i < monsterBaseList.size(); i++) {
-        monsterList.push_back(&monsterBaseList[i]);
-        monsterMap.insert(pair<string, Monster *>(monsterBaseList[i].name, &monsterBaseList[i]));
-    }
-    
     // Sort MonsterList by followers
-    sort(monsterList.begin(), monsterList.end(), isCheaper);
-    
-    // Reserve some space for heroes, otherwise pointers will become invalid (Important!)
-    heroReference.clear();
+    sort(monsterBaseList.begin(), monsterBaseList.end(), isCheaper);
+
+    // Initialize Monster Data
+    monsterReference.clear();
+    monsterMap.clear();
+    monsterList.clear();
+    for (size_t i = 0; i < monsterBaseList.size(); i++) {
+        monsterReference.push_back(monsterBaseList[i]);
+        monsterList.push_back(i);
+        monsterMap.insert(pair<string, int8_t>(monsterBaseList[i].name, i));
+    }
+
     availableHeroes.clear();
-    heroReference.reserve(baseHeroes.size()*5);
 }
 
 // Filter MonsterList by cost. User can specify if he wants to exclude cheap monsters
 void filterMonsterData(int minimumMonsterCost) {
-    while (monsterList.size() > 0 && monsterList[0]->cost <= minimumMonsterCost) {
+    while (monsterList.size() > 0 && monsterReference[monsterList[0]].cost <= minimumMonsterCost) {
         monsterList.erase(monsterList.begin());
     }
     if (minimumMonsterCost == -1) {
@@ -40,8 +37,7 @@ void filterMonsterData(int minimumMonsterCost) {
 void initializeUserHeroes(vector<int> levels) {
     for (size_t i = 0; i < baseHeroes.size(); i++) {
         if (levels[i] > 0) {
-            addLeveledHero(baseHeroes[i], levels[i]);
-            availableHeroes.push_back(monsterMap.at(baseHeroes[i].name + ":" + to_string(levels[i])));
+            availableHeroes.push_back(addLeveledHero(baseHeroes[i], levels[i]));
         }
     }
 }
@@ -66,9 +62,9 @@ Monster getLeveledHero(const Monster & m, int rarity, int level) {
 }
 
 // Add a leveled hero to the databse 
-void addLeveledHero(Monster hero, int level) {
+int8_t addLeveledHero(Monster hero, int level) {
     Monster m = getLeveledHero(hero, rarities.at(hero.name), level);
-    heroReference.emplace_back(m);
+    monsterReference.emplace_back(m);
     
-    monsterMap.insert(pair<string, Monster *>(m.name, &(heroReference[heroReference.size() -1])));
+    return monsterReference.size() - 1;
 }
