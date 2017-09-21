@@ -182,9 +182,11 @@ int solveInstance(bool debugInfo) {
     size_t i, j, sj, si;
 
     // Get first Upper limit on followers
-    getQuickSolutions(targetArmy, maxMonstersAllowed);
-    if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
-    cout << endl;
+    if (maxMonstersAllowed > 4) {
+        getQuickSolutions(targetArmy, maxMonstersAllowed);
+        if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
+        cout << endl;
+    }
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
     vector<Army> heroMonsterArmies {}; // initialize with all heroes
