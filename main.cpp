@@ -102,7 +102,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                     currentSkill = monsterReference[availableHeroes[m]].skill.type;
                     newHeroArmies.push_back(oldHeroArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = (currentSkill == pAoe || currentSkill == friends || currentSkill == berserk); // These skills are self centered
+                    newHeroArmies.back().lastFightData.valid = (currentSkill == pAoe || currentSkill == friends || currentSkill == berserk || currentSkill == adapt); // These skills are self centered
                 }
                 usedHeroes[m] = false;
             }
