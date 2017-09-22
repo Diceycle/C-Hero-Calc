@@ -11,11 +11,10 @@
 
 using namespace std;
 
-extern vector<Monster> heroReference; // Will be filled with leveled heroes if needed (determined by input)
-extern vector<Monster *> availableHeroes; // Contains all User Heroes, readily Leveled
+extern vector<int8_t> availableHeroes; // Contains all User Heroes, readily Leveled
 
-extern vector<Monster *> monsterList; // Contains pointers to raw Monster Data from a1 to f10, will be sorted by follower cost
-extern map<string, Monster *> monsterMap; // Maps monster Names to their pointers (includes heroes)
+extern vector<int8_t> monsterList; // Contains pointers to raw Monster Data from a1 to f15, will be sorted by follower cost
+extern map<string, int8_t> monsterMap; // Maps monster Names to their pointers (includes heroes)
 
 static vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual Objects
     Monster( 20,   8,    1000,  "a1", air),
@@ -267,7 +266,7 @@ void filterMonsterData(int minimumMonsterCost);
 void initializeUserHeroes(vector<int> levels);
 
 // Add a leveled hero to the databse 
-void addLeveledHero(Monster hero, int level);
+int8_t addLeveledHero(Monster hero, int level);
 
 // Create a new hero with leveled stats and return it
 Monster getLeveledHero(const Monster & m, int rarity, int level);
