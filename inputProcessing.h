@@ -23,6 +23,9 @@ const string helpMessage = "If you don't know what to do you can type help at an
 enum QueryType {question, integer, raw};
 
 const string inputModeQuestion = "Do you want to input everything via command line?";
+
+const string inputModeDefault = "y";
+
 const string inputModeHelp =
     "  If YES is selected all necessary data will be asked of you here.\n" 
     "  Note that selecting NO only makes sense if you have edited the data in the script and compiled the program for yourself! \n";
@@ -31,6 +34,9 @@ const string heroFileNotFoundErrorMessage =
     "  Switching to manual input mode...\n";
     
 const string heroInputModeQuestion = "Do you want to load hero levels from file?";
+
+const string heroInputDefault = "y";
+
 const string heroInputModeHelp =
     "  If YES is selected the hero levels will be loaded from the " + heroLevelFileName + " -file in this folder.\n"
     "  If this is your first time using this calculator then that file will be created for you when you select NO.\n";
@@ -48,13 +54,13 @@ const string lineupInputHelp =
 const string maxMonstersAllowedHelp =
     "  This determines the maximum size of your lineup.\n"
     "  The most common input here is 6 with the exception of doing quests where it can also be 5 or 4.\n";
-    
+	
 const string minimumMonsterCostHelp = 
     "  This determines how expensive a monster needs to be in order for the calculator to consider it for a solution.\n"
     "  This feature is intended for users with a lot of followers or good heroes to ignore monsters like a1.\n"
     "  Example: Entering 215000 will exclude e8 and cheaper monsters in the solution.\n"
     "  Special Values are: 0 for ALL monsters considered and -1 for NO monsters considered.\n";
-    
+
 const string maxFollowerHelp = 
     "  This determines how expensive the entire solution is allowed to be.\n"
     "  I only reluctantly put this option in because a lot of people asked for it. "
@@ -72,7 +78,7 @@ void haltExecution();
 string getResistantInput(string query, string help, QueryType queryType = raw);
 
 // Ask the user a question that they can answer via command line
-bool askYesNoQuestion(string question, string help);
+bool askYesNoQuestion(string question, string autoc, string help);
 
 // Output things on the command line. Using shouldOutput this can be easily controlled globally
 void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLastOutput, bool finishLine);

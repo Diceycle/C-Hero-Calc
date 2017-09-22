@@ -17,6 +17,11 @@
 
 using namespace std;
 
+// Define variable used to default value
+int maxMonstersAllowedDefault = 6;
+int minimumMonsterCostDefault = 0;
+int maxFollowerDefault = -1;
+
 // Define global variables used to track the best result
 size_t firstDominance;
 int minimumMonsterCost;
@@ -182,11 +187,17 @@ int solveInstance(bool debugInfo) {
     size_t i, j, sj, si;
 
     // Get first Upper limit on followers
+<<<<<<< HEAD
+    getQuickSolutions(targetArmy, maxMonstersAllowed);
+    if (!askYesNoQuestion("Continue calculation?", "y", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
+    cout << endl;
+=======
     if (maxMonstersAllowed > 4) {
         getQuickSolutions(targetArmy, maxMonstersAllowed);
         if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
         cout << endl;
     }
+>>>>>>> upstream/master
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
     vector<Army> heroMonsterArmies {}; // initialize with all heroes
@@ -428,7 +439,7 @@ int main(int argc, char** argv) {
     cout << helpMessage << endl;
     
     if (!ignoreConsole) {
-        manualInput = askYesNoQuestion(inputModeQuestion, inputModeHelp);
+        manualInput = askYesNoQuestion(inputModeQuestion, inputModeDefault, inputModeHelp);
     }
     
     bool userWantsContinue = true;
@@ -442,9 +453,16 @@ int main(int argc, char** argv) {
             yourHeroLevels = takeHerolevelInput();
             targetArmy = takeLineupInput("Enter Enemy Lineup: ");
             targetArmySize = targetArmy.monsterAmount;
-            maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution: ", maxMonstersAllowedHelp, integer));
-            minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
-            followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
+            try { maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution (default = " + to_string(maxMonstersAllowedDefault) +") : ", maxMonstersAllowedHelp, integer));
+				maxMonstersAllowedDefault = maxMonstersAllowed;
+			} catch (const exception & e) { maxMonstersAllowed = maxMonstersAllowedDefault; }
+            try { minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used (default = " + to_string(minimumMonsterCostDefault) +") : ", minimumMonsterCostHelp, integer));
+				minimumMonsterCostDefault = minimumMonsterCost;
+			} catch (const exception & e) { minimumMonsterCost = minimumMonsterCostDefault; }
+            try { followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use (default = " + to_string(maxFollowerDefault) +") : ", maxFollowerHelp, integer));
+				maxFollowerDefault = followerUpperBound ;
+			} catch (const exception & e) { followerUpperBound = maxFollowerDefault; }
+			
         } else {
             cout << "Taking data from script" << endl;
             targetArmy = Army(makeMonstersFromStrings(stringLineup));
@@ -470,7 +488,7 @@ int main(int argc, char** argv) {
                 simulateFight(left, right, true);
                 cout << left.lastFightData.rightWon << " " << left.followerCost << " " << right.followerCost << endl;
                 
-                if (!askYesNoQuestion("Simulate another Fight?", "")) {
+                if (!askYesNoQuestion("Simulate another Fight?", "y", "")) {
                     break;
                 }
             }
@@ -505,7 +523,7 @@ int main(int argc, char** argv) {
         cout << totalFightsSimulated << " Fights simulated." << endl;
         cout << "Total Calculation Time: " << totalTime << endl;
         if (manualInput) {
-            userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?", "");
+            userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?", "y", "");
         } else {
             userWantsContinue = false;
             haltExecution();
