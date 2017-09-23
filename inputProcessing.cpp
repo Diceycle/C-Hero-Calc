@@ -5,7 +5,7 @@ ifstream configFile;
 
 // Initialize a config file provided by filename
 void initConfigFile(string configFileName) {
-    configFile = ifstream(configFileName);
+    configFile.open(configFileName);
 }
 
 // Wait for user input before continuing. Used to stop program from closing outside of a command line.
