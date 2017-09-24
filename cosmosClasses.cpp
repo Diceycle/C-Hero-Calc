@@ -18,7 +18,7 @@ Monster::Monster() {
 }
 
 // Function for sorting Monsters by cost (ascending)
-bool isCheaper(Monster & a, Monster & b) {
+bool isCheaper(const Monster & a, const Monster & b) {
     return a.cost < b.cost;
 }
 

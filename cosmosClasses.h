@@ -46,7 +46,7 @@ class Monster {
 };
 
 // Function for sorting Monsters by cost (ascending)
-bool isCheaper(Monster & a, Monster & b);
+bool isCheaper(const Monster & a, const Monster & b);
 
 // Defines the results of a fight between two armies; monstersLost and damage desribe the condition of the winning side
 class FightResult {
