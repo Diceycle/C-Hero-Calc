@@ -11,6 +11,12 @@ bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
 	}
 }
 
+void InitFightData(FightData &fightData, Army &army) {
+	fightData.lost = 0;
+	fightData.armySize = army.monsterAmount;
+	fightData.lineup = army.monsters;
+}
+
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 void simulateFight(Army & left, Army & right, bool verbose) {
@@ -28,18 +34,16 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 
 	size_t i;
 
-	size_t leftLost = 0;
-	size_t leftArmySize = left.monsterAmount;
-	int8_t* leftLineup = left.monsters;
+	FightData leftData;
+	FightData rightData;
+
+	InitFightData(leftData, left);
+	InitFightData(rightData, right);
 
 	int leftFrontDamageTaken = 0;
 	int leftHealing = 0;
 	int leftCumAoeDamageTaken = 0;
 	float leftBerserkProcs = 0;
-
-	size_t rightLost = 0;
-	size_t rightArmySize = right.monsterAmount;
-	int8_t* rightLineup = right.monsters;
 
 	int rightFrontDamageTaken = 0;
 	int rightHealing = 0;
@@ -49,10 +53,10 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 	// If no heroes are in the army the result from the smaller army is still valid
 	if (left.lastFightData.valid && !verbose) { 
 		// Set pre-computed values to pick up where we left off
-		leftLost                = leftArmySize-1; // All monsters of left died last fight only the new one counts
+		leftData.lost           = leftData.armySize - 1; // All monsters of left died last fight only the new one counts
 		leftFrontDamageTaken    = left.lastFightData.leftAoeDamage;
 		leftCumAoeDamageTaken   = left.lastFightData.leftAoeDamage;
-		rightLost               = left.lastFightData.monstersLost;
+		rightData.lost               = left.lastFightData.monstersLost;
 		rightFrontDamageTaken   = left.lastFightData.damage;
 		rightCumAoeDamageTaken  = left.lastFightData.rightAoeDamage;
 		rightBerserkProcs       = left.lastFightData.berserk;
@@ -79,15 +83,15 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 	Element skillTargetRight[6];
 	float skillAmountRight[6];
 
-	for (i = leftLost; i < leftArmySize; i++) {
-		skill = &monsterReference[leftLineup[i]].skill;
+	for (i = leftData.lost; i < leftData.armySize; i++) {
+		skill = &monsterReference[leftData.lineup[i]].skill;
 		skillTypeLeft[i] = skill->type;
 		skillTargetLeft[i] = skill->target;
 		skillAmountLeft[i] = skill->amount;
 	}
 
-	for (i = rightLost; i < rightArmySize; i++) {
-		skill = &monsterReference[rightLineup[i]].skill;
+	for (i = rightData.lost; i < rightData.armySize; i++) {
+		skill = &monsterReference[rightData.lineup[i]].skill;
 		skillTypeRight[i] = skill->type;
 		skillTargetRight[i] = skill->target;
 		skillAmountRight[i] = skill->amount;
@@ -101,25 +105,25 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		paoeDamageLeft = 0;
 		healingLeft = 0;
 		pureMonstersLeft = 0;
-		for (i = leftLost; i < leftArmySize; i++) {
-			if (leftCumAoeDamageTaken >= monsterReference[leftLineup[i]].hp) { // Check for Backline Deaths
-				leftLost += (leftLost == i);
+		for (i = leftData.lost; i < leftData.armySize; i++) {
+			if (leftCumAoeDamageTaken >= monsterReference[leftData.lineup[i]].hp) { // Check for Backline Deaths
+				leftData.lost += (leftData.lost == i);
 			} else {
 				if (skillTypeLeft[i] == nothing) {
 					pureMonstersLeft++; // count for friends ability
-				} else if (skillTypeLeft[i] == protect && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftLineup[leftLost]].element)) {
+				} else if (skillTypeLeft[i] == protect && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
 					protectionLeft += skillAmountLeft[i];
-				} else if (skillTypeLeft[i] == buff && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftLineup[leftLost]].element)) {
+				} else if (skillTypeLeft[i] == buff && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
 					damageBuffLeft += skillAmountLeft[i];
-				} else if (skillTypeLeft[i] == champion && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftLineup[leftLost]].element)) {
+				} else if (skillTypeLeft[i] == champion && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
 					damageBuffLeft += skillAmountLeft[i];
 					protectionLeft += skillAmountLeft[i];
 				} else if (skillTypeLeft[i] == heal) {
 					healingLeft += skillAmountLeft[i];
 				} else if (skillTypeLeft[i] == aoe) {
 					aoeDamageLeft += skillAmountLeft[i];
-				} else if (skillTypeLeft[i] == pAoe && i == leftLost) {
-					paoeDamageLeft += monsterReference[leftLineup[i]].damage;
+				} else if (skillTypeLeft[i] == pAoe && i == leftData.lost) {
+					paoeDamageLeft += monsterReference[leftData.lineup[i]].damage;
 				}
 			}
 		}
@@ -130,25 +134,25 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		paoeDamageRight = 0;
 		healingRight = 0;
 		pureMonstersRight = 0;
-		for (i = rightLost; i < rightArmySize; i++) {
-			if (rightCumAoeDamageTaken >= monsterReference[rightLineup[i]].hp) { // Check for Backline Deaths
-				rightLost += (i == rightLost);
+		for (i = rightData.lost; i < rightData.armySize; i++) {
+			if (rightCumAoeDamageTaken >= monsterReference[rightData.lineup[i]].hp) { // Check for Backline Deaths
+				rightData.lost += (i == rightData.lost);
 			} else {
 				if (skillTypeRight[i] == nothing) {
 					pureMonstersRight++;  // count for friends ability
-				} else if (skillTypeRight[i] == protect && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightLineup[rightLost]].element)) {
+				} else if (skillTypeRight[i] == protect && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
 					protectionRight += skillAmountRight[i];
-				} else if (skillTypeRight[i] == buff && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightLineup[rightLost]].element)) {
+				} else if (skillTypeRight[i] == buff && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
 					damageBuffRight += skillAmountRight[i];
-				} else if (skillTypeRight[i] == champion && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightLineup[rightLost]].element)) {
+				} else if (skillTypeRight[i] == champion && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
 					damageBuffRight += skillAmountRight[i];
 					protectionRight += skillAmountRight[i];
 				} else if (skillTypeRight[i] == heal) {
 					healingRight += skillAmountRight[i];
 				} else if (skillTypeRight[i] == aoe) {
 					aoeDamageRight += skillAmountRight[i];
-				} else if (skillTypeRight[i] == pAoe && i == rightLost) {
-					paoeDamageRight += monsterReference[rightLineup[i]].damage;
+				} else if (skillTypeRight[i] == pAoe && i == rightData.lost) {
+					paoeDamageRight += monsterReference[rightData.lineup[i]].damage;
 				}
 			}
 		}
@@ -172,32 +176,32 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		}
 
 		// Add last effects of abilities and start resolving the turn
-		if (leftLost >= leftArmySize || rightLost >= rightArmySize) {
+		if (leftData.lost >= leftData.armySize || rightData.lost >= rightData.armySize) {
 			break; // At least One army was beaten
 		}
 
 		// Get Base Damage for this Turn
-		currentMonsterLeft = &monsterReference[leftLineup[leftLost]];
-		currentMonsterRight = &monsterReference[rightLineup[rightLost]];
+		currentMonsterLeft = &monsterReference[leftData.lineup[leftData.lost]];
+		currentMonsterRight = &monsterReference[rightData.lineup[rightData.lost]];
 		damageLeft = currentMonsterLeft->damage;
 		damageRight = currentMonsterRight->damage;
 
 		// Handle Monsters with skills berserk or friends
-		if (skillTypeLeft[leftLost] == friends) {
-			damageLeft *= pow(skillAmountLeft[leftLost], pureMonstersLeft);
-		} else if (skillTypeLeft[leftLost] == adapt && currentMonsterLeft->element == currentMonsterRight->element) {
-			damageLeft *= skillAmountLeft[leftLost];
-		} else if (skillTypeLeft[leftLost] == berserk) {
-			damageLeft *= pow(skillAmountLeft[leftLost], leftBerserkProcs);
+		if (skillTypeLeft[leftData.lost] == friends) {
+			damageLeft *= pow(skillAmountLeft[leftData.lost], pureMonstersLeft);
+		} else if (skillTypeLeft[leftData.lost] == adapt && currentMonsterLeft->element == currentMonsterRight->element) {
+			damageLeft *= skillAmountLeft[leftData.lost];
+		} else if (skillTypeLeft[leftData.lost] == berserk) {
+			damageLeft *= pow(skillAmountLeft[leftData.lost], leftBerserkProcs);
 			leftBerserkProcs++;
 		}
 
-		if (skillTypeRight[rightLost] == friends) {
-			damageRight *= pow(skillAmountRight[rightLost], pureMonstersRight);
-		} else if (skillTypeRight[rightLost] == adapt && currentMonsterRight->element == currentMonsterLeft->element) {
-			damageRight *= skillAmountRight[rightLost];
-		} else if (skillTypeRight[rightLost] == berserk) {
-			damageRight *= pow(skillAmountRight[rightLost], rightBerserkProcs);
+		if (skillTypeRight[rightData.lost] == friends) {
+			damageRight *= pow(skillAmountRight[rightData.lost], pureMonstersRight);
+		} else if (skillTypeRight[rightData.lost] == adapt && currentMonsterRight->element == currentMonsterLeft->element) {
+			damageRight *= skillAmountRight[rightData.lost];
+		} else if (skillTypeRight[rightData.lost] == berserk) {
+			damageRight *= pow(skillAmountRight[rightData.lost], rightBerserkProcs);
 			rightBerserkProcs++; 
 		}
 
@@ -236,19 +240,19 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 
 		// Check if the first Monster died (otherwise it will be revived next turn)
 		if (currentMonsterLeft->hp <= leftFrontDamageTaken) {
-			leftLost++;
+			leftData.lost++;
 			leftBerserkProcs = 0;
 			leftFrontDamageTaken = leftCumAoeDamageTaken;
 		}
 		if (currentMonsterRight->hp <= rightFrontDamageTaken) {
-			rightLost++;
+			rightData.lost++;
 			rightBerserkProcs = 0;
 			rightFrontDamageTaken = rightCumAoeDamageTaken;
 		}
 
 		// Output detailed fight Data for debugging
 		if (verbose) {
-			cout << setw(3) << leftLost << " " << setw(3) << leftFrontDamageTaken << " " << setw(3) << rightLost << " " << setw(3) << rightFrontDamageTaken << endl;
+			cout << setw(3) << leftData.lost << " " << setw(3) << leftFrontDamageTaken << " " << setw(3) << rightData.lost << " " << setw(3) << rightFrontDamageTaken << endl;
 		}
 	}
 
@@ -257,14 +261,14 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 	left.lastFightData.leftAoeDamage = leftCumAoeDamageTaken;
 	left.lastFightData.rightAoeDamage = rightCumAoeDamageTaken;
 
-	if (leftLost >= leftArmySize) { //draws count as right wins. 
+	if (leftData.lost >= leftData.armySize) { //draws count as right wins. 
 		left.lastFightData.rightWon = true;
-		left.lastFightData.monstersLost = rightLost; 
+		left.lastFightData.monstersLost = rightData.lost; 
 		left.lastFightData.damage = rightFrontDamageTaken;
 		left.lastFightData.berserk = rightBerserkProcs;
 	} else {
 		left.lastFightData.rightWon = false;
-		left.lastFightData.monstersLost = leftLost; 
+		left.lastFightData.monstersLost = leftData.lost; 
 		left.lastFightData.damage = leftFrontDamageTaken;
 		left.lastFightData.berserk = leftBerserkProcs;
 	}
