@@ -95,6 +95,8 @@ Element FightData::GetCurrentElement() {
 }
 
 void FightData::CalcDamage(Element enemyElement) {
+	int elementalDifference;
+
 	// Get Base Damage for this Turn
 	damage = currentMonster->damage;
 
@@ -106,6 +108,15 @@ void FightData::CalcDamage(Element enemyElement) {
 	} else if (skillType[lost] == berserk) {
 		damage *= pow(skillAmount[lost], berserkProcs);
 		berserkProcs++;
+	}
+
+	// Add Buff Damage
+	damage += damageBuff;
+
+	// Handle Elemental advantage
+	elementalDifference = (currentMonster->element - enemyElement);
+	if (elementalDifference == -1 || elementalDifference == 3) {
+		damage *= elementalBoost;
 	}
 }
 
@@ -125,7 +136,6 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 	totalFightsSimulated++;
 
 	size_t i;
-	int elementalDifference;
 
 	FightData leftData(left);
 	FightData rightData(right);
@@ -162,18 +172,6 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		rightData.SetCurrentMonster();
 		leftData.CalcDamage(rightData.GetCurrentElement());
 		rightData.CalcDamage(leftData.GetCurrentElement());
-
-		// Add Buff Damage
-		leftData.damage += leftData.damageBuff;
-		rightData.damage += rightData.damageBuff;
-
-		// Handle Elemental advantage
-		elementalDifference = (leftData.currentMonster->element - rightData.currentMonster->element);
-		if (elementalDifference == -1 || elementalDifference == 3) {
-			leftData.damage *= elementalBoost;
-		} else if (elementalDifference == 1 || elementalDifference == -3) {
-			rightData.damage *= elementalBoost;
-		}
 
 		// Handle Protection
 		if (leftData.damage > rightData.protection) {
