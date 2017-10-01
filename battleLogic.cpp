@@ -41,6 +41,38 @@ void FightData::LoadSkills() {
 	}
 }
 
+void FightData::LoadHeroInfluences() {
+	damageBuff = 0;
+	protection = 0;
+	aoeDamage = 0;
+	paoeDamage = 0;
+	healingSkill = 0;
+	pureMonsters = 0;
+
+	for (int i = lost; i < armySize; i++) {
+		if (cumAoeDamageTaken >= monsterReference[lineup[i]].hp) { // Check for Backline Deaths
+			lost += (lost == i);
+		} else {
+			if (skillType[i] == nothing) {
+				pureMonsters++; // count for friends ability
+			} else if (skillType[i] == protect && (skillTarget[i] == all || skillTarget[i] == monsterReference[lineup[lost]].element)) {
+				protection += skillAmount[i];
+			} else if (skillType[i] == buff && (skillTarget[i] == all || skillTarget[i] == monsterReference[lineup[lost]].element)) {
+				damageBuff += skillAmount[i];
+			} else if (skillType[i] == champion && (skillTarget[i] == all || skillTarget[i] == monsterReference[lineup[lost]].element)) {
+				damageBuff += skillAmount[i];
+				protection += skillAmount[i];
+			} else if (skillType[i] == heal) {
+				healingSkill += skillAmount[i];
+			} else if (skillType[i] == aoe) {
+				aoeDamage += skillAmount[i];
+			} else if (skillType[i] == pAoe && i == lost) {
+				paoeDamage += monsterReference[lineup[i]].damage;
+			}
+		}
+	}
+}
+
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 void simulateFight(Army & left, Army & right, bool verbose) {
@@ -78,64 +110,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 	rightData.LoadSkills();
 
 	while (true) {
-		// Get all hero influences
-		leftData.damageBuff = 0;
-		leftData.protection = 0;
-		leftData.aoeDamage = 0;
-		leftData.paoeDamage = 0;
-		leftData.healingSkill = 0;
-		leftData.pureMonsters = 0;
-		for (i = leftData.lost; i < leftData.armySize; i++) {
-			if (leftData.cumAoeDamageTaken >= monsterReference[leftData.lineup[i]].hp) { // Check for Backline Deaths
-				leftData.lost += (leftData.lost == i);
-			} else {
-				if (leftData.skillType[i] == nothing) {
-					leftData.pureMonsters++; // count for friends ability
-				} else if (leftData.skillType[i] == protect && (leftData.skillTarget[i] == all || leftData.skillTarget[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
-					leftData.protection += leftData.skillAmount[i];
-				} else if (leftData.skillType[i] == buff && (leftData.skillTarget[i] == all || leftData.skillTarget[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
-					leftData.damageBuff += leftData.skillAmount[i];
-				} else if (leftData.skillType[i] == champion && (leftData.skillTarget[i] == all || leftData.skillTarget[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
-					leftData.damageBuff += leftData.skillAmount[i];
-					leftData.protection += leftData.skillAmount[i];
-				} else if (leftData.skillType[i] == heal) {
-					leftData.healingSkill += leftData.skillAmount[i];
-				} else if (leftData.skillType[i] == aoe) {
-					leftData.aoeDamage += leftData.skillAmount[i];
-				} else if (leftData.skillType[i] == pAoe && i == leftData.lost) {
-					leftData.paoeDamage += monsterReference[leftData.lineup[i]].damage;
-				}
-			}
-		}
-
-		rightData.damageBuff = 0;
-		rightData.protection = 0;
-		rightData.aoeDamage = 0;
-		rightData.paoeDamage = 0;
-		rightData.healingSkill = 0;
-		rightData.pureMonsters = 0;
-		for (i = rightData.lost; i < rightData.armySize; i++) {
-			if (rightData.cumAoeDamageTaken >= monsterReference[rightData.lineup[i]].hp) { // Check for Backline Deaths
-				rightData.lost += (i == rightData.lost);
-			} else {
-				if (rightData.skillType[i] == nothing) {
-					rightData.pureMonsters++;  // count for friends ability
-				} else if (rightData.skillType[i] == protect && (rightData.skillTarget[i] == all || rightData.skillTarget[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
-					rightData.protection += rightData.skillAmount[i];
-				} else if (rightData.skillType[i] == buff && (rightData.skillTarget[i] == all || rightData.skillTarget[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
-					rightData.damageBuff += rightData.skillAmount[i];
-				} else if (rightData.skillType[i] == champion && (rightData.skillTarget[i] == all || rightData.skillTarget[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
-					rightData.damageBuff += rightData.skillAmount[i];
-					rightData.protection += rightData.skillAmount[i];
-				} else if (rightData.skillType[i] == heal) {
-					rightData.healingSkill += rightData.skillAmount[i];
-				} else if (rightData.skillType[i] == aoe) {
-					rightData.aoeDamage += rightData.skillAmount[i];
-				} else if (rightData.skillType[i] == pAoe && i == rightData.lost) {
-					rightData.paoeDamage += monsterReference[rightData.lineup[i]].damage;
-				}
-			}
-		}
+		leftData.LoadHeroInfluences();
+		rightData.LoadHeroInfluences();
 
 		// Heal everything that hasnt died
 		leftData.frontDamageTaken -= leftData.healing; // these values are from the last iteration

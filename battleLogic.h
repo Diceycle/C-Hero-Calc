@@ -20,6 +20,7 @@ public:
 	FightData(Army &army);
 
 	void LoadSkills();
+	void LoadHeroInfluences();
 
 	// army-wide data
 	size_t lost;
