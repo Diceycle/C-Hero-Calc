@@ -135,6 +135,22 @@ void FightData::CalcDamage(Element enemyElement, int enemyProtection) {
 	}
 }
 
+int FightData::GetDamageGiven() {
+	return damage + aoeDamage;
+}
+
+int FightData::GetAoeDamageGiven() {
+	return aoeDamage + paoeDamage;
+}
+
+void FightData::ApplyDamage(int enemyDamageGiven, int enemyAoeDamageGiven)
+{
+	// Write values into permanent Variables for the next iteration
+	frontDamageTaken += enemyDamageGiven;
+	cumAoeDamageTaken += enemyAoeDamageGiven;
+	healing = healingSkill;
+}
+
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 void simulateFight(Army & left, Army & right, bool verbose) {
@@ -186,13 +202,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		leftData.CalcDamage(rightData.GetCurrentElement(), rightData.GetProtection());
 		rightData.CalcDamage(leftData.GetCurrentElement(), leftData.GetProtection());
 
-		// Write values into permanent Variables for the next iteration
-		rightData.frontDamageTaken += leftData.damage + leftData.aoeDamage;
-		rightData.cumAoeDamageTaken += leftData.aoeDamage + leftData.paoeDamage;
-		rightData.healing = rightData.healingSkill;
-		leftData.frontDamageTaken += rightData.damage + rightData.aoeDamage;
-		leftData.cumAoeDamageTaken += rightData.aoeDamage + rightData.paoeDamage;
-		leftData.healing = leftData.healingSkill;
+		leftData.ApplyDamage(rightData.GetDamageGiven(), rightData.GetAoeDamageGiven());
+		rightData.ApplyDamage(leftData.GetDamageGiven(), leftData.GetAoeDamageGiven());
 
 		// Check if the first Monster died (otherwise it will be revived next turn)
 		if (leftData.currentMonster->hp <= leftData.frontDamageTaken) {

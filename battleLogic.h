@@ -29,6 +29,10 @@ public:
 	int GetProtection();
 	void CalcDamage(Element enemyElement, int enemyProtection);
 
+	int GetDamageGiven();
+	int GetAoeDamageGiven();
+	void ApplyDamage(int enemyDamageGiven, int enemyAoeDamageGiven);
+
 	// army-wide data
 	size_t lost;
 	size_t armySize;
