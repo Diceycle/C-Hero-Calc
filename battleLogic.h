@@ -19,6 +19,7 @@ class FightData {
 public:
 	FightData(Army &army);
 
+	// army-wide data
 	size_t lost;
 	size_t armySize;
 	int8_t *lineup;
@@ -27,6 +28,15 @@ public:
 	int healing;
 	int cumAoeDamageTaken;
 	float berserkProcs;
+
+	// skill data
+	int damage;
+	int damageBuff;
+	int protection;
+	int aoeDamage;
+	int paoeDamage;
+	int healingSkill;
+	int pureMonsters;
 };
 
 #endif
