@@ -149,6 +149,13 @@ void FightData::ApplyDamage(int enemyDamageGiven, int enemyAoeDamageGiven)
 	frontDamageTaken += enemyDamageGiven;
 	cumAoeDamageTaken += enemyAoeDamageGiven;
 	healing = healingSkill;
+
+	// Check if the first Monster died (otherwise it will be revived next turn)
+	if (currentMonster->hp <= frontDamageTaken) {
+		lost++;
+		berserkProcs = 0;
+		frontDamageTaken = cumAoeDamageTaken;
+	}
 }
 
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
@@ -204,18 +211,6 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 
 		leftData.ApplyDamage(rightData.GetDamageGiven(), rightData.GetAoeDamageGiven());
 		rightData.ApplyDamage(leftData.GetDamageGiven(), leftData.GetAoeDamageGiven());
-
-		// Check if the first Monster died (otherwise it will be revived next turn)
-		if (leftData.currentMonster->hp <= leftData.frontDamageTaken) {
-			leftData.lost++;
-			leftData.berserkProcs = 0;
-			leftData.frontDamageTaken = leftData.cumAoeDamageTaken;
-		}
-		if (rightData.currentMonster->hp <= rightData.frontDamageTaken) {
-			rightData.lost++;
-			rightData.berserkProcs = 0;
-			rightData.frontDamageTaken = rightData.cumAoeDamageTaken;
-		}
 
 		// Output detailed fight Data for debugging
 		if (verbose) {
