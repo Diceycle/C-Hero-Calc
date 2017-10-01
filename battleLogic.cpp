@@ -73,6 +73,19 @@ void FightData::LoadHeroInfluences() {
 	}
 }
 
+void FightData::Heal() {
+	// these values are from the last iteration
+	frontDamageTaken -= healing;
+	cumAoeDamageTaken -= healing;
+
+	if (frontDamageTaken < 0) {
+		frontDamageTaken = 0;
+	}
+	if (cumAoeDamageTaken < 0) {
+		cumAoeDamageTaken = 0;
+	}
+}
+
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 void simulateFight(Army & left, Army & right, bool verbose) {
@@ -114,22 +127,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		rightData.LoadHeroInfluences();
 
 		// Heal everything that hasnt died
-		leftData.frontDamageTaken -= leftData.healing; // these values are from the last iteration
-		leftData.cumAoeDamageTaken -= leftData.healing;
-		rightData.frontDamageTaken -= rightData.healing;
-		rightData.cumAoeDamageTaken -= rightData.healing;
-		if (leftData.frontDamageTaken < 0) {
-			leftData.frontDamageTaken = 0;
-		}
-		if (leftData.cumAoeDamageTaken < 0) {
-			leftData.cumAoeDamageTaken = 0;
-		}
-		if (rightData.frontDamageTaken < 0) {
-			rightData.frontDamageTaken = 0;
-		}
-		if (rightData.cumAoeDamageTaken < 0) {
-			rightData.cumAoeDamageTaken = 0;
-		}
+		leftData.Heal();
+		rightData.Heal();
 
 		// Add last effects of abilities and start resolving the turn
 		if (leftData.lost >= leftData.armySize || rightData.lost >= rightData.armySize) {

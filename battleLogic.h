@@ -21,6 +21,7 @@ public:
 
 	void LoadSkills();
 	void LoadHeroInfluences();
+	void Heal();
 
 	// army-wide data
 	size_t lost;
