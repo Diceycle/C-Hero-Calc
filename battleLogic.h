@@ -15,7 +15,10 @@ bool isBetter(Monster * a, Monster * b, bool considerAbilities = false);
 // Simulates One fight between 2 Armies
 void simulateFight(Army & left, Army & right, bool verbose = false);
 
-struct FightData {
+class FightData {
+public:
+	FightData(Army &army);
+
 	size_t lost;
 	size_t armySize;
 	int8_t *lineup;

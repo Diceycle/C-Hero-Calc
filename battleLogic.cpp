@@ -11,10 +11,10 @@ bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
 	}
 }
 
-void InitFightData(FightData &fightData, Army &army) {
-	fightData.lost = 0;
-	fightData.armySize = army.monsterAmount;
-	fightData.lineup = army.monsters;
+FightData::FightData(Army &army) {
+	lost = 0;
+	armySize = army.monsterAmount;
+	lineup = army.monsters;
 }
 
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
@@ -34,11 +34,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 
 	size_t i;
 
-	FightData leftData;
-	FightData rightData;
-
-	InitFightData(leftData, left);
-	InitFightData(rightData, right);
+	FightData leftData(left);
+	FightData rightData(right);
 
 	int leftFrontDamageTaken = 0;
 	int leftHealing = 0;
