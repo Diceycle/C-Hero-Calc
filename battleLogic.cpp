@@ -86,6 +86,12 @@ void FightData::Heal() {
 	}
 }
 
+void FightData::CalcDamage() {
+	// Get Base Damage for this Turn
+	currentMonster = &monsterReference[lineup[lost]];
+	damage = currentMonster->damage;
+}
+
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 void simulateFight(Army & left, Army & right, bool verbose) {
@@ -135,11 +141,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 			break; // At least One army was beaten
 		}
 
-		// Get Base Damage for this Turn
-		leftData.currentMonster = &monsterReference[leftData.lineup[leftData.lost]];
-		rightData.currentMonster = &monsterReference[rightData.lineup[rightData.lost]];
-		leftData.damage = leftData.currentMonster->damage;
-		rightData.damage = rightData.currentMonster->damage;
+		leftData.CalcDamage();
+		rightData.CalcDamage();
 
 		// Handle Monsters with skills berserk or friends
 		if (leftData.skillType[leftData.lost] == friends) {
