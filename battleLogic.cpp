@@ -86,6 +86,10 @@ void FightData::Heal() {
 	}
 }
 
+bool FightData::HasLost() {
+	return lost >= armySize;
+}
+
 void FightData::SetCurrentMonster() {
 	currentMonster = &monsterReference[lineup[lost]];
 }
@@ -94,7 +98,11 @@ Element FightData::GetCurrentElement() {
 	return currentMonster->element;
 }
 
-void FightData::CalcDamage(Element enemyElement) {
+int FightData::GetProtection() {
+	return protection;
+}
+
+void FightData::CalcDamage(Element enemyElement, int enemyProtection) {
 	int elementalDifference;
 
 	// Get Base Damage for this Turn
@@ -118,6 +126,13 @@ void FightData::CalcDamage(Element enemyElement) {
 	if (elementalDifference == -1 || elementalDifference == 3) {
 		damage *= elementalBoost;
 	}
+
+	// Handle Protection
+	if (damage > enemyProtection) {
+		damage -= enemyProtection;
+	} else {
+		damage = 0;
+	}
 }
 
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
@@ -134,8 +149,6 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 	//  7. Healing of enemy Side        (Auri, Aeris, etc.)
 
 	totalFightsSimulated++;
-
-	size_t i;
 
 	FightData leftData(left);
 	FightData rightData(right);
@@ -164,27 +177,14 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		rightData.Heal();
 
 		// Add last effects of abilities and start resolving the turn
-		if (leftData.lost >= leftData.armySize || rightData.lost >= rightData.armySize) {
+		if (leftData.HasLost() || rightData.HasLost()) {
 			break; // At least One army was beaten
 		}
 
 		leftData.SetCurrentMonster();
 		rightData.SetCurrentMonster();
-		leftData.CalcDamage(rightData.GetCurrentElement());
-		rightData.CalcDamage(leftData.GetCurrentElement());
-
-		// Handle Protection
-		if (leftData.damage > rightData.protection) {
-			leftData.damage -= rightData.protection;
-		} else {
-			leftData.damage = 0;
-		}
-
-		if (rightData.damage > leftData.protection) {
-			rightData.damage -= leftData.protection;
-		} else {
-			rightData.damage = 0; 
-		}
+		leftData.CalcDamage(rightData.GetCurrentElement(), rightData.GetProtection());
+		rightData.CalcDamage(leftData.GetCurrentElement(), leftData.GetProtection());
 
 		// Write values into permanent Variables for the next iteration
 		rightData.frontDamageTaken += leftData.damage + leftData.aoeDamage;

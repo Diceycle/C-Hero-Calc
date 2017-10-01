@@ -22,10 +22,12 @@ public:
 	void LoadSkills();
 	void LoadHeroInfluences();
 	void Heal();
+	bool HasLost();
 
 	void SetCurrentMonster();
 	Element GetCurrentElement();
-	void CalcDamage(Element enemyElement);
+	int GetProtection();
+	void CalcDamage(Element enemyElement, int enemyProtection);
 
 	// army-wide data
 	size_t lost;
