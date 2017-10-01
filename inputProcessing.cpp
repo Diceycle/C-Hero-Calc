@@ -83,9 +83,9 @@ vector<int> takeHerolevelInput() {
     string input;
     fstream heroFile;
     heroFile.exceptions(fstream::failbit);
-    bool fileInput;
+    bool fileInput = true;
     
-    fileInput = askYesNoQuestion(heroInputModeQuestion, heroInputModeHelp);
+    //fileInput = askYesNoQuestion(heroInputModeQuestion, heroInputModeHelp);
     if (fileInput) {
         try {
             heroFile.open(heroLevelFileName, fstream::in);

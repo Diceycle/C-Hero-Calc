@@ -26,7 +26,7 @@ struct HeroSkill {
     SkillType type;
     Element target;
     Element sourceElement;
-    float amount;
+    double amount;
 };
 static HeroSkill none = HeroSkill({nothing, air, air, 1}); // base skill used for normal monsters
 

@@ -415,8 +415,6 @@ int main(int argc, char** argv) {
     };
     
     // Flow Control Variables
-    bool ignoreConsole = true;                          // Disables the console question whether you want to read from file or command line
-    bool individual = false;                            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
     bool debugInfo = true;                              // Set this to true if you want to see how far the execution is and how lone the execution took altogether
     bool manualInput = true;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
     
@@ -427,10 +425,6 @@ int main(int argc, char** argv) {
     cout << welcomeMessage << endl;
     cout << helpMessage << endl;
     
-    if (!ignoreConsole) {
-        manualInput = askYesNoQuestion(inputModeQuestion, inputModeHelp);
-    }
-    
     bool userWantsContinue = true;
     while (userWantsContinue) {
         // Initialize global Data
@@ -438,18 +432,11 @@ int main(int argc, char** argv) {
         initMonsterData();
         
         // Collect the Data via Command Line if the user wants
-        if (manualInput) {
-            yourHeroLevels = takeHerolevelInput();
-            targetArmy = takeLineupInput("Enter Enemy Lineup: ");
-            targetArmySize = targetArmy.monsterAmount;
-            maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution: ", maxMonstersAllowedHelp, integer));
-            minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
-            followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
-        } else {
-            cout << "Taking data from script" << endl;
-            targetArmy = Army(makeMonstersFromStrings(stringLineup));
-            targetArmySize = targetArmy.monsterAmount;
-        }
+        yourHeroLevels = takeHerolevelInput();
+        targetArmy = takeLineupInput("Enter Enemy Lineup: ");
+        targetArmySize = targetArmy.monsterAmount;
+        maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution: ", maxMonstersAllowedHelp, integer));
+        followerUpperBound = -1;
         
         // Set Upper Bound Correctly
         if (followerUpperBound < 0) {
@@ -461,21 +448,6 @@ int main(int argc, char** argv) {
         
         filterMonsterData(minimumMonsterCost);
         initializeUserHeroes(yourHeroLevels);
-        
-        if (individual) { // custom input mode
-            cout << "Simulating individual Figths" << endl;
-            while (true) {
-                Army left = takeLineupInput("Enter friendly lineup: ");
-                Army right = takeLineupInput("Enter hostile lineup: ");
-                simulateFight(left, right, true);
-                cout << left.lastFightData.rightWon << " " << left.followerCost << " " << right.followerCost << endl;
-                
-                if (!askYesNoQuestion("Simulate another Fight?", "")) {
-                    break;
-                }
-            }
-            return 0;
-        }
         
         totalTime = solveInstance(debugInfo);
         // Last check to see if winning combination wins:
@@ -504,12 +476,7 @@ int main(int argc, char** argv) {
         cout << endl;
         cout << totalFightsSimulated << " Fights simulated." << endl;
         cout << "Total Calculation Time: " << totalTime << endl;
-        if (manualInput) {
-            userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?", "");
-        } else {
-            userWantsContinue = false;
-            haltExecution();
-        }
+        userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?", "");
     }
     return EXIT_SUCCESS;
 }
