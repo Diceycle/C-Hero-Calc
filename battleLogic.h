@@ -19,6 +19,8 @@ class FightData {
 public:
 	FightData(Army &army);
 
+	void LoadSkills();
+
 	// army-wide data
 	size_t lost;
 	size_t armySize;

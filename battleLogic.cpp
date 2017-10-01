@@ -30,6 +30,17 @@ FightData::FightData(Army &army) {
 	pureMonsters = 0;
 }
 
+void FightData::LoadSkills() {
+	HeroSkill * skill;
+
+	for (int i = lost; i < armySize; i++) {
+		skill = &monsterReference[lineup[i]].skill;
+		skillType[i] = skill->type;
+		skillTarget[i] = skill->target;
+		skillAmount[i] = skill->amount;
+	}
+}
+
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 void simulateFight(Army & left, Army & right, bool verbose) {
@@ -63,21 +74,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		rightData.berserkProcs       = left.lastFightData.berserk;
 	}
 
-	HeroSkill * skill;
-
-	for (i = leftData.lost; i < leftData.armySize; i++) {
-		skill = &monsterReference[leftData.lineup[i]].skill;
-		leftData.skillType[i] = skill->type;
-		leftData.skillTarget[i] = skill->target;
-		leftData.skillAmount[i] = skill->amount;
-	}
-
-	for (i = rightData.lost; i < rightData.armySize; i++) {
-		skill = &monsterReference[rightData.lineup[i]].skill;
-		rightData.skillType[i] = skill->type;
-		rightData.skillTarget[i] = skill->target;
-		rightData.skillAmount[i] = skill->amount;
-	}
+	leftData.LoadSkills();
+	rightData.LoadSkills();
 
 	while (true) {
 		// Get all hero influences
