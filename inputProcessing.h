@@ -29,12 +29,12 @@ const string inputModeHelp =
 const string heroFileNotFoundErrorMessage = 
     "  Could not find Hero File or Hero File is deprecated. (Were there any new Heroes added recently?)\n"
     "  Switching to manual input mode...\n";
-
+    
 const string heroInputModeQuestion = "Do you want to load hero levels from file?";
 const string heroInputModeHelp =
     "  If YES is selected the hero levels will be loaded from the " + heroLevelFileName + " -file in this folder.\n"
     "  If this is your first time using this calculator then that file will be created for you when you select NO.\n";
-
+    
 const string heroInputHelp = 
     "  Enter the Level of the hero whose name is displayed on the left. If you don't own that hero, enter 0.\n";
 
@@ -44,17 +44,17 @@ const string lineupInputHelp =
     "  Heroes are written first with their full name and a colon(:) followed by their level. For example: forestdruid:50\n"
     "  Full example: a1,geror:22,f13,w2,ladyoftwilight:1\n"
     "  The other alternative is selecting a quest from the game. For example: Typing quest23 loads the lineup for the 23rd quest.\n";
-
+    
 const string maxMonstersAllowedHelp =
     "  This determines the maximum size of your lineup.\n"
     "  The most common input here is 6 with the exception of doing quests where it can also be 5 or 4.\n";
-
+    
 const string minimumMonsterCostHelp = 
     "  This determines how expensive a monster needs to be in order for the calculator to consider it for a solution.\n"
     "  This feature is intended for users with a lot of followers or good heroes to ignore monsters like a1.\n"
     "  Example: Entering 215000 will exclude e8 and cheaper monsters in the solution.\n"
     "  Special Values are: 0 for ALL monsters considered and -1 for NO monsters considered.\n";
-
+    
 const string maxFollowerHelp = 
     "  This determines how expensive the entire solution is allowed to be.\n"
     "  I only reluctantly put this option in because a lot of people asked for it. "
@@ -62,7 +62,7 @@ const string maxFollowerHelp =
     "  You can enter your followers here if you think that it speeds up calculation. "
     "But then you won't be able to know how many followers you are missing to beat the lineup. Your choice.\n"
     "  Enter -1 if you don't want to set the limit yourself.\n";
-
+    
 // Initialize a config file provided by filename
 void initConfigFile(string configFileName);
 
