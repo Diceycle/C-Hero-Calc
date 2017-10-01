@@ -46,6 +46,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 	totalFightsSimulated++;
 
 	size_t i;
+	int elementalDifference;
 
 	FightData leftData(left);
 	FightData rightData(right);
@@ -62,32 +63,20 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		rightData.berserkProcs       = left.lastFightData.berserk;
 	}
 
-	// Values for skills
-	int elementalDifference;
-
-	// hero temp Variables
-	Monster * currentMonsterLeft;
-	Monster * currentMonsterRight;
 	HeroSkill * skill;
-	SkillType skillTypeLeft[6];
-	Element skillTargetLeft[6];
-	float skillAmountLeft[6];
-	SkillType skillTypeRight[6];
-	Element skillTargetRight[6];
-	float skillAmountRight[6];
 
 	for (i = leftData.lost; i < leftData.armySize; i++) {
 		skill = &monsterReference[leftData.lineup[i]].skill;
-		skillTypeLeft[i] = skill->type;
-		skillTargetLeft[i] = skill->target;
-		skillAmountLeft[i] = skill->amount;
+		leftData.skillType[i] = skill->type;
+		leftData.skillTarget[i] = skill->target;
+		leftData.skillAmount[i] = skill->amount;
 	}
 
 	for (i = rightData.lost; i < rightData.armySize; i++) {
 		skill = &monsterReference[rightData.lineup[i]].skill;
-		skillTypeRight[i] = skill->type;
-		skillTargetRight[i] = skill->target;
-		skillAmountRight[i] = skill->amount;
+		rightData.skillType[i] = skill->type;
+		rightData.skillTarget[i] = skill->target;
+		rightData.skillAmount[i] = skill->amount;
 	}
 
 	while (true) {
@@ -102,20 +91,20 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 			if (leftData.cumAoeDamageTaken >= monsterReference[leftData.lineup[i]].hp) { // Check for Backline Deaths
 				leftData.lost += (leftData.lost == i);
 			} else {
-				if (skillTypeLeft[i] == nothing) {
+				if (leftData.skillType[i] == nothing) {
 					leftData.pureMonsters++; // count for friends ability
-				} else if (skillTypeLeft[i] == protect && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
-					leftData.protection += skillAmountLeft[i];
-				} else if (skillTypeLeft[i] == buff && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
-					leftData.damageBuff += skillAmountLeft[i];
-				} else if (skillTypeLeft[i] == champion && (skillTargetLeft[i] == all || skillTargetLeft[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
-					leftData.damageBuff += skillAmountLeft[i];
-					leftData.protection += skillAmountLeft[i];
-				} else if (skillTypeLeft[i] == heal) {
-					leftData.healingSkill += skillAmountLeft[i];
-				} else if (skillTypeLeft[i] == aoe) {
-					leftData.aoeDamage += skillAmountLeft[i];
-				} else if (skillTypeLeft[i] == pAoe && i == leftData.lost) {
+				} else if (leftData.skillType[i] == protect && (leftData.skillTarget[i] == all || leftData.skillTarget[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
+					leftData.protection += leftData.skillAmount[i];
+				} else if (leftData.skillType[i] == buff && (leftData.skillTarget[i] == all || leftData.skillTarget[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
+					leftData.damageBuff += leftData.skillAmount[i];
+				} else if (leftData.skillType[i] == champion && (leftData.skillTarget[i] == all || leftData.skillTarget[i] == monsterReference[leftData.lineup[leftData.lost]].element)) {
+					leftData.damageBuff += leftData.skillAmount[i];
+					leftData.protection += leftData.skillAmount[i];
+				} else if (leftData.skillType[i] == heal) {
+					leftData.healingSkill += leftData.skillAmount[i];
+				} else if (leftData.skillType[i] == aoe) {
+					leftData.aoeDamage += leftData.skillAmount[i];
+				} else if (leftData.skillType[i] == pAoe && i == leftData.lost) {
 					leftData.paoeDamage += monsterReference[leftData.lineup[i]].damage;
 				}
 			}
@@ -131,20 +120,20 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 			if (rightData.cumAoeDamageTaken >= monsterReference[rightData.lineup[i]].hp) { // Check for Backline Deaths
 				rightData.lost += (i == rightData.lost);
 			} else {
-				if (skillTypeRight[i] == nothing) {
+				if (rightData.skillType[i] == nothing) {
 					rightData.pureMonsters++;  // count for friends ability
-				} else if (skillTypeRight[i] == protect && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
-					rightData.protection += skillAmountRight[i];
-				} else if (skillTypeRight[i] == buff && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
-					rightData.damageBuff += skillAmountRight[i];
-				} else if (skillTypeRight[i] == champion && (skillTargetRight[i] == all || skillTargetRight[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
-					rightData.damageBuff += skillAmountRight[i];
-					rightData.protection += skillAmountRight[i];
-				} else if (skillTypeRight[i] == heal) {
-					rightData.healingSkill += skillAmountRight[i];
-				} else if (skillTypeRight[i] == aoe) {
-					rightData.aoeDamage += skillAmountRight[i];
-				} else if (skillTypeRight[i] == pAoe && i == rightData.lost) {
+				} else if (rightData.skillType[i] == protect && (rightData.skillTarget[i] == all || rightData.skillTarget[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
+					rightData.protection += rightData.skillAmount[i];
+				} else if (rightData.skillType[i] == buff && (rightData.skillTarget[i] == all || rightData.skillTarget[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
+					rightData.damageBuff += rightData.skillAmount[i];
+				} else if (rightData.skillType[i] == champion && (rightData.skillTarget[i] == all || rightData.skillTarget[i] == monsterReference[rightData.lineup[rightData.lost]].element)) {
+					rightData.damageBuff += rightData.skillAmount[i];
+					rightData.protection += rightData.skillAmount[i];
+				} else if (rightData.skillType[i] == heal) {
+					rightData.healingSkill += rightData.skillAmount[i];
+				} else if (rightData.skillType[i] == aoe) {
+					rightData.aoeDamage += rightData.skillAmount[i];
+				} else if (rightData.skillType[i] == pAoe && i == rightData.lost) {
 					rightData.paoeDamage += monsterReference[rightData.lineup[i]].damage;
 				}
 			}
@@ -174,27 +163,27 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		}
 
 		// Get Base Damage for this Turn
-		currentMonsterLeft = &monsterReference[leftData.lineup[leftData.lost]];
-		currentMonsterRight = &monsterReference[rightData.lineup[rightData.lost]];
-		leftData.damage = currentMonsterLeft->damage;
-		rightData.damage = currentMonsterRight->damage;
+		leftData.currentMonster = &monsterReference[leftData.lineup[leftData.lost]];
+		rightData.currentMonster = &monsterReference[rightData.lineup[rightData.lost]];
+		leftData.damage = leftData.currentMonster->damage;
+		rightData.damage = rightData.currentMonster->damage;
 
 		// Handle Monsters with skills berserk or friends
-		if (skillTypeLeft[leftData.lost] == friends) {
-			leftData.damage *= pow(skillAmountLeft[leftData.lost], leftData.pureMonsters);
-		} else if (skillTypeLeft[leftData.lost] == adapt && currentMonsterLeft->element == currentMonsterRight->element) {
-			leftData.damage *= skillAmountLeft[leftData.lost];
-		} else if (skillTypeLeft[leftData.lost] == berserk) {
-			leftData.damage *= pow(skillAmountLeft[leftData.lost], leftData.berserkProcs);
+		if (leftData.skillType[leftData.lost] == friends) {
+			leftData.damage *= pow(leftData.skillAmount[leftData.lost], leftData.pureMonsters);
+		} else if (leftData.skillType[leftData.lost] == adapt && leftData.currentMonster->element == rightData.currentMonster->element) {
+			leftData.damage *= leftData.skillAmount[leftData.lost];
+		} else if (leftData.skillType[leftData.lost] == berserk) {
+			leftData.damage *= pow(leftData.skillAmount[leftData.lost], leftData.berserkProcs);
 			leftData.berserkProcs++;
 		}
 
-		if (skillTypeRight[rightData.lost] == friends) {
-			rightData.damage *= pow(skillAmountRight[rightData.lost], rightData.pureMonsters);
-		} else if (skillTypeRight[rightData.lost] == adapt && currentMonsterRight->element == currentMonsterLeft->element) {
-			rightData.damage *= skillAmountRight[rightData.lost];
-		} else if (skillTypeRight[rightData.lost] == berserk) {
-			rightData.damage *= pow(skillAmountRight[rightData.lost], rightData.berserkProcs);
+		if (rightData.skillType[rightData.lost] == friends) {
+			rightData.damage *= pow(rightData.skillAmount[rightData.lost], rightData.pureMonsters);
+		} else if (rightData.skillType[rightData.lost] == adapt && rightData.currentMonster->element == leftData.currentMonster->element) {
+			rightData.damage *= rightData.skillAmount[rightData.lost];
+		} else if (rightData.skillType[rightData.lost] == berserk) {
+			rightData.damage *= pow(rightData.skillAmount[rightData.lost], rightData.berserkProcs);
 			rightData.berserkProcs++; 
 		}
 
@@ -203,7 +192,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		rightData.damage += rightData.damageBuff;
 
 		// Handle Elemental advantage
-		elementalDifference = (currentMonsterLeft->element - currentMonsterRight->element);
+		elementalDifference = (leftData.currentMonster->element - rightData.currentMonster->element);
 		if (elementalDifference == -1 || elementalDifference == 3) {
 			leftData.damage *= elementalBoost;
 		} else if (elementalDifference == 1 || elementalDifference == -3) {
@@ -232,12 +221,12 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 		leftData.healing = leftData.healingSkill;
 
 		// Check if the first Monster died (otherwise it will be revived next turn)
-		if (currentMonsterLeft->hp <= leftData.frontDamageTaken) {
+		if (leftData.currentMonster->hp <= leftData.frontDamageTaken) {
 			leftData.lost++;
 			leftData.berserkProcs = 0;
 			leftData.frontDamageTaken = leftData.cumAoeDamageTaken;
 		}
-		if (currentMonsterRight->hp <= rightData.frontDamageTaken) {
+		if (rightData.currentMonster->hp <= rightData.frontDamageTaken) {
 			rightData.lost++;
 			rightData.berserkProcs = 0;
 			rightData.frontDamageTaken = rightData.cumAoeDamageTaken;

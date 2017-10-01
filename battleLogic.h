@@ -37,6 +37,11 @@ public:
 	int paoeDamage;
 	int healingSkill;
 	int pureMonsters;
+
+	Monster *currentMonster;
+	SkillType skillType[6];
+	Element skillTarget[6];
+	float skillAmount[6];
 };
 
 #endif
