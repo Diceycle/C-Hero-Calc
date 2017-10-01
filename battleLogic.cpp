@@ -86,10 +86,27 @@ void FightData::Heal() {
 	}
 }
 
-void FightData::CalcDamage() {
-	// Get Base Damage for this Turn
+void FightData::SetCurrentMonster() {
 	currentMonster = &monsterReference[lineup[lost]];
+}
+
+Element FightData::GetCurrentElement() {
+	return currentMonster->element;
+}
+
+void FightData::CalcDamage(Element enemyElement) {
+	// Get Base Damage for this Turn
 	damage = currentMonster->damage;
+
+	// Handle Monsters with skills berserk or friends
+	if (skillType[lost] == friends) {
+		damage *= pow(skillAmount[lost], pureMonsters);
+	} else if (skillType[lost] == adapt && currentMonster->element == enemyElement) {
+		damage *= skillAmount[lost];
+	} else if (skillType[lost] == berserk) {
+		damage *= pow(skillAmount[lost], berserkProcs);
+		berserkProcs++;
+	}
 }
 
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
@@ -141,27 +158,10 @@ void simulateFight(Army & left, Army & right, bool verbose) {
 			break; // At least One army was beaten
 		}
 
-		leftData.CalcDamage();
-		rightData.CalcDamage();
-
-		// Handle Monsters with skills berserk or friends
-		if (leftData.skillType[leftData.lost] == friends) {
-			leftData.damage *= pow(leftData.skillAmount[leftData.lost], leftData.pureMonsters);
-		} else if (leftData.skillType[leftData.lost] == adapt && leftData.currentMonster->element == rightData.currentMonster->element) {
-			leftData.damage *= leftData.skillAmount[leftData.lost];
-		} else if (leftData.skillType[leftData.lost] == berserk) {
-			leftData.damage *= pow(leftData.skillAmount[leftData.lost], leftData.berserkProcs);
-			leftData.berserkProcs++;
-		}
-
-		if (rightData.skillType[rightData.lost] == friends) {
-			rightData.damage *= pow(rightData.skillAmount[rightData.lost], rightData.pureMonsters);
-		} else if (rightData.skillType[rightData.lost] == adapt && rightData.currentMonster->element == leftData.currentMonster->element) {
-			rightData.damage *= rightData.skillAmount[rightData.lost];
-		} else if (rightData.skillType[rightData.lost] == berserk) {
-			rightData.damage *= pow(rightData.skillAmount[rightData.lost], rightData.berserkProcs);
-			rightData.berserkProcs++; 
-		}
+		leftData.SetCurrentMonster();
+		rightData.SetCurrentMonster();
+		leftData.CalcDamage(rightData.GetCurrentElement());
+		rightData.CalcDamage(leftData.GetCurrentElement());
 
 		// Add Buff Damage
 		leftData.damage += leftData.damageBuff;
