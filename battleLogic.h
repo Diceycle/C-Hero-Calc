@@ -17,45 +17,45 @@ void simulateFight(Army & left, Army & right, bool verbose = false);
 
 class FightData {
 public:
-	FightData(Army &army);
+    FightData(Army &army);
 
-	void LoadSkills();
-	void LoadHeroInfluences();
-	void Heal();
-	bool HasLost();
+    void LoadSkills();
+    void LoadHeroInfluences();
+    void Heal();
+    bool HasLost();
 
-	void SetCurrentMonster();
-	Element GetCurrentElement();
-	int GetProtection();
-	void CalcDamage(Element enemyElement, int enemyProtection);
+    void SetCurrentMonster();
+    Element GetCurrentElement();
+    int GetProtection();
+    void CalcDamage(Element enemyElement, int enemyProtection);
 
-	int GetDamageGiven();
-	int GetAoeDamageGiven();
-	void ApplyDamage(int enemyDamageGiven, int enemyAoeDamageGiven);
+    int GetDamageGiven();
+    int GetAoeDamageGiven();
+    void ApplyDamage(int enemyDamageGiven, int enemyAoeDamageGiven);
 
-	// army-wide data
-	size_t lost;
-	size_t armySize;
-	int8_t *lineup;
+    // army-wide data
+    size_t lost;
+    size_t armySize;
+    int8_t *lineup;
 
-	int frontDamageTaken;
-	int healing;
-	int cumAoeDamageTaken;
-	float berserkProcs;
+    int frontDamageTaken;
+    int healing;
+    int cumAoeDamageTaken;
+    float berserkProcs;
 
-	// skill data
-	int damage;
-	int damageBuff;
-	int protection;
-	int aoeDamage;
-	int paoeDamage;
-	int healingSkill;
-	int pureMonsters;
+    // skill data
+    int damage;
+    int damageBuff;
+    int protection;
+    int aoeDamage;
+    int paoeDamage;
+    int healingSkill;
+    int pureMonsters;
 
-	Monster *currentMonster;
-	SkillType skillType[6];
-	Element skillTarget[6];
-	float skillAmount[6];
+    Monster *currentMonster;
+    SkillType skillType[6];
+    Element skillTarget[6];
+    float skillAmount[6];
 };
 
 #endif
