@@ -22,6 +22,11 @@ public:
 	size_t lost;
 	size_t armySize;
 	int8_t *lineup;
+
+	int frontDamageTaken;
+	int healing;
+	int cumAoeDamageTaken;
+	float berserkProcs;
 };
 
 #endif
