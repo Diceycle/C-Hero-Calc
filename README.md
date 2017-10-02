@@ -17,10 +17,9 @@ Game forum and disscusuion thread [here](http://www.kongregate.com/forums/910715
 * Precompiled exe included (Built on Windows 8.1 (64Bit), no guarantee for other versions)
 
 ### What's New?
-**Now with 66% less ~~fat~~ Memory Usage**
-* You can thank **Tesko** for that one. He was the one who made me aware of a massive optimization
-* Small optimizations to the battle logic
-* Fixed a bug with Pontus
+**New Heroes have been added**
+* Gaia and Spyke are fully functional
+* Aoyuki is in the system but her ability does nothing as of now
 
 ## Usage
 
