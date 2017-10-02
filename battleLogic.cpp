@@ -27,6 +27,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     totalFightsSimulated++;
     
     size_t i;
+    int turncounter = 0;
     
     size_t leftLost = 0;
     size_t leftArmySize = left.monsterAmount;
@@ -56,6 +57,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         rightFrontDamageTaken   = left.lastFightData.damage;
         rightCumAoeDamageTaken  = left.lastFightData.rightAoeDamage;
         rightBerserkProcs       = left.lastFightData.berserk;
+        turncounter             = left.lastFightData.turncounter;
     }
     
     // Values for skills  
@@ -182,11 +184,13 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         damageLeft = currentMonsterLeft->damage;
         damageRight = currentMonsterRight->damage;
         
-        // Handle Monsters with skills berserk or friends
+        // Handle Monsters with skills berserk or friends or training etc.
         if (skillTypeLeft[leftLost] == friends) {
             damageLeft *= pow(skillAmountLeft[leftLost], pureMonstersLeft);
         } else if (skillTypeLeft[leftLost] == adapt && currentMonsterLeft->element == currentMonsterRight->element) {
             damageLeft *= skillAmountLeft[leftLost];
+        } else if (skillTypeLeft[leftLost] == training) {
+            damageLeft += skillAmountLeft[leftLost] * turncounter;
         } else if (skillTypeLeft[leftLost] == berserk) {
             damageLeft *= pow(skillAmountLeft[leftLost], leftBerserkProcs);
             leftBerserkProcs++;
@@ -196,6 +200,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
             damageRight *= pow(skillAmountRight[rightLost], pureMonstersRight);
         } else if (skillTypeRight[rightLost] == adapt && currentMonsterRight->element == currentMonsterLeft->element) {
             damageRight *= skillAmountRight[rightLost];
+        } else if (skillTypeRight[rightLost] == training) {
+            damageRight += skillAmountRight[rightLost] * turncounter;
         } else if (skillTypeRight[rightLost] == berserk) {
             damageRight *= pow(skillAmountRight[rightLost], rightBerserkProcs);
             rightBerserkProcs++; 
@@ -246,6 +252,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
             rightFrontDamageTaken = rightCumAoeDamageTaken;
         }
         
+        turncounter++;
+        
         // Output detailed fight Data for debugging
         if (verbose) {
             cout << setw(3) << leftLost << " " << setw(3) << leftFrontDamageTaken << " " << setw(3) << rightLost << " " << setw(3) << rightFrontDamageTaken << endl;
@@ -254,6 +262,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     
     // write all the results into a FightResult
     left.lastFightData.dominated = false;
+    left.lastFightData.turncounter = turncounter;
     left.lastFightData.leftAoeDamage = leftCumAoeDamageTaken;
     left.lastFightData.rightAoeDamage = rightCumAoeDamageTaken;
     

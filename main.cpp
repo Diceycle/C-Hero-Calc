@@ -60,7 +60,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     vector<bool> usedHeroes; usedHeroes.resize(availableHeroesSize, false);
     size_t i, j, m;
     SkillType currentSkill;
-    bool friendsActive;
+    bool globalAbilityInfluence;
     
     for (i = 0; i < oldPureArmies.size(); i++) {
         if (!oldPureArmies[i].lastFightData.dominated) {
@@ -74,19 +74,20 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 currentSkill = monsterReference[availableHeroes[m]].skill.type;
                 newHeroArmies.push_back(oldPureArmies[i]);
                 newHeroArmies.back().add(availableHeroes[m]);
-                newHeroArmies.back().lastFightData.valid = (currentSkill == pAoe || currentSkill == friends || currentSkill == berserk); // These skills are self centered
+                newHeroArmies.back().lastFightData.valid = (currentSkill == pAoe || currentSkill == friends || currentSkill == berserk || currentSkill == adapt); // These skills are self centered
             }
         }
     }
     
     for (i = 0; i < oldHeroArmies.size(); i++) {
         if (!oldHeroArmies[i].lastFightData.dominated) {
-            friendsActive = false;
+            globalAbilityInfluence = false;
             remainingFollowers = followerUpperBound - oldHeroArmies[i].followerCost;
             for (j = 0; j < currentArmySize; j++) {
                 for (m = 0; m < availableHeroesSize; m++) {
                     if (oldHeroArmies[i].monsters[j] == availableHeroes[m]) {
-                        friendsActive |= monsterReference[oldHeroArmies[i].monsters[j]].skill.type == friends;
+                        currentSkill = monsterReference[oldHeroArmies[i].monsters[j]].skill.type;
+                        globalAbilityInfluence |= (currentSkill == friends || currentSkill == rainbow);
                         usedHeroes[m] = true;
                         break;
                     }
@@ -95,7 +96,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
                 newHeroArmies.push_back(oldHeroArmies[i]);
                 newHeroArmies.back().add(availableMonsters[m]);
-                newHeroArmies.back().lastFightData.valid = !friendsActive;
+                newHeroArmies.back().lastFightData.valid = !globalAbilityInfluence;
             }
             for (m = 0; m < availableHeroesSize; m++) {
                 if (!usedHeroes[m]) {
@@ -409,6 +410,7 @@ int main(int argc, char** argv) {
          0, 0, 0,         // "ourea", "erebus", "pontus"
          0, 0, 0,         // "ladyoftwilight","tiny","nebra"
          0, 0, 0,         // "veildur", "brynhildr", "groth"
+         0, 0, 0,         // "spyke", "aoyuki", "gaiabyte"
          0, 0, 0, 0,      // "valor","rokka","pyromancer","bewat"
          0, 0, 0, 0,      // "nicte", "forestdruid","ignitor","undine"
          0, 0, 0          // "chroma", "petry", "zaytus"

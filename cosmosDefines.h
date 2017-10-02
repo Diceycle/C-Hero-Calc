@@ -13,8 +13,8 @@ using namespace std;
 
 extern vector<int8_t> availableHeroes; // Contains all User Heroes, readily Leveled
 
-extern vector<int8_t> monsterList; // Contains pointers to raw Monster Data from a1 to f15, will be sorted by follower cost
-extern map<string, int8_t> monsterMap; // Maps monster Names to their pointers (includes heroes)
+extern vector<int8_t> monsterList; // Contains indices to raw Monster Data from a1 to f15, will be sorted by follower cost
+extern map<string, int8_t> monsterMap; // Maps monster Names to their indices (includes heroes)
 
 static vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual Objects
     Monster( 20,   8,    1000,  "a1", air),
@@ -124,6 +124,10 @@ static vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Obj
     Monster( 72, 48, 0, "brynhildr",         air,   {champion,all, air, 4}),
     Monster( 78, 52, 0, "groth",             fire,  {champion,all, fire, 5}),
     
+    Monster( 75, 45, 0, "spyke",             air,   {training,self, air, 5}),
+    Monster( 70, 55, 0, "aoyuki",            water, {rainbow, self, water, 50}),
+    Monster( 50,100, 0, "gaiabyte",          earth, {berserk, self, earth, 0.5}),
+    
     Monster( 20, 10, 0, "valor",             air,   {protect, air, air, 1}),
     Monster( 30,  8, 0, "rokka",             earth, {protect, earth, earth, 1}),
     Monster( 24, 12, 0, "pyromancer",        fire,  {protect, fire, fire, 1}),
@@ -181,6 +185,10 @@ static map<string, int> rarities { // hero rarities
     {"veildur", 2},
     {"brynhildr", 2},
     {"groth", 2},
+    
+    {"spyke", 2},
+    {"aoyuki", 2},
+    {"gaiabyte", 2},
     
     {"valor", 0},
     {"rokka", 0},
