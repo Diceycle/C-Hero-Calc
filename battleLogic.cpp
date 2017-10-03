@@ -27,25 +27,25 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     totalFightsSimulated++;
     
     size_t i;
-    int turncounter = 0;
+    int8_t turncounter = 0;
     
     size_t leftLost = 0;
     size_t leftArmySize = left.monsterAmount;
     int8_t* leftLineup = left.monsters;
     
-    int leftFrontDamageTaken = 0;
-    int leftHealing = 0;
-    int leftCumAoeDamageTaken = 0;
-    float leftBerserkProcs = 0;
+    int16_t leftFrontDamageTaken = 0;
+    int16_t leftHealing = 0;
+    int16_t leftCumAoeDamageTaken = 0;
+    int8_t leftBerserkProcs = 0;
     
     size_t rightLost = 0;
     size_t rightArmySize = right.monsterAmount;
     int8_t* rightLineup = right.monsters;
     
-    int rightFrontDamageTaken = 0;
-    int rightHealing = 0;
-    int rightCumAoeDamageTaken = 0;
-    float rightBerserkProcs = 0;
+    int16_t rightFrontDamageTaken = 0;
+    int16_t rightHealing = 0;
+    int16_t rightCumAoeDamageTaken = 0;
+    int8_t rightBerserkProcs = 0;
     
     // If no heroes are in the army the result from the smaller army is still valid
     if (left.lastFightData.valid && !verbose) { 
@@ -61,15 +61,15 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     }
     
     // Values for skills  
-    int damageLeft, damageRight;
-    int damageBuffLeft, damageBuffRight;
-    int protectionLeft, protectionRight;
-    int aoeDamageLeft, aoeDamageRight;
-    int paoeDamageLeft, paoeDamageRight;
-    int healingLeft, healingRight;
-    int pureMonstersLeft, pureMonstersRight;
-    int rainbowConditionLeft, rainbowConditionRight;
-    int elementalDifference;
+    int16_t damageLeft, damageRight;
+    int16_t damageBuffLeft, damageBuffRight;
+    int16_t protectionLeft, protectionRight;
+    int16_t aoeDamageLeft, aoeDamageRight;
+    int16_t paoeDamageLeft, paoeDamageRight;
+    int16_t healingLeft, healingRight;
+    int8_t pureMonstersLeft, pureMonstersRight;
+    int8_t rainbowConditionLeft, rainbowConditionRight;
+    int8_t elementalDifference;
     
     // hero temp Variables
     Monster * currentMonsterLeft;
