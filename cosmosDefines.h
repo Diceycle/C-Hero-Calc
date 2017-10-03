@@ -126,7 +126,7 @@ static vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Obj
     
     Monster( 75, 45, 0, "spyke",             air,   {training,self, air, 5}),
     Monster( 70, 55, 0, "aoyuki",            water, {rainbow, self, water, 50}),
-    Monster( 50,100, 0, "gaiabyte",          earth, {berserk, self, earth, 0.5}),
+    Monster( 50,100, 0, "gaiabyte",          earth, {wither,  self, earth, 0.5}),
     
     Monster( 20, 10, 0, "valor",             air,   {protect, air, air, 1}),
     Monster( 30,  8, 0, "rokka",             earth, {protect, earth, earth, 1}),

@@ -68,6 +68,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     int paoeDamageLeft, paoeDamageRight;
     int healingLeft, healingRight;
     int pureMonstersLeft, pureMonstersRight;
+    int rainbowConditionLeft, rainbowConditionRight;
     int elementalDifference;
     
     // hero temp Variables
@@ -83,14 +84,22 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     
     for (i = leftLost; i < leftArmySize; i++) {
         skill = &monsterReference[leftLineup[i]].skill;
+        rainbowConditionLeft |= 1 << monsterReference[leftLineup[i]].element;
         skillTypeLeft[i] = skill->type;
+        if (skill->type == rainbow) {
+            rainbowConditionLeft = 0;
+        }
         skillTargetLeft[i] = skill->target;
         skillAmountLeft[i] = skill->amount;
     }
     
     for (i = rightLost; i < rightArmySize; i++) {
         skill = &monsterReference[rightLineup[i]].skill;
+        rainbowConditionRight |= 1 << monsterReference[rightLineup[i]].element;
         skillTypeRight[i] = skill->type;
+        if (skill->type == rainbow) {
+            rainbowConditionRight = 0;
+        }
         skillTargetRight[i] = skill->target;
         skillAmountRight[i] = skill->amount;
     }
@@ -191,6 +200,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
             damageLeft *= skillAmountLeft[leftLost];
         } else if (skillTypeLeft[leftLost] == training) {
             damageLeft += skillAmountLeft[leftLost] * turncounter;
+        } else if (skillTypeLeft[leftLost] == rainbow && rainbowConditionLeft == 15) {
+            damageLeft += skillAmountLeft[leftLost];
         } else if (skillTypeLeft[leftLost] == berserk) {
             damageLeft *= pow(skillAmountLeft[leftLost], leftBerserkProcs);
             leftBerserkProcs++;
@@ -202,6 +213,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
             damageRight *= skillAmountRight[rightLost];
         } else if (skillTypeRight[rightLost] == training) {
             damageRight += skillAmountRight[rightLost] * turncounter;
+        } else if (skillTypeRight[rightLost] == rainbow && rainbowConditionRight == 15) {
+            damageRight += skillAmountRight[rightLost];
         } else if (skillTypeRight[rightLost] == berserk) {
             damageRight *= pow(skillAmountRight[rightLost], rightBerserkProcs);
             rightBerserkProcs++; 
@@ -245,11 +258,15 @@ void simulateFight(Army & left, Army & right, bool verbose) {
             leftLost++;
             leftBerserkProcs = 0;
             leftFrontDamageTaken = leftCumAoeDamageTaken;
+        } else if (skillTypeLeft[leftLost] == wither) {
+            leftFrontDamageTaken += (monsterReference[leftLineup[leftLost]].hp - leftFrontDamageTaken) * skillAmountLeft[leftLost];
         }
         if (currentMonsterRight->hp <= rightFrontDamageTaken) {
             rightLost++;
             rightBerserkProcs = 0;
             rightFrontDamageTaken = rightCumAoeDamageTaken;
+        } else if (skillTypeRight[rightLost] == wither) {
+            rightFrontDamageTaken += (monsterReference[rightLineup[rightLost]].hp - rightFrontDamageTaken) * skillAmountRight[rightLost];
         }
         
         turncounter++;

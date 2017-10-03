@@ -4,7 +4,7 @@
 I took over the developement out of interest and educational purposes. Well, I also needed a good calculator and David's approach was a good place to start.
 My goal is to provide a Calculator that is usable even on difficult problems in respect to Memory usage and calculation time.
 
-Game forum and disscusuion thread [here](http://www.kongregate.com/forums/910715-cosmos-quest/topics/904741-version-2-6-1-new-heroes-and-quests-added-to-c-calc).
+Game forum and disscusuion thread [here](http://www.kongregate.com/forums/910715-cosmos-quest/topics/915430-version-2-7-0-c-calc-now-supports-the-banhammer-overlord).
 
 ### Features
 * C++ based Calcultor for solving PvE instances
