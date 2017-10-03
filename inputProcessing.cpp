@@ -32,7 +32,7 @@ string getResistantInput(string query, string help, QueryType queryType) {
         if (inputString == "help") {
             cout << help;
         } else {
-            if (queryType == question && (inputString == "y" || inputString == "n")) {
+            if (queryType == question) {
                 return inputString;
             }
             if (queryType == integer) {
@@ -48,16 +48,28 @@ string getResistantInput(string query, string help, QueryType queryType) {
     }
 }
 
-// Ask the user a question that they can answer via command line
+// Ask the user a question that they can answer via command line and follow a default if they just hit enter
+bool askYesNoQuestion(const string &questionMessage, const string &help, bool def) {
+    string inputOptions;
+    if (def) {
+        inputOptions = " [Y/n]: ";
+    }else{
+        inputOptions = " [y/N]: ";
+    }
+    while(true) {
+        char inputChar = tolower(getResistantInput(questionMessage + inputOptions, help, question)[0],  std::locale());
+        if (inputChar == 'n' or (inputChar == '\0' and not def)) {
+            return false;
+        }
+        if (inputChar == 'y' or (inputChar == '\0' and def)) {
+            return true;
+        }
+    }
+}
+
+// Ask the user a question that they can answer via command line (default value is true)
 bool askYesNoQuestion(string questionMessage, string help) {
-    string inputString = getResistantInput(questionMessage + " (y/n): ", help, question);
-    if (inputString == "n") {
-        return false;
-    }
-    if (inputString == "y") {
-        return true;
-    }
-    return false;
+    return askYesNoQuestion(questionMessage, help, true);
 }
 
 // Output things on the command line. Using shouldOutput this can be easily controlled globally
