@@ -376,61 +376,31 @@ int solveInstance(bool debugInfo) {
 
 int main(int argc, char** argv) {
     
-    if (argc == 2) {
-        initConfigFile(argv[1]);
-        useConfigFile = true;
-    } else {
-        useConfigFile = false;
-    }
-    
     // Declare Variables
-    vector<string> stringLineup {};
-    string inputString;
-    vector<int> yourHeroLevels;
-        
-    // Additional convienience Strings
-    vector<string> daily {"w14", "a14", "f13", "a13", "w13"};
-    vector<string> test {"a9", "e13", "nicte:25", "a5"};
+    string macroFileName;
+    vector<int> heroLevels;
  
     // Define User Input Data
-    firstDominance = 4;             // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
-    maxMonstersAllowed = 6;         // Set this to how many Monsters should be in the solution (f.e 4 for X-3 Quests) 
-    minimumMonsterCost = 0;    // Minimum amount a monster used in the soluiton should cost. Useful for reducing the amount of monsters when you are sure you wont need them (f.e. a1 in dq20)
-    followerUpperBound = -1;        // Maximum Cost of the whole Lineup, -1 means unlimited
-    stringLineup = quests[1];      // Choose against which lineup you want to fight use one from above or make your own and then change the name accordingly
-    yourHeroLevels = {    // INPUT YOUR HERO LEVELS HERE (For manual editing: Names tell you which number is the level of which hero)
-         0,               // "james"
-         0, 0, 0,         // "hunter","shaman","alpha"
-         0, 0, 0,         // "carl","nimue","athos"
-         0, 0, 0,         // "jet","geron","rei"
-         0, 0, 0,         // "ailen","faefyr","auri"
-         0, 0, 0,         // "k41ry", "t4urus", "tr0n1x"
-         0, 0, 0,         // "aquortis", "aeris", "geum"
-         0, 0, 0,         // "rudean","aural","geror"
-         0, 0, 0,         // "ourea", "erebus", "pontus"
-         0, 0, 0,         // "ladyoftwilight","tiny","nebra"
-         0, 0, 0,         // "veildur", "brynhildr", "groth"
-         0, 0, 0,         // "spyke", "aoyuki", "gaiabyte"
-         0, 0, 0, 0,      // "valor","rokka","pyromancer","bewat"
-         0, 0, 0, 0,      // "nicte", "forestdruid","ignitor","undine"
-         0, 0, 0          // "chroma", "petry", "zaytus"
-    };
-    
+    firstDominance = 4;                 // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
+    macroFileName = "default.cqinput"; // Path to default macro file
+   
     // Flow Control Variables
-    bool ignoreConsole = true;                          // Disables the console question whether you want to read from file or command line
-    bool individual = false;                            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
-    bool debugInfo = true;                              // Set this to true if you want to see how far the execution is and how lone the execution took altogether
-    bool manualInput = true;                           // Set this to true if you want nothing to do with this file and just want to input stuff over the command line like you're used to
+    bool useDefaultMacroFile = false;    // Set this to true to always use the specified macro file
+    bool showMacroFileInput = true;    // Set this to true to see what the macrofile inputs
+    bool individual = false;            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
+    bool debugInfo = true;              // Set this to true if you want to see how far the execution is and how long the execution took altogether
     
-    int totalTime;
-    
-    // --------------------------------------------- Actual Program Starts here --------------------------------------------
+    // -------------------------------------------- Program Start --------------------------------------------
     
     cout << welcomeMessage << endl;
     cout << helpMessage << endl;
     
-    if (!ignoreConsole) {
-        manualInput = askYesNoQuestion(inputModeQuestion, inputModeHelp);
+    // Check if the user provided a filename to be used as a macro file
+    if (argc == 2) {
+        initMacroFile(argv[1], showMacroFileInput);
+    }
+    else if (useDefaultMacroFile) {
+        initMacroFile(macroFileName, showMacroFileInput);
     }
     
     bool userWantsContinue = true;
@@ -439,19 +409,13 @@ int main(int argc, char** argv) {
         best = Army();
         initMonsterData();
         
-        // Collect the Data via Command Line if the user wants
-        if (manualInput) {
-            yourHeroLevels = takeHerolevelInput();
-            targetArmy = takeLineupInput("Enter Enemy Lineup: ");
-            targetArmySize = targetArmy.monsterAmount;
-            maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution: ", maxMonstersAllowedHelp, integer));
-            minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
-            followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
-        } else {
-            cout << "Taking data from script" << endl;
-            targetArmy = Army(makeMonstersFromStrings(stringLineup));
-            targetArmySize = targetArmy.monsterAmount;
-        }
+        // Collect the Data via Command Line
+        heroLevels = takeHerolevelInput();
+        targetArmy = takeLineupInput("Enter Enemy Lineup: ");
+        targetArmySize = targetArmy.monsterAmount;
+        maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution: ", maxMonstersAllowedHelp, integer));
+        minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
+        followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
         
         // Set Upper Bound Correctly
         if (followerUpperBound < 0) {
@@ -462,7 +426,7 @@ int main(int argc, char** argv) {
         }
         
         filterMonsterData(minimumMonsterCost);
-        initializeUserHeroes(yourHeroLevels);
+        initializeUserHeroes(heroLevels);
         
         if (individual) { // custom input mode
             cout << "Simulating individual Figths" << endl;
@@ -479,7 +443,7 @@ int main(int argc, char** argv) {
             return 0;
         }
         
-        totalTime = solveInstance(debugInfo);
+        int totalTime = solveInstance(debugInfo);
         // Last check to see if winning combination wins:
         if ((customFollowers && best.monsterAmount > 0) || (!customFollowers && followerUpperBound < numeric_limits<int>::max())) {
             best.lastFightData.valid = false;
@@ -506,12 +470,8 @@ int main(int argc, char** argv) {
         cout << endl;
         cout << totalFightsSimulated << " Fights simulated." << endl;
         cout << "Total Calculation Time: " << totalTime << endl;
-        if (manualInput) {
-            userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?", "");
-        } else {
-            userWantsContinue = false;
-            haltExecution();
-        }
+        
+        userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?", "");
     }
     return EXIT_SUCCESS;
 }

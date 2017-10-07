@@ -1,11 +1,18 @@
 #include "inputProcessing.h"
 
-bool useConfigFile;
-ifstream configFile;
+bool useMacroFile;
+bool showQueries = true;
+ifstream macroFile;
 
 // Initialize a config file provided by filename
-void initConfigFile(string configFileName) {
-    configFile.open(configFileName);
+void initMacroFile(string macroFileName, bool showInput) {
+    macroFile.open(macroFileName);
+    
+    useMacroFile = macroFile.good();
+    showQueries = macroFile.good() && showInput;
+    if (!macroFile.good()) {
+        cout << "Could not find Macro File. Switching to Manual Input." << endl;
+    }
 }
 
 // Wait for user input before continuing. Used to stop program from closing outside of a command line.
@@ -18,16 +25,23 @@ void haltExecution() {
 string getResistantInput(string query, string help, QueryType queryType) {
     string inputString;
     while (true) {
-        cout << query;
-        if (useConfigFile) {
-            useConfigFile = (bool) getline(configFile, inputString);
+        // Check first if there is still a line in the macro file
+        if (useMacroFile) {
+            useMacroFile = (bool) getline(macroFile, inputString);
         } 
-        if (!useConfigFile) {
+        // Print the query only if no macro file is used or specifically asked for
+        if (!useMacroFile || showQueries) {
+            cout << query;
+        }
+        // Ask for user input
+        if (!useMacroFile) {
             getline(cin, inputString);
         }
+        
+        // Process Input
         inputString = split(inputString, " ")[0];
-        if (useConfigFile) {
-            cout << inputString << endl;
+        if (useMacroFile && showQueries) {
+            cout << inputString << endl; // Show input if a macro file is used
         }
         if (inputString == "help") {
             cout << help;
@@ -101,7 +115,9 @@ vector<int> takeHerolevelInput() {
         }
     }
     if (!fileInput) {
-        cout << "Enter the level of the hero, whose name is shown." << endl;
+        if (!useMacroFile || showQueries) {
+            cout << "Enter the level of the hero, whose name is shown." << endl;
+        }
         for (size_t i = 0; i < baseHeroes.size(); i++) {
             input = getResistantInput(baseHeroes[i].name + ": ", heroInputHelp, integer);
             levels.push_back(stoi(input));
@@ -114,7 +130,9 @@ vector<int> takeHerolevelInput() {
 		}
 		heroFile << levels[levels.size()-1];
 		heroFile.close();
-        cout << "Hero Levels have been saved in a file. Next time you use this program you can load them from file." << endl;
+        if (!useMacroFile || showQueries) {
+            cout << "Hero Levels have been saved in a file. Next time you use this program you can load them from file." << endl;
+        }
     }
     return levels;
 }

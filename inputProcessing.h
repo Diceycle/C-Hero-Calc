@@ -14,9 +14,6 @@ using namespace std;
 const string heroVersion = "2.7.0";
 const string heroLevelFileName = "heroLevels" + heroVersion;
 
-extern bool useConfigFile;
-extern ifstream configFile;
-
 const string welcomeMessage = "Welcome to Diceycle's PvE Instance Solver!";
 const string helpMessage = "If you don't know what to do you can type help at any time to get an explanation about the current step.";
 
@@ -64,7 +61,7 @@ const string maxFollowerHelp =
     "  Enter -1 if you don't want to set the limit yourself.\n";
     
 // Initialize a config file provided by filename
-void initConfigFile(string configFileName);
+void initMacroFile(string macroFileName, bool showInput);
 
 // Wait for user input before continuing. Used to stop program from colsing outside of a command line.
 void haltExecution();
