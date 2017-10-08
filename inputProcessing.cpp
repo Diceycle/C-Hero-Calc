@@ -24,6 +24,7 @@ void haltExecution() {
 // Method for handling ALL input. Gives access to help, error resistance and config file for input.
 string getResistantInput(string query, string help, QueryType queryType) {
     string inputString;
+    string firstElement;
     while (true) {
         // Check first if there is still a line in the macro file
         if (useMacroFile) {
@@ -39,20 +40,21 @@ string getResistantInput(string query, string help, QueryType queryType) {
         }
         
         // Process Input
-        inputString = split(inputString, " ")[0];
+        inputString = split(inputString, "//")[0]; // trim potential comments in a macrofile
+        firstElement = split(inputString, " ")[0]; // except for rare input only the first string till a space is used
         if (useMacroFile && showQueries) {
             cout << inputString << endl; // Show input if a macro file is used
         }
-        if (inputString == "help") {
+        if (firstElement == "help") {
             cout << help;
         } else {
-            if (queryType == question && (inputString == "y" || inputString == "n")) {
-                return inputString;
+            if (queryType == question && (firstElement == "y" || firstElement == "n")) {
+                return firstElement;
             }
             if (queryType == integer) {
                 try {
-                    stoi(inputString);
-                    return inputString;
+                    stoi(firstElement);
+                    return firstElement;
                 } catch (const exception & e) {}
             }
             if (queryType == raw) {
