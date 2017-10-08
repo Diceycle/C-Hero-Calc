@@ -45,6 +45,5 @@ n // Make Sure not to load Heroes from File
 0 // petry
 0 // zaytus
 a1,a2,a3,a4,a5,a6 // Enemy Lineup goes here
-6 // Monster Maximum
 0 // Lower Follower Limit
 -1 // Upper Follower Limit
