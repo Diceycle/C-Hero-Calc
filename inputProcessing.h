@@ -19,6 +19,12 @@ const string helpMessage = "If you don't know what to do you can type help at an
 
 enum QueryType {question, integer, raw};
 
+struct Instance {
+    Army target;
+    size_t targetSize;
+    size_t maxCombatants;
+};
+
 const string inputModeQuestion = "Do you want to input everything via command line?";
 const string inputModeHelp =
     "  If YES is selected all necessary data will be asked of you here.\n" 
@@ -77,11 +83,14 @@ void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLa
 // Promt the User via command line to input his hero levels and return them as a vector<int>
 vector<int> takeHerolevelInput();
 
-// Promt the user via command Line to input a monster lineup and return them as a vector of pointers to those monster
-vector<int8_t> takeLineupInput(string promt);
+// Returns multiple Instaces parse from command line input
+vector<Instance> takeInstanceInput(string promt);
+
+// Convert a lineup string into an actual instance to solve
+Instance makeInstanceFromString(string instanceString);
 
 // Parse string linup input into actual monsters if there are heroes in the input, a leveled hero is added to the database
-vector<int8_t> makeMonstersFromStrings(vector<string> stringLineup);
+Army makeArmyFromStrings(vector<string> stringMonsters);
 
 // Parse hero input from a string into its name and level
 pair<Monster, int> parseHeroString(string heroString);

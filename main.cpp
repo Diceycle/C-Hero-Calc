@@ -1,9 +1,3 @@
-// DavidL1450 - solves PvE instances in Cosmos Quest - now with heroes
-// Brainisdead variant, added names of new heroes and input info comment
-// input now needs to be separated by commas. To enter heroes, do <name>:<level>, for example:
-// a2,e3,lady of twilight:1,e4
-// Clean-up and optimization done by Diceycle
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -19,21 +13,18 @@ using namespace std;
 
 // Define global variables used to track the best result
 size_t firstDominance;
-int minimumMonsterCost;
-size_t maxMonstersAllowed;
-Army targetArmy;
-size_t targetArmySize;
-
-int followerUpperBound;
+int32_t minimumMonsterCost;
 bool customFollowers;
+
+int32_t followerUpperBound;
 Army best;
 
 // Simulates fights with all armies against the target. armies will contain armies with the results written in.
-void simulateMultipleFights(vector<Army> & armies) {
+void simulateMultipleFights(vector<Army> & armies, Army target) {
     bool newFound = false;
     
     for (size_t i = 0; i < armies.size(); i++) {
-        simulateFight(armies[i], targetArmy);
+        simulateFight(armies[i], target);
         if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
             if (armies[i].followerCost < followerUpperBound) {
                 if (!newFound) {
@@ -111,32 +102,30 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     }
 }
 
-
 // Use a greedy method to get a first upper bound on follower cost for the solution
 // TODO: Think of an algorithm that works on limit < targetsize semi-reliable
-void getQuickSolutions(Army target, size_t limit) {
+void getQuickSolutions(Instance instance) {
     Army tempArmy = Army();
     vector<int8_t> greedy {};
     vector<int8_t> greedyHeroes {};
     vector<int8_t> greedyTemp {};
-    size_t targetSize = target.monsterAmount;
     bool invalid = false;
     
     cout << "Trying to find solutions greedily..." << endl;
     
     // Create Army that kills as many monsters as the army is big
-    if (targetSize <= limit) {
-        for (size_t i = 0; i < limit; i++) {
+    if (instance.targetSize <= instance.maxCombatants) {
+        for (size_t i = 0; i < instance.maxCombatants; i++) {
             for (size_t m = 0; m < monsterList.size(); m++) {
                 tempArmy = Army(greedy);
                 tempArmy.add(monsterList[m]);
-                simulateFight(tempArmy, target);
-                if (!tempArmy.lastFightData.rightWon || (tempArmy.lastFightData.monstersLost > (int) i && i+1 < limit)) { // the last monster has to win the encounter
+                simulateFight(tempArmy, instance.target);
+                if (!tempArmy.lastFightData.rightWon || (tempArmy.lastFightData.monstersLost > (int) i && i+1 < instance.maxCombatants)) { // the last monster has to win the encounter
                     greedy.push_back(monsterList[m]);
                     break;
                 }
             }
-            invalid = greedy.size() < limit;
+            invalid = greedy.size() < instance.maxCombatants;
         }
         if (!invalid) {
             cout << "  ";
@@ -153,7 +142,7 @@ void getQuickSolutions(Army target, size_t limit) {
                     greedyTemp = greedyHeroes;
                     greedyTemp[i] = availableHeroes[m];
                     tempArmy = Army(greedyTemp);
-                    simulateFight(tempArmy, target);
+                    simulateFight(tempArmy, instance.target);
                     if (!tempArmy.lastFightData.rightWon) { // Setup still needs to win
                         greedyHeroes = greedyTemp;
                         break;
@@ -175,7 +164,7 @@ void getQuickSolutions(Army target, size_t limit) {
     }
 }
 
-int solveInstance(bool debugInfo) {
+int solveInstance(Instance instance, bool debugInfo) {
     Army tempArmy = Army();
     int startTime;
     int tempTime;
@@ -183,8 +172,8 @@ int solveInstance(bool debugInfo) {
     size_t i, j, sj, si;
 
     // Get first Upper limit on followers
-    if (maxMonstersAllowed > 4) {
-        getQuickSolutions(targetArmy, maxMonstersAllowed);
+    if (instance.maxCombatants > 4) {
+        getQuickSolutions(instance);
         if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
         cout << endl;
     }
@@ -201,9 +190,9 @@ int solveInstance(bool debugInfo) {
     }
     
     // Check if a single monster can beat the last two monsters of the target. If not, solutions that can only beat n-2 monsters need not be expanded later
-    bool optimizable = (targetArmySize >= 3);
+    bool optimizable = (instance.targetSize >= 3);
     if (optimizable) {
-        tempArmy = Army({targetArmy.monsters[targetArmySize - 2], targetArmy.monsters[targetArmySize - 1]}); // Make an army from the last two monsters
+        tempArmy = Army({instance.target.monsters[instance.targetSize - 2], instance.target.monsters[instance.targetSize - 1]}); // Make an army from the last two monsters
     }
     
     if (optimizable) { // Check with normal Mobs
@@ -230,7 +219,7 @@ int solveInstance(bool debugInfo) {
     startTime = time(NULL);
     tempTime = startTime;
     size_t pureMonsterArmiesSize, heroMonsterArmiesSize;
-    for (size_t armySize = 1; armySize <= maxMonstersAllowed; armySize++) {
+    for (size_t armySize = 1; armySize <= instance.maxCombatants; armySize++) {
     
         pureMonsterArmiesSize = pureMonsterArmies.size();
         heroMonsterArmiesSize = heroMonsterArmies.size();
@@ -240,14 +229,14 @@ int solveInstance(bool debugInfo) {
         // Run Fights for non-Hero setups
         debugOutput(tempTime, "  Simulating " + to_string(pureMonsterArmiesSize) + " non-hero Fights... ", debugInfo, false, false);
         tempTime = time(NULL);
-        simulateMultipleFights(pureMonsterArmies);
+        simulateMultipleFights(pureMonsterArmies, instance.target);
         
         // Run fights for setups with heroes
         debugOutput(tempTime, "  Simulating " + to_string(heroMonsterArmiesSize) + " hero Fights... ", debugInfo, true, false);
         tempTime = time(NULL);
-        simulateMultipleFights(heroMonsterArmies);
+        simulateMultipleFights(heroMonsterArmies, instance.target);
         
-        if (armySize < maxMonstersAllowed) { 
+        if (armySize < instance.maxCombatants) { 
             // Sort the results by follower cost for some optimization
             debugOutput(tempTime, "  Sorting List... ", debugInfo, true, false);
             tempTime = time(NULL);
@@ -270,9 +259,9 @@ int solveInstance(bool debugInfo) {
                     leftFollowerCost = pureMonsterArmies[i].followerCost;
                     currentFightResult = &pureMonsterArmies[i].lastFightData;
                     // A result is obsolete if only one expansion is left but no single mob can beat the last two enemy mobs alone (optimizable)
-                    if (armySize == (maxMonstersAllowed - 1) && optimizable) {
+                    if (armySize == (instance.maxCombatants - 1) && optimizable) {
                         // TODO: Investigate whether this is truly correct: What if the second-to-last mob is already damaged (not from aoe) i.e. it defeated the last mob of left?
-                        if (currentFightResult->rightWon && currentFightResult->monstersLost < (int) (targetArmySize - 2) && currentFightResult->rightAoeDamage == 0) {
+                        if (currentFightResult->rightWon && currentFightResult->monstersLost < (int) (instance.targetSize - 2) && currentFightResult->rightAoeDamage == 0) {
                             currentFightResult->dominated = true;
                         }
                     }
@@ -315,9 +304,9 @@ int solveInstance(bool debugInfo) {
                     }
                     
                     // A result is obsolete if only one expansion is left but no single mob can beat the last two enemy mobs alone (optimizable)
-                    if (armySize == (maxMonstersAllowed - 1) && optimizable && currentFightResult->rightAoeDamage == 0) {
+                    if (armySize == (instance.maxCombatants - 1) && optimizable && currentFightResult->rightAoeDamage == 0) {
                         // TODO: Investigate whether this is truly correct: What if the second-to-last mob is already damaged (not from aoe) i.e. it defeated the last mob of left?
-                        if (currentFightResult->rightWon && currentFightResult->monstersLost < (int) (targetArmySize - 2)){
+                        if (currentFightResult->rightWon && currentFightResult->monstersLost < (int) (instance.targetSize - 2)){
                             currentFightResult->dominated = true;
                         }
                     }
@@ -379,6 +368,7 @@ int main(int argc, char** argv) {
     // Declare Variables
     string macroFileName;
     vector<int> heroLevels;
+    vector<Instance> instances;
  
     // Define User Input Data
     firstDominance = 4;                 // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
@@ -411,9 +401,7 @@ int main(int argc, char** argv) {
         
         // Collect the Data via Command Line
         heroLevels = takeHerolevelInput();
-        targetArmy = takeLineupInput("Enter Enemy Lineup: ");
-        targetArmySize = targetArmy.monsterAmount;
-        maxMonstersAllowed = stoi(getResistantInput("Enter how many monsters are allowed in the solution: ", maxMonstersAllowedHelp, integer));
+        instances = takeInstanceInput("Enter Enemy Lineup(s): ");
         minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
         followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
         
@@ -443,11 +431,11 @@ int main(int argc, char** argv) {
             return 0;
         }
         
-        int totalTime = solveInstance(debugInfo);
+        int totalTime = solveInstance(instances[0], debugInfo);
         // Last check to see if winning combination wins:
         if ((customFollowers && best.monsterAmount > 0) || (!customFollowers && followerUpperBound < numeric_limits<int>::max())) {
             best.lastFightData.valid = false;
-            simulateFight(best, targetArmy);
+            simulateFight(best, instances[0].target);
             if (best.lastFightData.rightWon) {
                 best.print();
                 cout << "This does not beat the lineup!!!" << endl;

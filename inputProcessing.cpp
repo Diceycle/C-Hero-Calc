@@ -139,43 +139,57 @@ vector<int> takeHerolevelInput() {
     return levels;
 }
 
-// Promt the user via command Line to input a monster lineup and return them as a vector of pointers to those monster
-vector<int8_t> takeLineupInput(string prompt) {
-    vector<int8_t> lineup {};
-    string questString = "quest";
+// Returns multiple Instaces parse from command line input
+vector<Instance> takeInstanceInput(string prompt) {
+    vector<Instance> instances;
+    vector<string> instanceStrings;
     
     string input;
     
     while (true) {
         input = getResistantInput(prompt, lineupInputHelp, raw);
+        instanceStrings = split(input, " ");
         try {
-            if (input.compare(0, questString.length(), questString) == 0) {
-                int questNumber = stoi(input.substr(questString.length(), 2));
-                lineup = makeMonstersFromStrings(quests[questNumber]);
-                return lineup;
-            } else {
-                vector<string> stringLineup = split(input, ",");
-                lineup = makeMonstersFromStrings(stringLineup);
-                return lineup;
+            for (size_t i = 0; i < instanceStrings.size(); i++) {
+                instances.push_back(makeInstanceFromString(instanceStrings[i]));
             }
+            return instances;
         } catch (const exception & e) {}
     }
 }
 
+// Convert a lineup string into an actual instance to solve
+Instance makeInstanceFromString(string instanceString) {
+    Instance instance;
+    string questString = "quest";
+    
+    if (instanceString.compare(0, questString.length(), questString) == 0) {
+        int questNumber = stoi(instanceString.substr(questString.length(), 2));
+        instance.target = makeArmyFromStrings(quests[questNumber]);
+        instance.maxCombatants = 7 - stoi(instanceString.substr(questString.find("-"), 1));
+    } else {
+        vector<string> stringLineup = split(instanceString, ",");
+        instance.target = makeArmyFromStrings(stringLineup);
+        instance.maxCombatants = 6;
+    }
+    instance.targetSize = instance.target.monsterAmount;
+    return instance;
+}
+
 // Parse string linup input into actual monsters if there are heroes in the input, a leveled hero is added to the database
-vector<int8_t> makeMonstersFromStrings(vector<string> stringLineup) {
-    vector<int8_t> lineup {};
+Army makeArmyFromStrings(vector<string> stringMonsters) {
+    Army army;
     pair<Monster, int> heroData;
     
-    for(size_t i = 0; i < stringLineup.size(); i++) {
-        if(stringLineup[i].find(":") != stringLineup[i].npos) {
-            heroData = parseHeroString(stringLineup[i]);
-            lineup.push_back(addLeveledHero(heroData.first, heroData.second));
+    for(size_t i = 0; i < stringMonsters.size(); i++) {
+        if(stringMonsters[i].find(":") != stringMonsters[i].npos) {
+            heroData = parseHeroString(stringMonsters[i]);
+            army.add(addLeveledHero(heroData.first, heroData.second));
         } else {
-            lineup.push_back(monsterMap.at(stringLineup[i]));
+            army.add(monsterMap.at(stringMonsters[i]));
         }
     }
-    return lineup;
+    return army;
 }
 
 // Parse hero input from a string into its name and level
