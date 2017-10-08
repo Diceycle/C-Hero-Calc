@@ -385,6 +385,21 @@ int main(int argc, char** argv) {
     cout << welcomeMessage << endl;
     cout << helpMessage << endl;
     
+    if (individual) { // custom input mode
+        cout << "Simulating individual Figths" << endl;
+        while (true) {
+            Army left = takeInstanceInput("Enter friendly lineup: ")[0].target;
+            Army right = takeInstanceInput("Enter hostile lineup: ")[0].target;
+            simulateFight(left, right, true);
+            cout << left.lastFightData.rightWon << " " << left.followerCost << " " << right.followerCost << endl;
+            
+            if (!askYesNoQuestion("Simulate another Fight?", "")) {
+                break;
+            }
+        }
+        return 0;
+    }
+    
     // Check if the user provided a filename to be used as a macro file
     if (argc == 2) {
         initMacroFile(argv[1], showMacroFileInput);
@@ -415,22 +430,6 @@ int main(int argc, char** argv) {
         
         filterMonsterData(minimumMonsterCost);
         initializeUserHeroes(heroLevels);
-        
-        if (individual) { // custom input mode
-            cout << "Simulating individual Figths" << endl;
-            while (true) {
-                Army left = takeLineupInput("Enter friendly lineup: ");
-                Army right = takeLineupInput("Enter hostile lineup: ");
-                simulateFight(left, right, true);
-                cout << left.lastFightData.rightWon << " " << left.followerCost << " " << right.followerCost << endl;
-                
-                if (!askYesNoQuestion("Simulate another Fight?", "")) {
-                    break;
-                }
-            }
-            return 0;
-        }
-        
         int totalTime = solveInstance(instances[0], debugInfo);
         // Last check to see if winning combination wins:
         if ((customFollowers && best.monsterAmount > 0) || (!customFollowers && followerUpperBound < numeric_limits<int>::max())) {
