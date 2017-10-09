@@ -12,10 +12,6 @@
 using namespace std;
 
 // Define global variables used to track the best result
-size_t firstDominance;
-int32_t minimumMonsterCost;
-bool customFollowers;
-
 int32_t followerUpperBound;
 Army best;
 
@@ -42,7 +38,6 @@ void simulateMultipleFights(vector<Army> & armies, Army target) {
 
 void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
             vector<Army> & oldPureArmies, vector<Army> & oldHeroArmies, 
-            const vector<int8_t> & availableMonsters,
             size_t currentArmySize) {
 
     int remainingFollowers;
@@ -116,12 +111,12 @@ void getQuickSolutions(Instance instance) {
     // Create Army that kills as many monsters as the army is big
     if (instance.targetSize <= instance.maxCombatants) {
         for (size_t i = 0; i < instance.maxCombatants; i++) {
-            for (size_t m = 0; m < monsterList.size(); m++) {
+            for (size_t m = 0; m < availableMonsters.size(); m++) {
                 tempArmy = Army(greedy);
-                tempArmy.add(monsterList[m]);
+                tempArmy.add(availableMonsters[m]);
                 simulateFight(tempArmy, instance.target);
                 if (!tempArmy.lastFightData.rightWon || (tempArmy.lastFightData.monstersLost > (int) i && i+1 < instance.maxCombatants)) { // the last monster has to win the encounter
-                    greedy.push_back(monsterList[m]);
+                    greedy.push_back(availableMonsters[m]);
                     break;
                 }
             }
@@ -156,7 +151,7 @@ void getQuickSolutions(Instance instance) {
     }
 }
 
-int solveInstance(Instance instance, bool debugInfo, bool multiInstance) {
+int solveInstance(Instance instance, size_t firstDominance, bool debugInfo, bool multiInstance) {
     Army tempArmy = Army();
     int startTime;
     int tempTime;
@@ -170,9 +165,9 @@ int solveInstance(Instance instance, bool debugInfo, bool multiInstance) {
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
     vector<Army> heroMonsterArmies {}; // initialize with all heroes
-    for (i = 0; i < monsterList.size(); i++) {
-        if (monsterReference[monsterList[i]].cost <= followerUpperBound) {
-            pureMonsterArmies.push_back(Army( {monsterList[i]} ));
+    for (i = 0; i < availableMonsters.size(); i++) {
+        if (monsterReference[availableMonsters[i]].cost <= followerUpperBound) {
+            pureMonsterArmies.push_back(Army( {availableMonsters[i]} ));
         }
     }
     for (i = 0; i < availableHeroes.size(); i++) { // Ignore chacking for Hero Cost
@@ -349,7 +344,7 @@ int solveInstance(Instance instance, bool debugInfo, bool multiInstance) {
             
             vector<Army> nextPureArmies;
             vector<Army> nextHeroArmies;
-            expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies, monsterList, armySize);
+            expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies, armySize);
 
             debugOutput(tempTime, "  Moving Data... ", debugInfo && armySize >= firstDominance, true, false);
             tempTime = time(NULL);
@@ -367,10 +362,12 @@ int main(int argc, char** argv) {
     // Declare Variables
     string macroFileName;
     vector<int> heroLevels;
+    int32_t minimumMonsterCost;
+    int32_t userFollowerUpperBound;
     vector<Instance> instances;
  
     // Define User Input Data
-    firstDominance = 4;                 // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
+    size_t firstDominance = 4;                 // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
     macroFileName = "default.cqinput"; // Path to default macro file
    
     // Flow Control Variables
@@ -408,29 +405,30 @@ int main(int argc, char** argv) {
     }
     
     // Initialize global Data
-    best = Army();
     initMonsterData();
     
     // Collect the Data via Command Line
     heroLevels = takeHerolevelInput();
     minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
-    followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
+    userFollowerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
+    
+    // Fill monster arrays with relevant monsters
+    filterMonsterData(minimumMonsterCost);
+    initializeUserHeroes(heroLevels);
     
     instances = takeInstanceInput("Enter Enemy Lineup(s): ");
     
     for (size_t i = 0; i < instances.size(); i++) {
+        // Reset solution Data
+        best = Army();
         
-        // Set Upper Bound Correctly
-        if (followerUpperBound < 0) {
+        if (userFollowerUpperBound < 0) {
             followerUpperBound = numeric_limits<int>::max();
-            customFollowers = false;
         } else {
-            customFollowers = true;
+            followerUpperBound = userFollowerUpperBound;
         }
         
-        filterMonsterData(minimumMonsterCost);
-        initializeUserHeroes(heroLevels);
-        int totalTime = solveInstance(instances[i], debugInfo, instances.size() > 1);
+        int totalTime = solveInstance(instances[i], firstDominance, debugInfo, instances.size() > 1);
         
         cout << endl << "Solution for: ";
         instances[0].target.print();

@@ -1,8 +1,8 @@
 #include "cosmosDefines.h"
 
-vector<int8_t> monsterList {}; // Contains pointers to raw Monster Data from a1 to f10, will be sorted by follower cost
 map<string, int8_t> monsterMap {}; // Maps monster Names to their pointers (includes heroes)
 
+vector<int8_t> availableMonsters {}; // Contains pointers to raw Monster Data from a1 to f10, will be sorted by follower cost
 vector<int8_t> availableHeroes {};
 
 // Make sure all the values are set
@@ -13,23 +13,21 @@ void initMonsterData() {
     // Initialize Monster Data
     monsterReference.clear();
     monsterMap.clear();
-    monsterList.clear();
     for (size_t i = 0; i < monsterBaseList.size(); i++) {
         monsterReference.push_back(monsterBaseList[i]);
-        monsterList.push_back(i);
         monsterMap.insert(pair<string, int8_t>(monsterBaseList[i].name, i));
     }
 
+    availableMonsters.clear();
     availableHeroes.clear();
 }
 
 // Filter MonsterList by cost. User can specify if he wants to exclude cheap monsters
 void filterMonsterData(int minimumMonsterCost) {
-    while (monsterList.size() > 0 && monsterReference[monsterList[0]].cost <= minimumMonsterCost) {
-        monsterList.erase(monsterList.begin());
-    }
-    if (minimumMonsterCost == -1) {
-        monsterList = {};
+    for (size_t i = 0; i < monsterBaseList.size(); i++) {
+        if (minimumMonsterCost <= monsterBaseList[i].cost) {
+            availableMonsters.push_back(i); // Kinda Dirty but I know that the normal mobs come first in the reference
+        }
     }
 }
 

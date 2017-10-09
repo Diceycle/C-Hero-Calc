@@ -12,8 +12,8 @@
 using namespace std;
 
 extern vector<int8_t> availableHeroes; // Contains all User Heroes, readily Leveled
+extern vector<int8_t> availableMonsters; // Contains indices to raw Monster Data from a1 to f15, will be sorted by follower cost
 
-extern vector<int8_t> monsterList; // Contains indices to raw Monster Data from a1 to f15, will be sorted by follower cost
 extern map<string, int8_t> monsterMap; // Maps monster Names to their indices (includes heroes)
 
 static vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual Objects
