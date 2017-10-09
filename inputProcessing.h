@@ -92,6 +92,6 @@ Army makeArmyFromStrings(vector<string> stringMonsters);
 pair<Monster, int> parseHeroString(string heroString);
 
 // Splits strings into a vector of strings. No need to optimize, only used for input.
-vector<string> split(string s, string to_split);
+vector<string> split(string target, string separator);
 
 #endif

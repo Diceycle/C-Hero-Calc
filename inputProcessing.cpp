@@ -207,14 +207,19 @@ pair<Monster, int> parseHeroString(string heroString) {
 }
 
 // Splits strings into a vector of strings. No need to optimize, only used for input.
-vector<string> split(string s, string to_split) {
+vector<string> split(string target, string separator) {
     vector<string> output;
-    size_t x = 0;
-    size_t limit = 0;
-    while(limit != s.npos){
-        limit = s.find(to_split, x);
-        output.push_back(s.substr(x, limit-x));
-        x = limit + to_split.length();
+    string substring;
+    size_t start = 0;
+    size_t occurrence = 0;
+    while(occurrence != target.npos) {
+        occurrence = target.find(separator, start);
+        substring = target.substr(start, occurrence-start);
+        if (start == 0 || substring.length() > 0) {
+            cout << substring << endl;
+            output.push_back(substring);
+        }
+        start = occurrence + separator.length();
     }
     return output;
 }
