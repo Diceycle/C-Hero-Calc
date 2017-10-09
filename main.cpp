@@ -11,29 +11,33 @@
 
 using namespace std;
 
+int NO_OUTPUT = 0;
+int BASIC_OUTPUT = 1;
+int DETAILED_OUTPUT = 2;
+
 // Define global variables used to track the best result
 int32_t followerUpperBound;
 Army best;
 
 // Simulates fights with all armies against the target. armies will contain armies with the results written in.
-void simulateMultipleFights(vector<Army> & armies, Army target) {
+void simulateMultipleFights(vector<Army> & armies, Army target, int outputLevel) {
     bool newFound = false;
     
     for (size_t i = 0; i < armies.size(); i++) {
         simulateFight(armies[i], target);
         if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
             if (armies[i].followerCost < followerUpperBound) {
-                if (!newFound) {
+                if (!newFound && outputLevel > BASIC_OUTPUT) {
                     cout << endl;
                 }
                 newFound = true;
                 followerUpperBound = armies[i].followerCost;
                 best = armies[i];
-                debugOutput(time(NULL), "    " + best.toString(), true, false, true);
+                debugOutput(time(NULL), "    " + best.toString(), outputLevel > BASIC_OUTPUT, false, true);
             }
         }
     }
-    debugOutput(time(NULL), " ", newFound, false, false);
+    debugOutput(time(NULL), " ", newFound && outputLevel > BASIC_OUTPUT, false, false);
 }
 
 void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
@@ -99,14 +103,14 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
 
 // Use a greedy method to get a first upper bound on follower cost for the solution
 // TODO: Think of an algorithm that works on limit < targetsize semi-reliable
-void getQuickSolutions(Instance instance) {
+void getQuickSolutions(Instance instance, int outputLevel) {
     Army tempArmy = Army();
     vector<int8_t> greedy {};
     vector<int8_t> greedyHeroes {};
     vector<int8_t> greedyTemp {};
     bool invalid = false;
     
-    cout << "Trying to find solutions greedily..." << endl;
+    debugOutput(time(NULL), "Trying to find solutions greedily...", outputLevel > BASIC_OUTPUT, false, true);
     
     // Create Army that kills as many monsters as the army is big
     if (instance.targetSize <= instance.maxCombatants) {
@@ -151,7 +155,7 @@ void getQuickSolutions(Instance instance) {
     }
 }
 
-int solveInstance(Instance instance, size_t firstDominance, bool debugInfo, bool multiInstance) {
+int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
     Army tempArmy = Army();
     int startTime;
     int tempTime;
@@ -160,7 +164,7 @@ int solveInstance(Instance instance, size_t firstDominance, bool debugInfo, bool
 
     // Get first Upper limit on followers
     if (instance.maxCombatants > 4) {
-        getQuickSolutions(instance);
+        getQuickSolutions(instance, outputLevel);
     }
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
@@ -209,37 +213,38 @@ int solveInstance(Instance instance, size_t firstDominance, bool debugInfo, bool
         pureMonsterArmiesSize = pureMonsterArmies.size();
         heroMonsterArmiesSize = heroMonsterArmies.size();
         // Output Debug Information
-        debugOutput(tempTime, "Starting loop for armies of size " + to_string(armySize), true, false, true);
+        debugOutput(tempTime, "Starting loop for armies of size " + to_string(armySize), outputLevel > NO_OUTPUT, false, true);
         
         // Run Fights for non-Hero setups
-        debugOutput(tempTime, "  Simulating " + to_string(pureMonsterArmiesSize) + " non-hero Fights... ", debugInfo && armySize > firstDominance, false, false);
+        debugOutput(tempTime, "  Simulating " + to_string(pureMonsterArmiesSize) + " non-hero Fights... ", outputLevel > BASIC_OUTPUT, false, false);
         tempTime = time(NULL);
-        simulateMultipleFights(pureMonsterArmies, instance.target);
+        simulateMultipleFights(pureMonsterArmies, instance.target, outputLevel);
         
         // Run fights for setups with heroes
-        debugOutput(tempTime, "  Simulating " + to_string(heroMonsterArmiesSize) + " hero Fights... ", debugInfo && armySize > firstDominance, true, false);
+        debugOutput(tempTime, "  Simulating " + to_string(heroMonsterArmiesSize) + " hero Fights... ", outputLevel > BASIC_OUTPUT, true, false);
         tempTime = time(NULL);
-        simulateMultipleFights(heroMonsterArmies, instance.target);
+        simulateMultipleFights(heroMonsterArmies, instance.target, outputLevel);
         
         if (armySize < instance.maxCombatants) { 
             // Sort the results by follower cost for some optimization
-            debugOutput(tempTime, "  Sorting List... ", debugInfo && armySize > firstDominance, true, false);
+            debugOutput(tempTime, "  Sorting List... ", outputLevel > BASIC_OUTPUT, true, false);
             tempTime = time(NULL);
             sort(pureMonsterArmies.begin(), pureMonsterArmies.end(), hasFewerFollowers);
             sort(heroMonsterArmies.begin(), heroMonsterArmies.end(), hasFewerFollowers);
                 
-            if (armySize == firstDominance) {
+            if (armySize == firstDominance && outputLevel > NO_OUTPUT) {
+                outputLevel = DETAILED_OUTPUT;
                 cout << endl << "Best Solution so far:" << endl;
                 cout << "  " << best.toString() << endl;
                 if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
                 startTime = time(NULL);
                 tempTime = startTime;
-                debugOutput(tempTime, "\nPreparing to work on loop for armies of size " + to_string(armySize+1), true, false, true);
+                debugOutput(tempTime, "\nPreparing to work on loop for armies of size " + to_string(armySize+1), outputLevel > BASIC_OUTPUT, false, true);
             }
                 
             if (firstDominance <= armySize) {
                 // Calculate which results are strictly better than others (dominance)
-                debugOutput(tempTime, "  Calculating Dominance for non-heroes... ", debugInfo, armySize > firstDominance, false);
+                debugOutput(tempTime, "  Calculating Dominance for non-heroes... ", outputLevel > BASIC_OUTPUT, outputLevel > BASIC_OUTPUT && firstDominance < armySize, false);
                 tempTime = time(NULL);
                 
                 int leftFollowerCost;
@@ -281,7 +286,7 @@ int solveInstance(Instance instance, size_t firstDominance, bool debugInfo, bool
                     }
                 }
                 
-                debugOutput(tempTime, "  Calculating Dominance for heroes... ", debugInfo, true, false);
+                debugOutput(tempTime, "  Calculating Dominance for heroes... ", outputLevel > BASIC_OUTPUT, true, false);
                 tempTime = time(NULL);
                 // Domination for setups with heroes
                 bool usedHeroSubset, leftUsedHero;
@@ -339,20 +344,20 @@ int solveInstance(Instance instance, size_t firstDominance, bool debugInfo, bool
                 }
             }
             // now we expand to add the next monster to all non-dominated armies
-            debugOutput(tempTime, "  Expanding Lineups by one... ", debugInfo && armySize >= firstDominance, true, false);
+            debugOutput(tempTime, "  Expanding Lineups by one... ", outputLevel > BASIC_OUTPUT, true, false);
             tempTime = time(NULL);
             
             vector<Army> nextPureArmies;
             vector<Army> nextHeroArmies;
             expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies, armySize);
 
-            debugOutput(tempTime, "  Moving Data... ", debugInfo && armySize >= firstDominance, true, false);
+            debugOutput(tempTime, "  Moving Data... ", outputLevel > BASIC_OUTPUT, true, false);
             tempTime = time(NULL);
             
             pureMonsterArmies = move(nextPureArmies);
             heroMonsterArmies = move(nextHeroArmies);
         }
-        debugOutput(tempTime, "", armySize >= firstDominance, true, true);
+        debugOutput(tempTime, "", outputLevel > BASIC_OUTPUT, true, true);
     }
     return time(NULL) - startTime;
 }
@@ -365,16 +370,16 @@ int main(int argc, char** argv) {
     int32_t minimumMonsterCost;
     int32_t userFollowerUpperBound;
     vector<Instance> instances;
+    int outputLevel;
  
     // Define User Input Data
-    size_t firstDominance = 4;                 // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
+    size_t firstDominance = 4;          // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
     macroFileName = "default.cqinput"; // Path to default macro file
    
     // Flow Control Variables
     bool useDefaultMacroFile = false;    // Set this to true to always use the specified macro file
     bool showMacroFileInput = true;    // Set this to true to see what the macrofile inputs
     bool individual = false;            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
-    bool debugInfo = true;              // Set this to true if you want to see how far the execution is and how long the execution took altogether
     
     // -------------------------------------------- Program Start --------------------------------------------
     
@@ -418,9 +423,12 @@ int main(int argc, char** argv) {
     
     instances = takeInstanceInput("Enter Enemy Lineup(s): ");
     
+    cout << "Calaculating with " << availableMonsters.size() << " available Monsters and " << availableHeroes.size() << " enabled Heroes." << endl;
+    
     for (size_t i = 0; i < instances.size(); i++) {
         // Reset solution Data
         best = Army();
+        totalFightsSimulated = 0;
         
         if (userFollowerUpperBound < 0) {
             followerUpperBound = numeric_limits<int>::max();
@@ -428,9 +436,13 @@ int main(int argc, char** argv) {
             followerUpperBound = userFollowerUpperBound;
         }
         
-        int totalTime = solveInstance(instances[i], firstDominance, debugInfo, instances.size() > 1);
+        outputLevel = BASIC_OUTPUT;
+        if (instances.size() > 1) {
+            outputLevel = NO_OUTPUT;
+        }
+        int totalTime = solveInstance(instances[i], firstDominance, outputLevel);
         
-        cout << endl << "Solution for " << instances[0].target.toString() << ":" << endl;
+        cout << endl << "Solution for " << instances[i].target.toString() << ":" << endl;
         
         // Last check to see if winning combination wins: TODO: Handle Custom Followers == 0
         if ((userFollowerUpperBound < 0 && followerUpperBound < numeric_limits<int>::max()) || (userFollowerUpperBound >= 0 && followerUpperBound <= userFollowerUpperBound)) {
@@ -451,5 +463,7 @@ int main(int argc, char** argv) {
         cout << "  " << totalFightsSimulated << " Fights simulated." << endl;
         cout << "  Total Calculation Time: " << totalTime << endl;
     }
+    cout << endl;
+    haltExecution();
     return EXIT_SUCCESS;
 }
