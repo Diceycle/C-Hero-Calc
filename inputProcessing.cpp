@@ -17,7 +17,7 @@ void initMacroFile(string macroFileName, bool showInput) {
 
 // Wait for user input before continuing. Used to stop program from closing outside of a command line.
 void haltExecution() {
-    cout << "Press enter to continue...";
+    cout << "Press enter to exit...";
     cin.get();
 }
 
