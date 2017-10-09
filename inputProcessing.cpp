@@ -216,7 +216,6 @@ vector<string> split(string target, string separator) {
         occurrence = target.find(separator, start);
         substring = target.substr(start, occurrence-start);
         if (start == 0 || substring.length() > 0) {
-            cout << substring << endl;
             output.push_back(substring);
         }
         start = occurrence + separator.length();
