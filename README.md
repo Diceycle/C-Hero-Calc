@@ -14,11 +14,27 @@ Game forum and disscusuion thread [here](http://www.kongregate.com/forums/910715
 * All quests predefined and accessable
 * Don't know how to input heroes, monster or just generally confused how to use this calculator? Type `help` when asked for input to get... well, help
 * Macro your input by using external files
+* Specify multiple quests and let it work on them uninterupted
 * Precompiled exe included (Built on Windows 8.1 (64Bit), no guarantee for other versions)
 
 ### What's New?
-**New Heroes have been added**
-* All heroes should be fully functional now
+**The Great In- and Output Overhaul + 2.7.1 Heroes**
+* Maybe most importantly: **The Program has gotten significantly faster again.** Mostly due to a new flag when compiling... 
+* Input via script is no longer possible. Instead it's now possible to specify a default macro file.
+* There is also the option to hide queries if they are answered by a macro file
+* There are now "true comments" in the macro files. Anything behind a double slash(`//`) is ignored.
+* There is no option to specify maximum allowed monsters anymore. Instead it defaults to 6. However,
+* Quests have a new input format which is: `quest##-#`. For example: `quest50-3` solves quest 50 with 4 monsters, `quest1-1` solves quest 1 with 6 monsters 
+* Output for sizes 4 and lower has been reduced. What's more the program now asks about continuing only after it completed size 4 as the RAM usage only really picks up after that.
+* General order of input has changed!! Make sure to compare your macro files with the new default one, if you're using them.
+* And Obviously the new heroes are implemented
+
+And finally:
+* The calc can now calculate multiple instances one after another without stopping.
+* To achieve that behaviour enter lineups separated by a space
+* Example: `quest10-3 quest11-3 a11,e14 quest12-2`
+* This can be used to go through multiple quests at once without having to input everything a gazillion times
+* Note: You can't change maximum or minimum followers inbetween either. A restart is required for that.
 
 ## Usage
 
@@ -26,41 +42,35 @@ For most people, only downloading the exe and running it will be enough. For tho
 
 ### Compiling
 Personally I get it to compile by running:
-`g++ -std=c++11 -o CosmosQuest main.cpp cosmosClasses.cpp inputProcessing.cpp cosmosDefines.cpp battleLogic.cpp` from the command line.
+`g++ -std=c++11 -O2 -o CosmosQuest main.cpp cosmosClasses.cpp inputProcessing.cpp cosmosDefines.cpp battleLogic.cpp` from the command line.
 
 **Makefile**: For those who know how to use them, I added a Makefile that BugsyLansky provided.
 
 ### Input via command line
-If you use the exe then the programm will take you through the steps you need to take to start calculating. Access the quests by typing `questX` (X being the quest number) when asked for a lineup. All other questions can be answered by typing `help` at any point.
+If you use the exe then the programm will take you through the steps you need to take to start calculating. Access the quests by typing `questX-Y` (X being the quest number and Y the difficulty (1-3)) when asked for a lineup. All other questions can be answered by typing `help` at any point.
 
 ### Control Variables (Input via Code)
-If you know your way around source code you can input your data directly into the file and avoid having to input it over and over again. Here are the values that can be adjusted, all located in the `main`-method in the `main.cpp` file.
+Only a few control variable remain:
 * `firstDominace` This controls at which army length the calc should start removing suboptimal solutions. Setting this higher *might* improve the solution provided but no guarantees. Also treat this with extreme caution as it can cause your PC run out of RAM.
-* `maxMonstersAllowed` controls how many monsters are allowed in a solution. Set this to 4 or 5 when you do quests X-2 and X-3.
-* `minimumMonsterCost`: controls how expensive a monster has to be to be considered by the calc
-* `follower UpperBound` lets the calc know when the soluitons get too expensive for you. It will not consider any solutions more expensive than this number.
-* `stringLineup` defines against which lineup of monsters you want to fight against. Lineups are defined a bit above. You can make your own lineup by following the patterns. Just remember to give it a unique name. All quests are available as `quests[1]`, `quests[2]` and so on (Indices **start at 1** in this case)
-* `yourHeroLevels`: Input your hero levels according to the names you see on the side. 
-
-Flow Control
-* `ignoreConsole`: If true, this skips the question asking which input mode should be used.
-* `manualInput`: If true, all data is going to be asked via command line, otherwise the variables above are going to be used.
-* `individual` lets you run individual battles if you set it to `true`. It will ask for the two lineups via command line.
-* `debugOutput`: If false will remove most of the output regarding what the calculator is doing at the moment. 
+* `macroFileName` Path to your default macro file
+* `useDefaultMacroFile` Whether you want to always use the specified macro file or not
+* `showMacroFileInput` If enabled will hide any input promts that are answered by a macro file 
 
 **If you want to use this method you have to compile the program yourself!**
 
-### Using a "Config File" to macro your input
+### Using a Macro file to automate your input
 Always inputting the same data can get quite tiring. So I added a way to read your input from a file that you can specify. 
 
-In short: When running from the command line (You have to do this!) you can say: 
+In short: When running from the command line you can say: 
 
 `CosmosQuest.exe configFile` instead of just `CosmosQuest.exe` and the program will read everything from the file you specified and treat it as if you input it yourself. 
+
+Alternatively you can specify a default macro file in the code and make the progam always use that. You have to compile yourself in that case
 
 This can be used in many different ways but most importantly it's an easy way to switch between hero setups, and level heroes individually. 
 It should also be a great help for people who are helping others in the chat, by enabling them to have files for everyone that they are helping without destroying their own data.
 
-An example file (`default.cqinput`) is included and should be self-explanatory. Only thing to note is that there are no actual comments, the program just ignores everything after a space.
+An example file (`default.cqinput`) is included and should be self-explanatory.
 
 ## Bugs, Warnings and other problems
 
