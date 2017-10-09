@@ -365,7 +365,6 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
 int main(int argc, char** argv) {
     
     // Declare Variables
-    string macroFileName;
     vector<int> heroLevels;
     int32_t minimumMonsterCost;
     int32_t userFollowerUpperBound;
@@ -374,7 +373,7 @@ int main(int argc, char** argv) {
  
     // Define User Input Data
     size_t firstDominance = 4;          // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
-    macroFileName = "default.cqinput"; // Path to default macro file
+    string macroFileName = "default.cqinput"; // Path to default macro file
    
     // Flow Control Variables
     bool useDefaultMacroFile = false;    // Set this to true to always use the specified macro file
@@ -444,11 +443,11 @@ int main(int argc, char** argv) {
         
         cout << endl << "Solution for " << instances[i].target.toString() << ":" << endl;
         
-        // Last check to see if winning combination wins: TODO: Handle Custom Followers == 0
-        if ((userFollowerUpperBound < 0 && followerUpperBound < numeric_limits<int>::max()) || (userFollowerUpperBound >= 0 && followerUpperBound <= userFollowerUpperBound)) {
+        // Announce the result
+        if (best.monsterAmount > 0) {
             cout << "  " << best.toString() << endl;
             best.lastFightData.valid = false;
-            simulateFight(best, instances[i].target);
+            simulateFight(best, instances[i].target); // Sanity check on the solution
             if (best.lastFightData.rightWon) {
                 cout << "  This does not beat the lineup!!!";
                 for (int i = 1; i <= 10; i++) {
