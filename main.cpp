@@ -229,8 +229,8 @@ int solveInstance(Instance instance, size_t firstDominance, bool debugInfo, bool
             sort(heroMonsterArmies.begin(), heroMonsterArmies.end(), hasFewerFollowers);
                 
             if (armySize == firstDominance) {
-                cout << endl << "Best Solution so far:" << endl << "  ";
-                best.print();
+                cout << endl << "Best Solution so far:" << endl;
+                cout << "  " << best.toString() << endl;
                 if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
                 startTime = time(NULL);
                 tempTime = startTime;
@@ -430,27 +430,20 @@ int main(int argc, char** argv) {
         
         int totalTime = solveInstance(instances[i], firstDominance, debugInfo, instances.size() > 1);
         
-        cout << endl << "Solution for: ";
-        instances[0].target.print();
-        cout << "  ";
+        cout << endl << "Solution for " << instances[0].target.toString() << ":" << endl;
         
-        // Last check to see if winning combination wins:
-        if ((customFollowers && best.monsterAmount > 0) || (!customFollowers && followerUpperBound < numeric_limits<int>::max())) {
+        // Last check to see if winning combination wins: TODO: Handle Custom Followers == 0
+        if ((userFollowerUpperBound < 0 && followerUpperBound < numeric_limits<int>::max()) || (userFollowerUpperBound >= 0 && followerUpperBound <= userFollowerUpperBound)) {
+            cout << "  " << best.toString() << endl;
             best.lastFightData.valid = false;
             simulateFight(best, instances[i].target);
             if (best.lastFightData.rightWon) {
-                best.print();
                 cout << "  This does not beat the lineup!!!";
                 for (int i = 1; i <= 10; i++) {
                     cout << "ERROR";
                 } cout << endl;
                 haltExecution();
                 return EXIT_FAILURE;
-                
-            } else {
-                // Print the winning combination!
-                best.print();
-                cout << "  (Right-most fights first)" << endl;
             }
         } else {
             cout << endl << "Could not find a solution that beats this lineup." << endl;
