@@ -411,6 +411,7 @@ int main(int argc, char** argv) {
          0, 0, 0,         // "ladyoftwilight","tiny","nebra"
          0, 0, 0,         // "veildur", "brynhildr", "groth"
          0, 0, 0,         // "spyke", "aoyuki", "gaiabyte"
+         0, 0, 0,         // "oymos", "xarth", "atzar"
          0, 0, 0, 0,      // "valor","rokka","pyromancer","bewat"
          0, 0, 0, 0,      // "nicte", "forestdruid","ignitor","undine"
          0, 0, 0          // "chroma", "petry", "zaytus"
