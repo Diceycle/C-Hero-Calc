@@ -162,11 +162,12 @@ vector<Instance> takeInstanceInput(string prompt) {
 Instance makeInstanceFromString(string instanceString) {
     Instance instance;
     string questString = "quest";
+    int dashPosition = instanceString.find("-");
     
     if (instanceString.compare(0, questString.length(), questString) == 0) {
-        int questNumber = stoi(instanceString.substr(questString.length(), 2));
+        int questNumber = stoi(instanceString.substr(questString.length(), dashPosition-questString.length()));
         instance.target = makeArmyFromStrings(quests[questNumber]);
-        instance.maxCombatants = 7 - stoi(instanceString.substr(questString.find("-"), 1));
+        instance.maxCombatants = 7 - stoi(instanceString.substr(dashPosition+1, 1));
     } else {
         vector<string> stringLineup = split(instanceString, ",");
         instance.target = makeArmyFromStrings(stringLineup);
