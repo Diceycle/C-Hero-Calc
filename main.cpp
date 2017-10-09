@@ -128,8 +128,6 @@ void getQuickSolutions(Instance instance) {
             invalid = greedy.size() < instance.maxCombatants;
         }
         if (!invalid) {
-            cout << "  ";
-            tempArmy.print();
             best = tempArmy;
             if (followerUpperBound > tempArmy.followerCost) {
                 followerUpperBound = tempArmy.followerCost;
@@ -149,18 +147,12 @@ void getQuickSolutions(Instance instance) {
                     }
                 }
             }
-            cout << "  ";
             tempArmy = Army(greedyHeroes);
-            tempArmy.print();
             best = tempArmy;
-            if (followerUpperBound > tempArmy.followerCost) {
+            if (followerUpperBound > tempArmy.followerCost) { // Take care not to override custom follower counts
                 followerUpperBound = tempArmy.followerCost;
             }
-        } else {
-            cout << "  Could not find valid solution while being greedy" << endl;
         }
-    } else {
-        cout << "  Could not find valid solution while being greedy" << endl;
     }
 }
 
@@ -174,8 +166,6 @@ int solveInstance(Instance instance, bool debugInfo) {
     // Get first Upper limit on followers
     if (instance.maxCombatants > 4) {
         getQuickSolutions(instance);
-        if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
-        cout << endl;
     }
     
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
@@ -227,25 +217,34 @@ int solveInstance(Instance instance, bool debugInfo) {
         debugOutput(tempTime, "Starting loop for armies of size " + to_string(armySize), true, false, true);
         
         // Run Fights for non-Hero setups
-        debugOutput(tempTime, "  Simulating " + to_string(pureMonsterArmiesSize) + " non-hero Fights... ", debugInfo, false, false);
+        debugOutput(tempTime, "  Simulating " + to_string(pureMonsterArmiesSize) + " non-hero Fights... ", debugInfo && armySize > firstDominance, false, false);
         tempTime = time(NULL);
         simulateMultipleFights(pureMonsterArmies, instance.target);
         
         // Run fights for setups with heroes
-        debugOutput(tempTime, "  Simulating " + to_string(heroMonsterArmiesSize) + " hero Fights... ", debugInfo, true, false);
+        debugOutput(tempTime, "  Simulating " + to_string(heroMonsterArmiesSize) + " hero Fights... ", debugInfo && armySize > firstDominance, true, false);
         tempTime = time(NULL);
         simulateMultipleFights(heroMonsterArmies, instance.target);
         
         if (armySize < instance.maxCombatants) { 
             // Sort the results by follower cost for some optimization
-            debugOutput(tempTime, "  Sorting List... ", debugInfo, true, false);
+            debugOutput(tempTime, "  Sorting List... ", debugInfo && armySize > firstDominance, true, false);
             tempTime = time(NULL);
             sort(pureMonsterArmies.begin(), pureMonsterArmies.end(), hasFewerFollowers);
             sort(heroMonsterArmies.begin(), heroMonsterArmies.end(), hasFewerFollowers);
                 
+            if (armySize == firstDominance) {
+                cout << "Best Solution so far:" << endl << "  ";
+                best.print();
+                if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
+                startTime = time(NULL);
+                tempTime = startTime;
+                debugOutput(tempTime, "\nPreparing to work on loop for armies of size " + to_string(armySize+1), true, false, true);
+            }
+                
             if (firstDominance <= armySize) {
                 // Calculate which results are strictly better than others (dominance)
-                debugOutput(tempTime, "  Calculating Dominance for non-heroes... ", debugInfo, true, false);
+                debugOutput(tempTime, "  Calculating Dominance for non-heroes... ", debugInfo, armySize > firstDominance, false);
                 tempTime = time(NULL);
                 
                 int leftFollowerCost;
@@ -345,20 +344,20 @@ int solveInstance(Instance instance, bool debugInfo) {
                 }
             }
             // now we expand to add the next monster to all non-dominated armies
-            debugOutput(tempTime, "  Expanding Lineups by one... ", debugInfo, true, false);
+            debugOutput(tempTime, "  Expanding Lineups by one... ", debugInfo && armySize >= firstDominance, true, false);
             tempTime = time(NULL);
             
             vector<Army> nextPureArmies;
             vector<Army> nextHeroArmies;
             expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies, monsterList, armySize);
 
-            debugOutput(tempTime, "  Moving Data... ", debugInfo, true, false);
+            debugOutput(tempTime, "  Moving Data... ", debugInfo && armySize >= firstDominance, true, false);
             tempTime = time(NULL);
             
             pureMonsterArmies = move(nextPureArmies);
             heroMonsterArmies = move(nextHeroArmies);
         }
-        debugOutput(tempTime, "", true, true, true);
+        debugOutput(tempTime, "", armySize >= firstDominance, true, true);
     }
     return time(NULL) - startTime;
 }
