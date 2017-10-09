@@ -59,10 +59,10 @@ void Army::add(int8_t m) {
 
 string Army::toString() {
     stringstream s;
-    s << "(Followers: " << setw(7) << this->followerCost << " | ";
+    s << "[Followers: " << setw(7) << this->followerCost << " | ";
     for (int i = this->monsterAmount-1; i >= 0; i--) {
         s << monsterReference[this->monsters[i]].name << " "; // Print in reversed Order
-    } s << ")"; 
+    } s << "<==]"; 
     return s.str();
 }
 
