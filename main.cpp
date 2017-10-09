@@ -156,7 +156,7 @@ void getQuickSolutions(Instance instance) {
     }
 }
 
-int solveInstance(Instance instance, bool debugInfo) {
+int solveInstance(Instance instance, bool debugInfo, bool multiInstance) {
     Army tempArmy = Army();
     int startTime;
     int tempTime;
@@ -234,7 +234,7 @@ int solveInstance(Instance instance, bool debugInfo) {
             sort(heroMonsterArmies.begin(), heroMonsterArmies.end(), hasFewerFollowers);
                 
             if (armySize == firstDominance) {
-                cout << "Best Solution so far:" << endl << "  ";
+                cout << endl << "Best Solution so far:" << endl << "  ";
                 best.print();
                 if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
                 startTime = time(NULL);
@@ -382,7 +382,7 @@ int main(int argc, char** argv) {
     // -------------------------------------------- Program Start --------------------------------------------
     
     cout << welcomeMessage << endl;
-    cout << helpMessage << endl;
+    cout << helpMessage << endl << endl;
     
     if (individual) { // custom input mode
         cout << "Simulating individual Figths" << endl;
@@ -407,17 +407,18 @@ int main(int argc, char** argv) {
         initMacroFile(macroFileName, showMacroFileInput);
     }
     
-    bool userWantsContinue = true;
-    while (userWantsContinue) {
-        // Initialize global Data
-        best = Army();
-        initMonsterData();
-        
-        // Collect the Data via Command Line
-        heroLevels = takeHerolevelInput();
-        instances = takeInstanceInput("Enter Enemy Lineup(s): ");
-        minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
-        followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
+    // Initialize global Data
+    best = Army();
+    initMonsterData();
+    
+    // Collect the Data via Command Line
+    heroLevels = takeHerolevelInput();
+    minimumMonsterCost = stoi(getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
+    followerUpperBound = stoi(getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
+    
+    instances = takeInstanceInput("Enter Enemy Lineup(s): ");
+    
+    for (size_t i = 0; i < instances.size(); i++) {
         
         // Set Upper Bound Correctly
         if (followerUpperBound < 0) {
@@ -429,35 +430,35 @@ int main(int argc, char** argv) {
         
         filterMonsterData(minimumMonsterCost);
         initializeUserHeroes(heroLevels);
-        int totalTime = solveInstance(instances[0], debugInfo);
+        int totalTime = solveInstance(instances[i], debugInfo, instances.size() > 1);
+        
+        cout << endl << "Solution for: ";
+        instances[0].target.print();
+        cout << "  ";
+        
         // Last check to see if winning combination wins:
         if ((customFollowers && best.monsterAmount > 0) || (!customFollowers && followerUpperBound < numeric_limits<int>::max())) {
             best.lastFightData.valid = false;
-            simulateFight(best, instances[0].target);
+            simulateFight(best, instances[i].target);
             if (best.lastFightData.rightWon) {
                 best.print();
-                cout << "This does not beat the lineup!!!" << endl;
+                cout << "  This does not beat the lineup!!!";
                 for (int i = 1; i <= 10; i++) {
                     cout << "ERROR";
-                }
+                } cout << endl;
                 haltExecution();
                 return EXIT_FAILURE;
                 
             } else {
                 // Print the winning combination!
-                cout << endl << "The optimal combination is:" << endl << "  ";
                 best.print();
                 cout << "  (Right-most fights first)" << endl;
             }
         } else {
             cout << endl << "Could not find a solution that beats this lineup." << endl;
         }
-        
-        cout << endl;
-        cout << totalFightsSimulated << " Fights simulated." << endl;
-        cout << "Total Calculation Time: " << totalTime << endl;
-        
-        userWantsContinue = askYesNoQuestion("Do you want to calculate another lineup?", "");
+        cout << "  " << totalFightsSimulated << " Fights simulated." << endl;
+        cout << "  Total Calculation Time: " << totalTime << endl;
     }
     return EXIT_SUCCESS;
 }
