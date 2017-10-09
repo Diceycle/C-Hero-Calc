@@ -370,6 +370,7 @@ int main(int argc, char** argv) {
     int32_t userFollowerUpperBound;
     vector<Instance> instances;
     int outputLevel;
+    bool userWantsContinue;
  
     // Define User Input Data
     size_t firstDominance = 4;          // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
@@ -420,48 +421,50 @@ int main(int argc, char** argv) {
     filterMonsterData(minimumMonsterCost);
     initializeUserHeroes(heroLevels);
     
-    instances = takeInstanceInput("Enter Enemy Lineup(s): ");
-    
-    cout << "Calaculating with " << availableMonsters.size() << " available Monsters and " << availableHeroes.size() << " enabled Heroes." << endl;
-    
-    for (size_t i = 0; i < instances.size(); i++) {
-        // Reset solution Data
-        best = Army();
-        totalFightsSimulated = 0;
+    do {
+        instances = takeInstanceInput("Enter Enemy Lineup(s): ");
+        cout << "Calaculating with " << availableMonsters.size() << " available Monsters and " << availableHeroes.size() << " enabled Heroes." << endl;
         
-        if (userFollowerUpperBound < 0) {
-            followerUpperBound = numeric_limits<int>::max();
-        } else {
-            followerUpperBound = userFollowerUpperBound;
-        }
-        
-        outputLevel = BASIC_OUTPUT;
-        if (instances.size() > 1) {
-            outputLevel = NO_OUTPUT;
-        }
-        int totalTime = solveInstance(instances[i], firstDominance, outputLevel);
-        
-        cout << endl << "Solution for " << instances[i].target.toString() << ":" << endl;
-        
-        // Announce the result
-        if (best.monsterAmount > 0) {
-            cout << "  " << best.toString() << endl;
-            best.lastFightData.valid = false;
-            simulateFight(best, instances[i].target); // Sanity check on the solution
-            if (best.lastFightData.rightWon) {
-                cout << "  This does not beat the lineup!!!";
-                for (int i = 1; i <= 10; i++) {
-                    cout << "ERROR";
-                } cout << endl;
-                haltExecution();
-                return EXIT_FAILURE;
+        for (size_t i = 0; i < instances.size(); i++) {
+            // Reset solution Data
+            best = Army();
+            totalFightsSimulated = 0;
+            
+            if (userFollowerUpperBound < 0) {
+                followerUpperBound = numeric_limits<int>::max();
+            } else {
+                followerUpperBound = userFollowerUpperBound;
             }
-        } else {
-            cout << endl << "Could not find a solution that beats this lineup." << endl;
+            
+            outputLevel = BASIC_OUTPUT;
+            if (instances.size() > 1) {
+                outputLevel = NO_OUTPUT;
+            }
+            int totalTime = solveInstance(instances[i], firstDominance, outputLevel);
+            
+            cout << endl << "Solution for " << instances[i].target.toString() << ":" << endl;
+            
+            // Announce the result
+            if (best.monsterAmount > 0) {
+                cout << "  " << best.toString() << endl;
+                best.lastFightData.valid = false;
+                simulateFight(best, instances[i].target); // Sanity check on the solution
+                if (best.lastFightData.rightWon) {
+                    cout << "  This does not beat the lineup!!!";
+                    for (int i = 1; i <= 10; i++) {
+                        cout << "ERROR";
+                    } cout << endl;
+                    haltExecution();
+                    return EXIT_FAILURE;
+                }
+            } else {
+                cout << endl << "Could not find a solution that beats this lineup." << endl;
+            }
+            cout << "  " << totalFightsSimulated << " Fights simulated." << endl;
+            cout << "  Total Calculation Time: " << totalTime << endl;
         }
-        cout << "  " << totalFightsSimulated << " Fights simulated." << endl;
-        cout << "  Total Calculation Time: " << totalTime << endl;
-    }
+        userWantsContinue = askYesNoQuestion("Do you want to calculate more lineups?", "");
+    } while (userWantsContinue);
     cout << endl;
     haltExecution();
     return EXIT_SUCCESS;
