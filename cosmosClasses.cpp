@@ -57,6 +57,12 @@ void Army::add(int8_t m) {
     this->monsterAmount++;
 }
 
+void Army::replace(int i, int8_t m) {
+    this->followerCost -= monsterReference[this->monsters[i]].cost;
+    this->monsters[i] = m;
+    this->followerCost += monsterReference[m].cost;
+}
+
 string Army::toString() {
     stringstream s;
     s << "[Followers: " << setw(7) << this->followerCost << " | ";

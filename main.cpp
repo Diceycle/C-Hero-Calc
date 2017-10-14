@@ -155,6 +155,44 @@ void getQuickSolutions(Instance instance, int outputLevel) {
     }
 }
 
+void seedMoreArmies(Instance instance, size_t firstDominance, int outputLevel) {
+    vector<Army> newArmies{};
+
+    if (best.monsterAmount <= firstDominance)
+        return;
+
+    for (int slot = 0; slot < best.monsterAmount; slot++) {
+        for (int i = 0; i < availableMonsters.size(); i++) {
+            if (monsterReference[availableMonsters[i]].cost <= followerUpperBound) {
+                Army tempArmy = best;
+                tempArmy.replace(slot, availableMonsters[i]);
+                newArmies.push_back(tempArmy);
+            }
+        }
+
+        for (int i = 0; i < availableHeroes.size(); i++) {
+            bool fHeroUsed = false;
+            int8_t hero = availableHeroes[i];
+
+            for (int j = 0; j < best.monsterAmount; j++) {
+                if (best.monsters[j] == hero) {
+                    fHeroUsed = true;
+                    break;
+                }
+            }
+
+            if (!fHeroUsed) {
+                Army tempArmy = best;
+                tempArmy.replace(slot, hero);
+                newArmies.push_back(tempArmy);
+            }
+        }
+    }
+
+    cout << "  Simulating " << newArmies.size() << " more fights...";
+    simulateMultipleFights(newArmies, instance.target, outputLevel);
+}
+
 int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
     Army tempArmy = Army();
     int startTime;
@@ -359,6 +397,7 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
         }
         debugOutput(tempTime, "", outputLevel > BASIC_OUTPUT, true, true);
     }
+    seedMoreArmies(instance, firstDominance, outputLevel);
     return time(NULL) - startTime;
 }
 
