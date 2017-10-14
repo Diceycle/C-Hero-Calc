@@ -157,6 +157,7 @@ void getQuickSolutions(Instance instance, int outputLevel) {
 
 void seedMoreArmies(Instance instance, size_t firstDominance, int outputLevel) {
     vector<Army> newArmies{};
+    best.lastFightData.valid = false;
 
     if (best.monsterAmount <= firstDominance)
         return;
