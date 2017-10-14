@@ -76,6 +76,7 @@ class Army {
         int8_t monsterAmount;
         
         void add(int8_t m);
+        void replace(int i, int8_t m);
         string toString();
         void print();
         Army(vector<int8_t> monsters = {});
