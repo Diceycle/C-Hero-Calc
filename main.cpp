@@ -423,7 +423,7 @@ int main(int argc, char** argv) {
     
     do {
         instances = takeInstanceInput("Enter Enemy Lineup(s): ");
-        cout << "Calaculating with " << availableMonsters.size() << " available Monsters and " << availableHeroes.size() << " enabled Heroes." << endl;
+        cout << "Calculating with " << availableMonsters.size() << " available Monsters and " << availableHeroes.size() << " enabled Heroes." << endl;
         
         for (size_t i = 0; i < instances.size(); i++) {
             // Reset solution Data
