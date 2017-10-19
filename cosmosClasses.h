@@ -20,6 +20,7 @@ enum Element {
     all, 
     self
 }; // also used for hero skill targets
+const Element counter [] { fire, earth, air, water, self, self }; // Elemental Advantages
 
 // Defines Skills of Heros
 struct HeroSkill {
