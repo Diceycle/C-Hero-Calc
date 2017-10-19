@@ -26,17 +26,6 @@ FightResult::FightResult() {
     this->valid = false;
 }
 
-bool FightResult::operator <=(const FightResult & toCompare) { // both results are expected to not have won
-    if(this->leftAoeDamage < toCompare.leftAoeDamage || this->rightAoeDamage > toCompare.rightAoeDamage) {
-        return false; // left is not certainly worse than right
-    }
-    if (this->monstersLost == toCompare.monstersLost) {
-        return this->damage <= toCompare.damage; // less damage dealt to the enemy -> left is worse
-    } else {
-        return this->monstersLost < toCompare.monstersLost; // less monsters destroyed on the enemy side -> left is worse
-    }
-}
-
 Army::Army(vector<int8_t> monsters) {
     this->followerCost = 0;
     this->monsterAmount = 0;
@@ -45,12 +34,6 @@ Army::Army(vector<int8_t> monsters) {
     for(size_t i = 0; i < monsters.size(); i++) {
         this->add(monsters[i]);
     }
-}
-
-void Army::add(int8_t m) {
-    this->monsters[monsterAmount] = m;
-    this->followerCost += monsterReference[m].cost;
-    this->monsterAmount++;
 }
 
 string Army::toString() {
@@ -64,9 +47,4 @@ string Army::toString() {
 
 void Army::print() {
     cout << this->toString() << endl;
-}
-
-// Function for sorting FightResults by followers (ascending)
-bool hasFewerFollowers(const Army & a, const Army & b) {
-    return (a.followerCost < b.followerCost);
 }

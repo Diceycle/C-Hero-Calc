@@ -64,8 +64,19 @@ class FightResult {
             
         FightResult();
         
-    bool operator <= (const FightResult & toCompare);
+    inline bool operator <= (const FightResult & toCompare) const;
 };
+
+inline bool FightResult::operator <=(const FightResult & toCompare) const { // both results are expected to not have won
+    if(this->leftAoeDamage < toCompare.leftAoeDamage || this->rightAoeDamage > toCompare.rightAoeDamage) {
+        return false; // left is not certainly worse than right
+    }
+    if (this->monstersLost == toCompare.monstersLost) {
+        return this->damage <= toCompare.damage; // less damage dealt to the enemy -> left is worse
+    } else {
+        return this->monstersLost < toCompare.monstersLost; // less monsters destroyed on the enemy side -> left is worse
+    }
+} 
 
 // Defines a single lineup of monsters
 class Army {
@@ -75,15 +86,23 @@ class Army {
         int8_t monsters[6];
         int8_t monsterAmount;
         
-        void add(int8_t m);
+        inline void add(const int8_t m);
         string toString();
         void print();
         Army(vector<int8_t> monsters = {});
 };
 
-// Function for sorting Armies by followers (ascending)
-bool hasFewerFollowers(const Army & a, const Army & b);
-
 extern vector<Monster> monsterReference; // Will be filled with leveled heroes if needed (determined by input)
+
+// Function for sorting FightResults by followers (ascending)
+inline bool hasFewerFollowers(const Army & a, const Army & b) {
+    return (a.followerCost < b.followerCost);
+}
+
+inline void Army::add(const int8_t m) {
+    this->monsters[monsterAmount] = m;
+    this->followerCost += monsterReference[m].cost;
+    this->monsterAmount++;
+}
 
 #endif
