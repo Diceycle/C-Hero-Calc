@@ -225,6 +225,9 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
         tempTime = time(NULL);
         simulateMultipleFights(heroMonsterArmies, instance.target, outputLevel);
         
+        // If we have a valid solution with 0 followers there is no need to continue
+        if (best.monsterAmount > 0 && best.followerCost == 0) { break; }
+        
         if (armySize < instance.maxCombatants) { 
             // Sort the results by follower cost for some optimization
             debugOutput(tempTime, "  Sorting List... ", outputLevel > BASIC_OUTPUT, true, false);
