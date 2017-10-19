@@ -11,7 +11,7 @@
 
 using namespace std;
 
-const string heroVersion = "2.7.1";
+const string heroVersion = "2.7.2";
 const string heroLevelFileName = "heroLevels" + heroVersion;
 
 const string welcomeMessage = "Welcome to Diceycle's PvE Instance Solver!";

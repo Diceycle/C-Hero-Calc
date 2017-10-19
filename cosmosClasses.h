@@ -11,7 +11,7 @@
 using namespace std;
 
 // Define types of HeroSkills and Elements
-enum SkillType {nothing, buff, protect, aoe, pAoe, heal, berserk, friends, champion, adapt, rainbow, training, wither};
+enum SkillType {nothing, buff, protect, aoe, pAoe, heal, berserk, friends, champion, adapt, rainbow, training, wither, selfdestruct};
 enum Element {
     earth   = 0,
     air     = 1, 
