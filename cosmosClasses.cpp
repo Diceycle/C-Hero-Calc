@@ -26,19 +26,15 @@ FightResult::FightResult() {
     this->valid = false;
 }
 
-bool FightResult::operator <=(FightResult & toCompare) { // both results are expected to not have won
+bool FightResult::operator <=(const FightResult & toCompare) { // both results are expected to not have won
     if(this->leftAoeDamage < toCompare.leftAoeDamage || this->rightAoeDamage > toCompare.rightAoeDamage) {
-        return false; // left is not certainly worse thn right
+        return false; // left is not certainly worse than right
     }
     if (this->monstersLost == toCompare.monstersLost) {
         return this->damage <= toCompare.damage; // less damage dealt to the enemy -> left is worse
     } else {
         return this->monstersLost < toCompare.monstersLost; // less monsters destroyed on the enemy side -> left is worse
     }
-}
-
-bool FightResult::operator >=(FightResult & toCompare) {
-    return toCompare <= *this;
 }
 
 Army::Army(vector<int8_t> monsters) {

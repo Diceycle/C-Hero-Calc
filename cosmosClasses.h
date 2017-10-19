@@ -64,8 +64,7 @@ class FightResult {
             
         FightResult();
         
-    bool operator <= (FightResult & toCompare);
-    bool operator >= (FightResult & toCompare);
+    bool operator <= (const FightResult & toCompare);
 };
 
 // Defines a single lineup of monsters

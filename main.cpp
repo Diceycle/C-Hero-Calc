@@ -284,7 +284,7 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
                         for (j = 0; j < heroMonsterArmiesSize; j++) {
                             if (leftFollowerCost > heroMonsterArmies[j].followerCost) {
                                 break; 
-                            } else if (*currentFightResult >= heroMonsterArmies[j].lastFightData) { // pureResults[i] has less followers implicitly
+                            } else if (heroMonsterArmies[j].lastFightData <= *currentFightResult) { // pureResults[i] has less followers implicitly
                                 heroMonsterArmies[j].lastFightData.dominated = true;
                             }                       
                         }
