@@ -22,8 +22,10 @@ Army best;
 // Simulates fights with all armies against the target. armies will contain armies with the results written in.
 void simulateMultipleFights(vector<Army> & armies, Army target, int outputLevel) {
     bool newFound = false;
+    size_t i = 0;
+    size_t armyAmount = armies.size();
     
-    for (size_t i = 0; i < armies.size(); i++) {
+    for (i = 0; i < armyAmount; i++) {
         simulateFight(armies[i], target);
         if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
             if (armies[i].followerCost < followerUpperBound) {
