@@ -148,6 +148,7 @@ vector<Instance> takeInstanceInput(string prompt) {
     
     while (true) {
         input = getResistantInput(prompt, lineupInputHelp, raw);
+        instances.clear();
         instanceStrings = split(input, " ");
         try {
             for (size_t i = 0; i < instanceStrings.size(); i++) {
