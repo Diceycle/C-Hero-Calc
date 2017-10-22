@@ -396,6 +396,9 @@ int main(int argc, char** argv) {
     cout << welcomeMessage << endl;
     cout << helpMessage << endl << endl;
     
+    // Initialize global Data
+    initMonsterData();
+    
     if (individual) { // custom input mode
         cout << "Simulating individual Figths" << endl;
         while (true) {
@@ -418,9 +421,6 @@ int main(int argc, char** argv) {
     else if (useDefaultMacroFile) {
         initMacroFile(macroFileName, showMacroFileInput);
     }
-    
-    // Initialize global Data
-    initMonsterData();
     
     // Collect the Data via Command Line
     heroLevels = takeHerolevelInput();
