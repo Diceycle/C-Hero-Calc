@@ -239,7 +239,7 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
                 
             if (armySize == firstDominance && outputLevel > NO_OUTPUT) {
                 outputLevel = DETAILED_OUTPUT;
-                cout << endl
+                cout << endl;
                 if (best.monsterAmount > 0) {
                     cout << "Best Solution so far:" << endl;
                     cout << "  " << best.toString() << endl;
