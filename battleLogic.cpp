@@ -65,7 +65,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
             leftCondition.aoeDamageTaken += rightCondition.turnData.revengeDamage;
             leftCondition.frontDamageTaken += rightCondition.turnData.revengeDamage;
             
-            if (leftCondition.lineup[leftCondition.monstersLost]->hp <= leftCondition.frontDamageTaken) {
+            if (!leftDied && leftCondition.lineup[leftCondition.monstersLost]->hp <= leftCondition.frontDamageTaken) {
                 leftCondition.afterDeath();
                 rightCondition.aoeDamageTaken += leftCondition.turnData.revengeDamage;
                 rightCondition.frontDamageTaken += leftCondition.turnData.revengeDamage;
