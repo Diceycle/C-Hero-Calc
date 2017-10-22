@@ -94,4 +94,6 @@ pair<Monster, int> parseHeroString(string heroString);
 // Splits strings into a vector of strings. No need to optimize, only used for input.
 vector<string> split(string target, string separator);
 
+string toLower(string input);
+
 #endif

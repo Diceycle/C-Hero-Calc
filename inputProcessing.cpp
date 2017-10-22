@@ -40,7 +40,7 @@ string getResistantInput(string query, string help, QueryType queryType) {
         }
         
         // Process Input
-        inputString = split(inputString, "//")[0]; // trim potential comments in a macrofile
+        inputString = split(toLower(inputString), "//")[0]; // trim potential comments in a macrofile
         firstElement = split(inputString, " ")[0]; // except for rare input only the first string till a space is used
         if (useMacroFile && showQueries) {
             cout << inputString << endl; // Show input if a macro file is used
@@ -222,4 +222,11 @@ vector<string> split(string target, string separator) {
         start = occurrence + separator.length();
     }
     return output;
+}
+
+string toLower(string input) {
+    for (size_t i = 0; i < input.length(); i++) {
+        input[i] = tolower(input[i]);
+    }
+    return input;
 }
