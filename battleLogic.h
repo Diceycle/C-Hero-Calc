@@ -16,6 +16,7 @@ struct TurnData {
     int16_t paoeDamage = 0;
     int16_t protection = 0;
     int16_t healing = 0;
+    int16_t revengeDamage = 0;
 };
 
 class ArmyCondition {
@@ -40,9 +41,10 @@ class ArmyCondition {
         ArmyCondition();
         
         inline void init(const Army & army);
+        inline void afterDeath();
         inline bool startNewTurn();
         inline void getDamage(const int8_t turncounter, const Element opposingElement);
-        inline void resolveDamage(const TurnData & opposing);
+        inline bool resolveDamage(TurnData & opposing);
     
 };
 
@@ -71,6 +73,15 @@ inline void ArmyCondition::init(const Army & army) {
     }
 }
 
+inline void ArmyCondition::afterDeath() {
+    if (this->skillTypes[this->monstersLost] == revenge) {
+        this->turnData.revengeDamage = this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost];
+    }
+    this->monstersLost++;
+    this->berserkProcs = 0;
+    this->frontDamageTaken = this->aoeDamageTaken;
+}
+
 inline bool ArmyCondition::startNewTurn() {
     int16_t healingTemp;
     size_t i;
@@ -79,13 +90,16 @@ inline bool ArmyCondition::startNewTurn() {
     this->turnData.protection = 0;
     this->turnData.aoeDamage = 0;
     this->turnData.paoeDamage = 0;
+    this->turnData.revengeDamage = 0;
     healingTemp = this->turnData.healing;
     this->turnData.healing = 0;
     this->pureMonsters = 0;
     
     for (i = this->monstersLost; i < this->armySize; i++) {
         if (this->aoeDamageTaken >= this->lineup[i]->hp) { // Check for Backline Deaths
-            this->monstersLost += (this->monstersLost == i);
+            if (i == this->monstersLost) {
+                this->afterDeath();
+            }
         } else {
             if (this->skillTypes[i] == nothing) {
                 pureMonsters++; // count for friends ability
@@ -142,20 +156,20 @@ inline void ArmyCondition::getDamage(const int8_t turncounter, const Element opp
     }
 }
 
-inline void ArmyCondition::resolveDamage(const TurnData & opposing) {
+inline bool ArmyCondition::resolveDamage(TurnData & opposing) {
     if (opposing.baseDamage > this->turnData.protection) {
         this->frontDamageTaken += opposing.baseDamage - this->turnData.protection; // Handle Protection
     }
-    this->frontDamageTaken += opposing.aoeDamage; // Also apply aoeDamage
-    this->aoeDamageTaken += opposing.aoeDamage + opposing.paoeDamage; // Apply aoe Damage to backline
+    this->frontDamageTaken += opposing.aoeDamage + opposing.revengeDamage; // Also apply aoeDamage
+    this->aoeDamageTaken += opposing.aoeDamage + opposing.paoeDamage + opposing.revengeDamage; // Apply aoe Damage to backline
+    opposing.revengeDamage = 0; // Vital to check for additional revenge damage later
     
     // Check if the first Monster died (otherwise it will be revived next turn)
     if (this->lineup[this->monstersLost]->hp <= this->frontDamageTaken) {
-        this->monstersLost++;
-        this->berserkProcs = 0;
-        this->frontDamageTaken = this->aoeDamageTaken;
-    } else if (this->skillTypes[this->monstersLost] == wither) {
-        this->frontDamageTaken += (this->lineup[this->monstersLost]->hp - this->frontDamageTaken) * this->skillAmounts[this->monstersLost];
+        this->afterDeath();
+        return true;
+    } else {
+        return false;
     }
 }
 

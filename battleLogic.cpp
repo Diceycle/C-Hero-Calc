@@ -2,7 +2,7 @@
 
 int totalFightsSimulated = 0;
 
-// Function determining if a monster is strictly better than another
+// Prototype function! Currently not used. Function determining if a monster is strictly better than another
 bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
     if (a->element == b->element) {
         return (a->damage >= b->damage) && (a->hp >= b->hp);
@@ -16,6 +16,7 @@ ArmyCondition::ArmyCondition() {}
 ArmyCondition leftCondition = ArmyCondition();
 ArmyCondition rightCondition = ArmyCondition();
 int8_t turncounter;
+bool leftDied, rightDied;
 
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
@@ -58,8 +59,25 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         leftCondition.getDamage(turncounter, rightCondition.lineup[rightCondition.monstersLost]->element);
         rightCondition.getDamage(turncounter, leftCondition.lineup[leftCondition.monstersLost]->element);
         
-        leftCondition.resolveDamage(rightCondition.turnData);
-        rightCondition.resolveDamage(leftCondition.turnData);
+        leftDied = leftCondition.resolveDamage(rightCondition.turnData);
+        rightDied = rightCondition.resolveDamage(leftCondition.turnData);
+        if (rightCondition.turnData.revengeDamage != 0) { // Means the frontline had revenge
+            leftCondition.aoeDamageTaken += rightCondition.turnData.revengeDamage;
+            leftCondition.frontDamageTaken += rightCondition.turnData.revengeDamage;
+            
+            if (leftCondition.lineup[leftCondition.monstersLost]->hp <= leftCondition.frontDamageTaken) {
+                leftCondition.afterDeath();
+                rightCondition.aoeDamageTaken += leftCondition.turnData.revengeDamage;
+                rightCondition.frontDamageTaken += leftCondition.turnData.revengeDamage;
+                leftDied = true;
+            } 
+        }
+        if (!leftDied && leftCondition.skillTypes[leftCondition.monstersLost] == wither) {
+            leftCondition.frontDamageTaken += (leftCondition.lineup[leftCondition.monstersLost]->hp - leftCondition.frontDamageTaken) * leftCondition.skillAmounts[leftCondition.monstersLost];
+        }
+        if (!rightDied && rightCondition.skillTypes[rightCondition.monstersLost] == wither) {
+            rightCondition.frontDamageTaken += (rightCondition.lineup[rightCondition.monstersLost]->hp - rightCondition.frontDamageTaken) * rightCondition.skillAmounts[rightCondition.monstersLost];
+        }
         
         // Output detailed fight Data for debugging
         if (verbose) {
