@@ -239,8 +239,13 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
                 
             if (armySize == firstDominance && outputLevel > NO_OUTPUT) {
                 outputLevel = DETAILED_OUTPUT;
-                cout << endl << "Best Solution so far:" << endl;
-                cout << "  " << best.toString() << endl;
+                cout << endl
+                if (best.monsterAmount > 0) {
+                    cout << "Best Solution so far:" << endl;
+                    cout << "  " << best.toString() << endl;
+                } else {
+                    cout << "Could not find a solution yet!" << endl;
+                }
                 if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
                 startTime = time(NULL);
                 tempTime = startTime;
