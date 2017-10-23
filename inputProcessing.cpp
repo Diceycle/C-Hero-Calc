@@ -2,11 +2,12 @@
 
 using namespace std;
 
+// Global data related to using macro files
 bool useMacroFile;
 bool showQueries = true;
 ifstream macroFile;
 
-// Initialize a config file provided by filename
+// Initialize a macro file provided by filename
 void initMacroFile(string macroFileName, bool showInput) {
     macroFile.open(macroFileName);
     
@@ -23,7 +24,7 @@ void haltExecution() {
     cin.get();
 }
 
-// Method for handling ALL input. Gives access to help, error resistance and config file for input.
+// Method for handling ALL input. Gives access to help, error resistance and macro file for input.
 string getResistantInput(string query, string help, QueryType queryType) {
     string inputString;
     string firstElement;
@@ -42,7 +43,7 @@ string getResistantInput(string query, string help, QueryType queryType) {
         }
         
         // Process Input
-        inputString = split(toLower(inputString), "//")[0]; // trim potential comments in a macrofile
+        inputString = split(toLower(inputString), "//")[0]; // trim potential comments in a macrofile and convert to lowercase
         firstElement = split(inputString, " ")[0]; // except for rare input only the first string till a space is used
         if (useMacroFile && showQueries) {
             cout << inputString << endl; // Show input if a macro file is used
@@ -93,7 +94,6 @@ void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLa
     }   
 }
 
-
 // Promt the User via command line to input his hero levels and return them as a vector<int>
 vector<int> takeHerolevelInput() {
     vector<string> stringLevels;
@@ -141,7 +141,7 @@ vector<int> takeHerolevelInput() {
     return levels;
 }
 
-// Returns multiple Instaces parse from command line input
+// Promts the user to input instance(s) to be solved 
 vector<Instance> takeInstanceInput(string prompt) {
     vector<Instance> instances;
     vector<string> instanceStrings;
@@ -180,7 +180,7 @@ Instance makeInstanceFromString(string instanceString) {
     return instance;
 }
 
-// Parse string linup input into actual monsters if there are heroes in the input, a leveled hero is added to the database
+// Parse string linup input into actual monsters. If there are heroes in the input, a leveled hero is added to the database
 Army makeArmyFromStrings(vector<string> stringMonsters) {
     Army army;
     pair<Monster, int> heroData;
@@ -209,7 +209,7 @@ pair<Monster, int> parseHeroString(string heroString) {
     return pair<Monster, int>(hero, level);
 }
 
-// Splits strings into a vector of strings. No need to optimize, only used for input.
+// Splits strings into a vector of strings.
 vector<string> split(string target, string separator) {
     vector<string> output;
     string substring;
@@ -226,6 +226,7 @@ vector<string> split(string target, string separator) {
     return output;
 }
 
+// Convert a string to lowercase where available
 string toLower(string input) {
     for (size_t i = 0; i < input.length(); i++) {
         input[i] = tolower(input[i]);

@@ -9,16 +9,32 @@
 #include <sstream>
 
 // Define types of HeroSkills and Elements
-enum SkillType {nothing, buff, protect, aoe, pAoe, heal, berserk, friends, champion, adapt, rainbow, training, wither, revenge};
+enum SkillType {
+    nothing,    // Base Skill used by normal monsters
+    buff,       // Increases Damage of own army
+    protect,    // Reduces incoming damage vs the own army
+    aoe,        // Damages the entire opposing army every turn
+    pAoe,       // If this monster attacks it also damages every monster behind the attacked
+    heal,       // Heals the entire own army every turn
+    berserk,    // Every attack this monster makes multiplies its own damage 
+    friends,    // This monster receives a damage multiplicator for every NORMAL monster behind it
+    champion,   // This monster has the buff and protect ability at the same time
+    adapt,      // This monster deals more damage vs certain elements
+    rainbow,    // This monster receives a damage buff if monsters of every element are behind it
+    training,   // This monster receives a damage buff for every turn that passed
+    wither,     // This monster's hp decrease after every attack it survives
+    revenge     // After this onster dies it damages the entire opposing army
+};
+
 enum Element {
     earth   = 0,
     air     = 1, 
     water   = 2, 
-    fire    = 3, 
-    all, 
-    self
-}; // also used for hero skill targets
-const Element counter [] { fire, earth, air, water, self, self }; // Elemental Advantages
+    fire    = 3, // Discrete Values needed to quickly determine counters
+    all,         
+    self         // These Values are used to specify targets of hero skills
+};
+const Element counter [] { fire, earth, air, water, self, self }; // Elemental Advantages earth = 0 -> counter[0] = fire -> fire has advantage over earth
 
 // Defines Skills of Heros
 struct HeroSkill {
@@ -97,6 +113,7 @@ inline bool hasFewerFollowers(const Army & a, const Army & b) {
     return (a.followerCost < b.followerCost);
 }
 
+// Add monster to the back of the army
 inline void Army::add(const int8_t m) {
     this->monsters[monsterAmount] = m;
     this->followerCost += monsterReference[m].cost;

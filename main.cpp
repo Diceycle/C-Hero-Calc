@@ -11,15 +11,18 @@
 
 using namespace std;
 
-int NO_OUTPUT = 0;
-int BASIC_OUTPUT = 1;
-int DETAILED_OUTPUT = 2;
+// Enum to control the amount of output generate
+enum OutputLevel {
+    NO_OUTPUT = 0,
+    BASIC_OUTPUT = 1,
+    DETAILED_OUTPUT = 2
+};
 
 // Define global variables used to track the best result
 int32_t followerUpperBound;
 Army best;
 
-// Simulates fights with all armies against the target. armies will contain armies with the results written in.
+// Simulates fights with all armies against the target. Armies will contain Army objects with the results written in.
 void simulateMultipleFights(vector<Army> & armies, Army target, int outputLevel) {
     bool newFound = false;
     size_t i = 0;
@@ -42,6 +45,8 @@ void simulateMultipleFights(vector<Army> & armies, Army target, int outputLevel)
     debugOutput(time(NULL), " ", newFound && outputLevel > BASIC_OUTPUT, false, false);
 }
 
+// Take the data from oldArmies and write all armies into newArmies with an additional monster at the end.
+// Armies that are dominated are ignored.
 void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
             vector<Army> & oldPureArmies, vector<Army> & oldHeroArmies, 
             size_t currentArmySize) {
@@ -104,7 +109,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
 }
 
 // Use a greedy method to get a first upper bound on follower cost for the solution
-// TODO: Think of an algorithm that works on limit < targetsize semi-reliable
+// Greedy approach for 4 or less monsters is obsolete, as bruteforce is still fast enough
 void getQuickSolutions(Instance instance, int outputLevel) {
     Army tempArmy = Army();
     vector<int8_t> greedy {};
@@ -157,6 +162,7 @@ void getQuickSolutions(Instance instance, int outputLevel) {
     }
 }
 
+// Main method for solving an instance. Returns time taken to calculate in seconds
 int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
     Army tempArmy = Army();
     int startTime;

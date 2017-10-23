@@ -1,11 +1,13 @@
 #include "cosmosDefines.h"
 
-std::map<std::string, int8_t> monsterMap {}; // Maps monster Names to their pointers (includes heroes)
+std::map<std::string, int8_t> monsterMap {}; // Maps monster Names to their indices in monsterReference from cosmosClasses
 
-std::vector<int8_t> availableMonsters {}; // Contains pointers to raw Monster Data from a1 to f10, will be sorted by follower cost
-std::vector<int8_t> availableHeroes {};
+std::vector<int8_t> availableMonsters {}; // Contains indices of raw Monster Data from a1 to f15, will be sorted by follower cost
+std::vector<int8_t> availableHeroes {}; // Contains all user heroes' indices 
 
-// Make sure all the values are set
+// Clean up all monster related vectors and sort the monsterBaseList
+// Also fills the map used to parse strings into monsters
+// Must be called before any input can be processed
 void initMonsterData() {
     // Sort MonsterList by followers
     sort(monsterBaseList.begin(), monsterBaseList.end(), isCheaper);
@@ -31,7 +33,7 @@ void filterMonsterData(int minimumMonsterCost) {
     }
 }
 
-// Initialize Hero Data
+// Initialize Hero Data. Must be called after filterMonsterData
 void initializeUserHeroes(std::vector<int> levels) {
     for (size_t i = 0; i < baseHeroes.size(); i++) {
         if (levels[i] > 0) {
@@ -59,7 +61,7 @@ Monster getLeveledHero(const Monster & m, int rarity, int level) {
     );
 }
 
-// Add a leveled hero to the databse 
+// Add a leveled hero to the databse and return its corresponding index
 int8_t addLeveledHero(Monster hero, int level) {
     Monster m = getLeveledHero(hero, rarities.at(hero.name), level);
     monsterReference.emplace_back(m);

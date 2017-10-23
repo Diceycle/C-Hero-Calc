@@ -9,10 +9,10 @@
 
 #include "cosmosClasses.h"
 
-extern std::vector<int8_t> availableHeroes; // Contains all User Heroes, readily Leveled
-extern std::vector<int8_t> availableMonsters; // Contains indices to raw Monster Data from a1 to f15, will be sorted by follower cost
+extern std::map<std::string, int8_t> monsterMap; // // Maps monster Names to their indices in monsterReference from cosmosClasses
 
-extern std::map<std::string, int8_t> monsterMap; // Maps monster Names to their indices (includes heroes)
+extern std::vector<int8_t> availableMonsters; // Contains indices of raw Monster Data from a1 to f15, will be sorted by follower cost
+extern std::vector<int8_t> availableHeroes; // Contains all user heroes' indices 
 
 static std::vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual Objects
     Monster( 20,   8,    1000,  "a1", air),
@@ -149,7 +149,7 @@ static std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actua
     Monster( 58, 22, 0, "zaytus",            fire,  {protect,       fire, fire, 4}),
 };
 
-static std::map<std::string, int> rarities { // hero rarities
+static std::map<std::string, int> rarities { // Hero Rarities: 0 = Common, 1 = Rare, 2 = Legendary
     {"james", 2},  
   
     {"hunter", 0},
@@ -278,19 +278,21 @@ static std::vector<std::vector<std::string>> quests { // Contains all quest line
     {"a11", "f10", "a11", "e14", "f13", "a11"}, //55
 };
 
-// Make sure all the values are set
+// Clean up all monster related vectors and sort the monsterBaseList
+// Also fills the map used to parse strings into monsters
+// Must be called before any input can be processed
 void initMonsterData();
 
 // Filter MonsterList by cost. User can specify if he wants to exclude cheap monsters
 void filterMonsterData(int minimumMonsterCost);
 
-// Initialize Hero Data
+// Initialize Hero Data. Must be called after filterMonsterData
 void initializeUserHeroes(std::vector<int> levels);
-
-// Add a leveled hero to the databse 
-int8_t addLeveledHero(Monster hero, int level);
 
 // Create a new hero with leveled stats and return it
 Monster getLeveledHero(const Monster & m, int rarity, int level);
+
+// Add a leveled hero to the databse and return its corresponding index
+int8_t addLeveledHero(Monster hero, int level);
 
 #endif

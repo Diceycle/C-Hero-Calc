@@ -6,9 +6,10 @@
 
 #include "cosmosClasses.h"
 
-const float elementalBoost = 1.5;
+const float elementalBoost = 1.5; // Damage Boost if element has advantage over another
 extern int totalFightsSimulated;
 
+// Struct keeping track of everything that is only valid for one turn
 struct TurnData {
     float baseDamage = 0;
     int16_t buffDamage = 0;
@@ -19,6 +20,7 @@ struct TurnData {
     int16_t revengeDamage = 0;
 };
 
+// Keep track of an army's condition during a fight and save some convinience data
 class ArmyCondition {
     public: 
         size_t armySize;
@@ -48,6 +50,7 @@ class ArmyCondition {
     
 };
 
+// extract and extrapolate all necessary data from an army
 inline void ArmyCondition::init(const Army & army) {
     size_t i;
     HeroSkill * skill;
@@ -73,6 +76,7 @@ inline void ArmyCondition::init(const Army & army) {
     }
 }
 
+// Handle death of the front-most monster
 inline void ArmyCondition::afterDeath() {
     if (this->skillTypes[this->monstersLost] == revenge) {
         this->turnData.revengeDamage = (int) ceil(this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
@@ -82,6 +86,8 @@ inline void ArmyCondition::afterDeath() {
     this->frontDamageTaken = this->aoeDamageTaken;
 }
 
+// Resert turndata and fill it again with the hero abilities' values
+// Also handles healing afterwards to avoid accidental ressurects
 inline bool ArmyCondition::startNewTurn() {
     int16_t healingTemp;
     size_t i;
@@ -95,6 +101,7 @@ inline bool ArmyCondition::startNewTurn() {
     this->turnData.healing = 0;
     this->pureMonsters = 0;
     
+    // Gather hero abilities' effects
     for (i = this->monstersLost; i < this->armySize; i++) {
         if (this->aoeDamageTaken >= this->lineup[i]->hp) { // Check for Backline Deaths
             if (i == this->monstersLost) {
@@ -120,6 +127,7 @@ inline bool ArmyCondition::startNewTurn() {
         }
     }
     
+    // heal monsters
     this->frontDamageTaken -= healingTemp;
     this->aoeDamageTaken -= healingTemp;
     if (this->frontDamageTaken < 0) {
@@ -129,9 +137,11 @@ inline bool ArmyCondition::startNewTurn() {
         this->aoeDamageTaken = 0;
     }
     
+    // Return if loss condition is fulfilled
     return (this->monstersLost >= this->armySize);
 }
 
+// Handle all self-centered abilites and other multipliers on damage
 inline void ArmyCondition::getDamage(const int8_t turncounter, const Element opposingElement) {
     this->turnData.baseDamage = this->lineup[this->monstersLost]->damage; // Get Base damage
     
@@ -156,6 +166,7 @@ inline void ArmyCondition::getDamage(const int8_t turncounter, const Element opp
     }
 }
 
+// Add damage to the opposing side and check for deaths
 inline bool ArmyCondition::resolveDamage(TurnData & opposing) {
     if (opposing.baseDamage > this->turnData.protection) {
         this->frontDamageTaken += (int) ceil(opposing.baseDamage) - this->turnData.protection; // Handle Protection

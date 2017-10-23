@@ -15,8 +15,9 @@ const std::string heroLevelFileName = "heroLevels" + heroVersion;
 const std::string welcomeMessage = "Welcome to Diceycle's PvE Instance Solver!";
 const std::string helpMessage = "If you don't know what to do you can type help at any time to get an explanation about the current step.";
 
-enum QueryType {question, integer, raw};
+enum QueryType {question, integer, raw}; // Types of command line promts
 
+// An instance to be solved by the program
 struct Instance {
     Army target;
     size_t targetSize;
@@ -29,7 +30,7 @@ const std::string heroFileNotFoundErrorMessage =
     
 const std::string heroInputModeQuestion = "Do you want to load hero levels from file?";
 const std::string heroInputModeHelp =
-    "  If YES is selected the hero levels will be loaded from the " + heroLevelFileName + " -file in this folder.\n"
+    "  If YES is selected the hero levels will be loaded from the " + heroLevelFileName + "-file in this folder.\n"
     "  If this is your first time using this calculator then that file will be created for you when you select NO.\n";
     
 const std::string heroInputHelp = 
@@ -66,6 +67,7 @@ void initMacroFile(std::string macroFileName, bool showInput);
 // Wait for user input before continuing. Used to stop program from colsing outside of a command line.
 void haltExecution();
 
+// Method for handling ALL input. Gives access to help, error resistance and macro file for input.
 std::string getResistantInput(std::string query, std::string help, QueryType queryType = raw);
 
 // Ask the user a question that they can answer via command line
@@ -77,13 +79,13 @@ void debugOutput(int timeStamp, std::string message, bool shouldOutput, bool fin
 // Promt the User via command line to input his hero levels and return them as a vector<int>
 std::vector<int> takeHerolevelInput();
 
-// Returns multiple Instaces parse from command line input
+// Promts the user to input instance(s) to be solved 
 std::vector<Instance> takeInstanceInput(std::string promt);
 
 // Convert a lineup string into an actual instance to solve
 Instance makeInstanceFromString(std::string instanceString);
 
-// Parse string linup input into actual monsters if there are heroes in the input, a leveled hero is added to the database
+// Parse string linup input into actual monsters. If there are heroes in the input, a leveled hero is added to the database
 Army makeArmyFromStrings(std::vector<std::string> stringMonsters);
 
 // Parse hero input from a string into its name and level
@@ -92,6 +94,7 @@ std::pair<Monster, int> parseHeroString(std::string heroString);
 // Splits strings into a vector of strings. No need to optimize, only used for input.
 std::vector<std::string> split(std::string target, std::string separator);
 
+// Convert a string to lowercase where available
 std::string toLower(std::string input);
 
 #endif
