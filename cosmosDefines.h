@@ -9,14 +9,12 @@
 
 #include "cosmosClasses.h"
 
-using namespace std;
+extern std::vector<int8_t> availableHeroes; // Contains all User Heroes, readily Leveled
+extern std::vector<int8_t> availableMonsters; // Contains indices to raw Monster Data from a1 to f15, will be sorted by follower cost
 
-extern vector<int8_t> availableHeroes; // Contains all User Heroes, readily Leveled
-extern vector<int8_t> availableMonsters; // Contains indices to raw Monster Data from a1 to f15, will be sorted by follower cost
+extern std::map<std::string, int8_t> monsterMap; // Maps monster Names to their indices (includes heroes)
 
-extern map<string, int8_t> monsterMap; // Maps monster Names to their indices (includes heroes)
-
-static vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual Objects
+static std::vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual Objects
     Monster( 20,   8,    1000,  "a1", air),
     Monster( 48,   6,    3900,  "a2", air),
     Monster( 36,  12,    8000,  "a3", air),
@@ -81,7 +79,7 @@ static vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual O
     Monster(168, 168, 4741000, "f14", fire),
     Monster(234, 136, 5676000, "f15", fire)
 };
-static vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Objects
+static std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Objects
     Monster( 50, 12, 0, "james",             earth, {pAoe,          all, earth, 1}),
     
     Monster( 22, 14, 0, "hunter",            air,   {buff,          air, air, 2}),
@@ -151,7 +149,7 @@ static vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Obj
     Monster( 58, 22, 0, "zaytus",            fire,  {protect,       fire, fire, 4}),
 };
 
-static map<string, int> rarities { // hero rarities
+static std::map<std::string, int> rarities { // hero rarities
     {"james", 2},  
   
     {"hunter", 0},
@@ -221,7 +219,7 @@ static map<string, int> rarities { // hero rarities
     {"zaytus", 1}
 };
 
-static vector<vector<string>> quests { // Contains all quest lineups for easy referencing
+static std::vector<std::vector<std::string>> quests { // Contains all quest lineups for easy referencing
 	{""},
 	{"w5"},
 	{"f1", "a1", "f1", "a1", "f1", "a1"},
@@ -287,7 +285,7 @@ void initMonsterData();
 void filterMonsterData(int minimumMonsterCost);
 
 // Initialize Hero Data
-void initializeUserHeroes(vector<int> levels);
+void initializeUserHeroes(std::vector<int> levels);
 
 // Add a leveled hero to the databse 
 int8_t addLeveledHero(Monster hero, int level);

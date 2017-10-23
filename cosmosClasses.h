@@ -8,8 +8,6 @@
 #include <cstdint>
 #include <sstream>
 
-using namespace std;
-
 // Define types of HeroSkills and Elements
 enum SkillType {nothing, buff, protect, aoe, pAoe, heal, berserk, friends, champion, adapt, rainbow, training, wither, revenge};
 enum Element {
@@ -38,11 +36,11 @@ class Monster {
         int damage;
         int cost;
         bool isHero;
-        string name;
+        std::string name;
         Element element;
         HeroSkill skill;
         
-        Monster(int hp, int damage, int cost, string name, Element element, HeroSkill skill = none);
+        Monster(int hp, int damage, int cost, std::string name, Element element, HeroSkill skill = none);
         Monster();
 };
 
@@ -87,12 +85,12 @@ class Army {
         int8_t monsterAmount;
         
         inline void add(const int8_t m);
-        string toString();
+        std::string toString();
         void print();
-        Army(vector<int8_t> monsters = {});
+        Army(std::vector<int8_t> monsters = {});
 };
 
-extern vector<Monster> monsterReference; // Will be filled with leveled heroes if needed (determined by input)
+extern std::vector<Monster> monsterReference; // Will be filled with leveled heroes if needed (determined by input)
 
 // Function for sorting FightResults by followers (ascending)
 inline bool hasFewerFollowers(const Army & a, const Army & b) {

@@ -1,9 +1,9 @@
 #include "cosmosDefines.h"
 
-map<string, int8_t> monsterMap {}; // Maps monster Names to their pointers (includes heroes)
+std::map<std::string, int8_t> monsterMap {}; // Maps monster Names to their pointers (includes heroes)
 
-vector<int8_t> availableMonsters {}; // Contains pointers to raw Monster Data from a1 to f10, will be sorted by follower cost
-vector<int8_t> availableHeroes {};
+std::vector<int8_t> availableMonsters {}; // Contains pointers to raw Monster Data from a1 to f10, will be sorted by follower cost
+std::vector<int8_t> availableHeroes {};
 
 // Make sure all the values are set
 void initMonsterData() {
@@ -15,7 +15,7 @@ void initMonsterData() {
     monsterMap.clear();
     for (size_t i = 0; i < monsterBaseList.size(); i++) {
         monsterReference.push_back(monsterBaseList[i]);
-        monsterMap.insert(pair<string, int8_t>(monsterBaseList[i].name, i));
+        monsterMap.insert(std::pair<std::string, int8_t>(monsterBaseList[i].name, i));
     }
 
     availableMonsters.clear();
@@ -32,7 +32,7 @@ void filterMonsterData(int minimumMonsterCost) {
 }
 
 // Initialize Hero Data
-void initializeUserHeroes(vector<int> levels) {
+void initializeUserHeroes(std::vector<int> levels) {
     for (size_t i = 0; i < baseHeroes.size(); i++) {
         if (levels[i] > 0) {
             availableHeroes.push_back(addLeveledHero(baseHeroes[i], levels[i]));
@@ -53,7 +53,7 @@ Monster getLeveledHero(const Monster & m, int rarity, int level) {
         round(m.hp + points * ((double)m.hp) / value),
         m.damage + round(points * ((double)m.damage) / value),
         m.cost,
-        m.name + ":" + to_string(level),
+        m.name + ":" + std::to_string(level),
         m.element,
         m.skill
     );

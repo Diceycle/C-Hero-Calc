@@ -1,8 +1,8 @@
 #include "cosmosClasses.h"
 
-vector<Monster> monsterReference {}; // Will be filled with leveled heroes if needed (determined by input)
+std::vector<Monster> monsterReference {}; // Will be filled with leveled heroes if needed (determined by input)
 
-Monster::Monster(int hp, int damage, int cost, string name, Element element, HeroSkill skill) {
+Monster::Monster(int hp, int damage, int cost, std::string name, Element element, HeroSkill skill) {
     this->hp = hp;
     this->damage = damage;
     this->cost = cost;
@@ -26,7 +26,7 @@ FightResult::FightResult() {
     this->valid = false;
 }
 
-Army::Army(vector<int8_t> monsters) {
+Army::Army(std::vector<int8_t> monsters) {
     this->followerCost = 0;
     this->monsterAmount = 0;
     this->lastFightData = FightResult();
@@ -36,9 +36,9 @@ Army::Army(vector<int8_t> monsters) {
     }
 }
 
-string Army::toString() {
-    stringstream s;
-    s << "[Followers: " << setw(7) << this->followerCost << " | ";
+std::string Army::toString() {
+    std::stringstream s;
+    s << "[Followers: " << std::setw(7) << this->followerCost << " | ";
     for (int i = this->monsterAmount-1; i >= 0; i--) {
         s << monsterReference[this->monsters[i]].name << " "; // Print in reversed Order
     } s << "<==]"; 
@@ -46,5 +46,5 @@ string Army::toString() {
 }
 
 void Army::print() {
-    cout << this->toString() << endl;
+    std::cout << this->toString() << std::endl;
 }

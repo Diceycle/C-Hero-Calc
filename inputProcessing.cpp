@@ -1,5 +1,7 @@
 #include "inputProcessing.h"
 
+using namespace std;
+
 bool useMacroFile;
 bool showQueries = true;
 ifstream macroFile;

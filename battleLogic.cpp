@@ -81,8 +81,8 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         
         // Output detailed fight Data for debugging
         if (verbose) {
-            cout << setw(3) << leftCondition.monstersLost << " " << setw(3) << leftCondition.frontDamageTaken<< " " << setw(3) << leftCondition.aoeDamageTaken << " ";
-            cout << setw(3) << rightCondition.monstersLost << " " << setw(3) << rightCondition.frontDamageTaken << " " << setw(3) << rightCondition.aoeDamageTaken << endl;
+            std::cout << std::setw(3) << leftCondition.monstersLost << " " << std::setw(3) << leftCondition.frontDamageTaken<< " " << std::setw(3) << leftCondition.aoeDamageTaken << " ";
+            std::cout << std::setw(3) << rightCondition.monstersLost << " " << std::setw(3) << rightCondition.frontDamageTaken << " " << std::setw(3) << rightCondition.aoeDamageTaken << std::endl;
         }
         turncounter++;
     }
