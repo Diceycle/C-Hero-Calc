@@ -10,7 +10,7 @@ const float elementalBoost = 1.5;
 extern int totalFightsSimulated;
 
 struct TurnData {
-    int16_t baseDamage = 0;
+    float baseDamage = 0;
     int16_t buffDamage = 0;
     int16_t aoeDamage = 0;
     int16_t paoeDamage = 0;
@@ -75,7 +75,7 @@ inline void ArmyCondition::init(const Army & army) {
 
 inline void ArmyCondition::afterDeath() {
     if (this->skillTypes[this->monstersLost] == revenge) {
-        this->turnData.revengeDamage = this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost];
+        this->turnData.revengeDamage = (int) ceil(this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
     }
     this->monstersLost++;
     this->berserkProcs = 0;
@@ -158,7 +158,7 @@ inline void ArmyCondition::getDamage(const int8_t turncounter, const Element opp
 
 inline bool ArmyCondition::resolveDamage(TurnData & opposing) {
     if (opposing.baseDamage > this->turnData.protection) {
-        this->frontDamageTaken += opposing.baseDamage - this->turnData.protection; // Handle Protection
+        this->frontDamageTaken += (int) ceil(opposing.baseDamage) - this->turnData.protection; // Handle Protection
     }
     this->frontDamageTaken += opposing.aoeDamage + opposing.revengeDamage; // Also apply aoeDamage
     this->aoeDamageTaken += opposing.aoeDamage + opposing.paoeDamage + opposing.revengeDamage; // Apply aoe Damage to backline
