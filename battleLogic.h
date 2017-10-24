@@ -9,6 +9,8 @@
 const float elementalBoost = 1.5; // Damage Boost if element has advantage over another
 extern int totalFightsSimulated;
 
+const int8_t VALID_RAINBOW_CONDITION = 15; // Binary 00001111 -> means all elements were added
+
 // Struct keeping track of everything that is only valid for one turn
 struct TurnData {
     float baseDamage = 0;
@@ -24,10 +26,10 @@ struct TurnData {
 class ArmyCondition {
     public: 
         size_t armySize;
-        Monster * lineup[6];
-        SkillType skillTypes[6];
-        Element skillTargets[6];
-        float skillAmounts[6];
+        Monster * lineup[ARMY_MAX_SIZE];
+        SkillType skillTypes[ARMY_MAX_SIZE];
+        Element skillTargets[ARMY_MAX_SIZE];
+        float skillAmounts[ARMY_MAX_SIZE];
         
         int8_t rainbowCondition; // for rainbow ability
         int8_t pureMonsters; // for friends ability
@@ -150,7 +152,7 @@ inline void ArmyCondition::getDamage(const int8_t turncounter, const Element opp
         this->turnData.baseDamage *= pow(this->skillAmounts[this->monstersLost], this->pureMonsters);
     } else if (this->skillTypes[this->monstersLost] == TRAINING) {
         this->turnData.baseDamage += this->skillAmounts[this->monstersLost] * turncounter;
-    } else if (this->skillTypes[this->monstersLost] == RAINBOW && this->rainbowCondition == 15) {
+    } else if (this->skillTypes[this->monstersLost] == RAINBOW && this->rainbowCondition == VALID_RAINBOW_CONDITION) {
         this->turnData.baseDamage += this->skillAmounts[this->monstersLost];
     } else if (this->skillTypes[this->monstersLost] == ADAPT && opposingElement == this->skillTargets[this->monstersLost]) {
         this->turnData.baseDamage *= this->skillAmounts[this->monstersLost];

@@ -9,6 +9,12 @@
 
 #include "cosmosClasses.h"
 
+enum HeroRarity { 
+    COMMON = 1, 
+    RARE = 2, 
+    LEGENDARY = 6 // Values define how many stat points per level a hero of this rarity gets
+};
+
 extern std::map<std::string, int8_t> monsterMap; // // Maps monster Names to their indices in monsterReference from cosmosClasses
 
 extern std::vector<int8_t> availableMonsters; // Contains indices of raw Monster Data from a1 to f15, will be sorted by follower cost
@@ -149,74 +155,74 @@ static std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actua
     Monster( 58, 22, 0, "zaytus",            FIRE,  {PROTECT,       FIRE, FIRE, 4}),
 };
 
-static std::map<std::string, int> rarities { // Hero Rarities: 0 = Common, 1 = Rare, 2 = Legendary
-    {"james", 2},  
+static std::map<std::string, HeroRarity> rarities { // Hero Rarities: 0 = Common, 1 = Rare, 2 = Legendary
+    {"james",       LEGENDARY},  
   
-    {"hunter", 0},
-    {"shaman", 1},
-    {"alpha", 2},
+    {"hunter",      COMMON},
+    {"shaman",      RARE},
+    {"alpha",       LEGENDARY},
     
-    {"carl", 0},
-    {"nimue", 1},
-    {"athos", 2},
+    {"carl",        COMMON},
+    {"nimue",       RARE},
+    {"athos",       LEGENDARY},
     
-    {"jet", 0},
-    {"geron", 1},
-    {"rei", 2},
+    {"jet",         COMMON},
+    {"geron",       RARE},
+    {"rei",         LEGENDARY},
     
-    {"ailen", 0},
-    {"faefyr", 1},
-    {"auri", 2},
+    {"ailen",       COMMON},
+    {"faefyr",      RARE},
+    {"auri",        LEGENDARY},
     
-    {"k41ry", 0},
-    {"t4urus", 1},
-    {"tr0n1x", 2},
+    {"k41ry",       COMMON},
+    {"t4urus",      RARE},
+    {"tr0n1x",      LEGENDARY},
     
-    {"aquortis", 0},
-    {"aeris", 1},
-    {"geum", 2},
+    {"aquortis",    COMMON},
+    {"aeris",       RARE},
+    {"geum",        LEGENDARY},
     
-    {"rudean", 0},
-    {"aural", 1},
-    {"geror", 2},
+    {"rudean",      COMMON},
+    {"aural",       RARE},
+    {"geror",       LEGENDARY},
     
-    {"ourea", 0},
-    {"erebus", 1},
-    {"pontus", 2},
+    {"ourea",       COMMON},
+    {"erebus",      RARE},
+    {"pontus",      LEGENDARY},
     
-    {"oymos", 0},
-    {"xarth", 1},
-    {"atzar", 2},
+    {"oymos",       COMMON},
+    {"xarth",       RARE},
+    {"atzar",       LEGENDARY},
     
-    {"ladyoftwilight", 0},
-    {"tiny", 1},
-    {"nebra", 2},
+    {"ladyoftwilight",COMMON},
+    {"tiny",        RARE},
+    {"nebra",       LEGENDARY},
     
-    {"veildur", 2},
-    {"brynhildr", 2},
-    {"groth", 2},
+    {"veildur",     LEGENDARY},
+    {"brynhildr",   LEGENDARY},
+    {"groth",       LEGENDARY},
     
-    {"zeth", 2},
-    {"koth", 2},
-    {"gurth", 2},
+    {"zeth",        LEGENDARY},
+    {"koth",        LEGENDARY},
+    {"gurth",       LEGENDARY},
     
-    {"spyke", 2},
-    {"aoyuki", 2},
-    {"gaiabyte", 2},
+    {"spyke",       LEGENDARY},
+    {"aoyuki",      LEGENDARY},
+    {"gaiabyte",    LEGENDARY},
     
-    {"valor", 0},
-    {"rokka", 0},
-    {"pyromancer", 0},
-    {"bewat", 0},
+    {"valor",       COMMON},
+    {"rokka",       COMMON},
+    {"pyromancer",  COMMON},
+    {"bewat",       COMMON},
     
-    {"nicte",  1},
-    {"forestdruid", 1},
-    {"ignitor", 1},
-    {"undine",1},
+    {"nicte",       RARE},
+    {"forestdruid", RARE},
+    {"ignitor",     RARE},
+    {"undine",      RARE},
     
-    {"chroma", 1},
-    {"petry", 1},
-    {"zaytus", 1}
+    {"chroma",      RARE},
+    {"petry",       RARE},
+    {"zaytus",      RARE}
 };
 
 static std::vector<std::vector<std::string>> quests { // Contains all quest lineups for easy referencing
@@ -290,7 +296,7 @@ void filterMonsterData(int minimumMonsterCost);
 void initializeUserHeroes(std::vector<int> levels);
 
 // Create a new hero with leveled stats and return it
-Monster getLeveledHero(const Monster & m, int rarity, int level);
+Monster getLeveledHero(const Monster & m, int level);
 
 // Add a leveled hero to the databse and return its corresponding index
 int8_t addLeveledHero(Monster hero, int level);

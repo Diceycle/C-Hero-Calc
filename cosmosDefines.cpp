@@ -43,13 +43,9 @@ void initializeUserHeroes(std::vector<int> levels) {
 }
 
 // Create a new hero with leveled stats and return it
-Monster getLeveledHero(const Monster & m, int rarity, int level) {
-    int points = level-1;
-    if (rarity == 1) {
-        points = 2 * points;
-    } else if (rarity == 2) {
-        points = 6 * points;
-    }
+Monster getLeveledHero(const Monster & m, int level) {
+    HeroRarity rarity = rarities.at(m.name);
+    int points = rarity * level-1;
     int value = m.hp + m.damage;
     return Monster(
         round(m.hp + points * ((double)m.hp) / value),
@@ -63,7 +59,7 @@ Monster getLeveledHero(const Monster & m, int rarity, int level) {
 
 // Add a leveled hero to the databse and return its corresponding index
 int8_t addLeveledHero(Monster hero, int level) {
-    Monster m = getLeveledHero(hero, rarities.at(hero.name), level);
+    Monster m = getLeveledHero(hero, level);
     monsterReference.emplace_back(m);
     
     return monsterReference.size() - 1;

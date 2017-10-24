@@ -171,7 +171,7 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
     size_t i, j, sj, si;
 
     // Get first Upper limit on followers
-    if (instance.maxCombatants > 4) {
+    if (instance.maxCombatants > ARMY_MAX_BRUTEFORCEABLE_SIZE) {
         getQuickSolutions(instance, outputLevel);
     }
     
@@ -187,7 +187,7 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
     }
     
     // Check if a single monster can beat the last two monsters of the target. If not, solutions that can only beat n-2 monsters need not be expanded later
-    bool optimizable = (instance.targetSize >= 3);
+    bool optimizable = (instance.targetSize > ARMY_MAX_BRUTEFORCEABLE_SIZE && instance.targetSize > 3);
     if (optimizable) {
         tempArmy = Army({instance.target.monsters[instance.targetSize - 2], instance.target.monsters[instance.targetSize - 1]}); // Make an army from the last two monsters
     }
@@ -265,7 +265,7 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
                 
                 int leftFollowerCost;
                 FightResult * currentFightResult;
-                int8_t leftHeroList[6];
+                int8_t leftHeroList[ARMY_MAX_SIZE];
                 size_t leftHeroListSize;
                 int8_t rightMonster;
                 int8_t leftMonster;
@@ -286,7 +286,7 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
                         for (j = i+1; j < pureMonsterArmiesSize; j++) {
                             if (leftFollowerCost < pureMonsterArmies[j].followerCost) {
                                 break; 
-                            } else if (*currentFightResult <= pureMonsterArmies[j].lastFightData) { // pureResults[i] has more followers implicitly 
+                            } else if (*currentFightResult <= pureMonsterArmies[j].lastFightData) { // currentFightResult has more followers implicitly 
                                 currentFightResult->dominated = true;
                                 break;
                             }
@@ -295,7 +295,7 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
                         for (j = 0; j < heroMonsterArmiesSize; j++) {
                             if (leftFollowerCost > heroMonsterArmies[j].followerCost) {
                                 break; 
-                            } else if (heroMonsterArmies[j].lastFightData <= *currentFightResult) { // pureResults[i] has less followers implicitly
+                            } else if (heroMonsterArmies[j].lastFightData <= *currentFightResult) { // currentFightResult has less followers implicitly
                                 heroMonsterArmies[j].lastFightData.dominated = true;
                             }                       
                         }
@@ -389,9 +389,9 @@ int main(int argc, char** argv) {
     bool userWantsContinue;
  
     // Define User Input Data
-    size_t firstDominance = 4;          // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
-    string macroFileName = "default.cqinput"; // Path to default macro file
-   
+    size_t firstDominance = ARMY_MAX_BRUTEFORCEABLE_SIZE;   // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
+    string macroFileName = "default.cqinput";               // Path to default macro file
+
     // Flow Control Variables
     bool useDefaultMacroFile = false;    // Set this to true to always use the specified macro file
     bool showMacroFileInput = true;    // Set this to true to see what the macrofile inputs
@@ -421,7 +421,7 @@ int main(int argc, char** argv) {
     }
     
     // Check if the user provided a filename to be used as a macro file
-    if (argc == 2) {
+    if (argc >= 2) {
         initMacroFile(argv[1], showMacroFileInput);
     }
     else if (useDefaultMacroFile) {

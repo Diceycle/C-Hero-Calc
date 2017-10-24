@@ -8,6 +8,9 @@
 #include <cstdint>
 #include <sstream>
 
+const size_t ARMY_MAX_SIZE = 6;
+const size_t ARMY_MAX_BRUTEFORCEABLE_SIZE = 4;
+
 // Define types of HeroSkills and Elements
 enum SkillType {
     NOTHING,    // Base Skill used by normal monsters
@@ -97,7 +100,7 @@ class Army {
     public:
         FightResult lastFightData;
         int32_t followerCost;
-        int8_t monsters[6];
+        int8_t monsters[ARMY_MAX_SIZE];
         int8_t monsterAmount;
         
         inline void add(const int8_t m);
