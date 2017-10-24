@@ -10,7 +10,7 @@ Monster::Monster(int hp, int damage, int cost, std::string name, Element element
     this->element = element;
     this->skill = skill;
     
-    this->isHero = (skill.type != nothing);
+    this->isHero = (skill.type != NOTHING);
 };
 
 Monster::Monster() {

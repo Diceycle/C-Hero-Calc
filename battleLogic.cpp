@@ -84,10 +84,10 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         }
         
         // Handle wither ability
-        if (!leftDied && leftCondition.skillTypes[leftCondition.monstersLost] == wither) {
+        if (!leftDied && leftCondition.skillTypes[leftCondition.monstersLost] == WITHER) {
             leftCondition.frontDamageTaken += (leftCondition.lineup[leftCondition.monstersLost]->hp - leftCondition.frontDamageTaken) * leftCondition.skillAmounts[leftCondition.monstersLost];
         }
-        if (!rightDied && rightCondition.skillTypes[rightCondition.monstersLost] == wither) {
+        if (!rightDied && rightCondition.skillTypes[rightCondition.monstersLost] == WITHER) {
             rightCondition.frontDamageTaken += (rightCondition.lineup[rightCondition.monstersLost]->hp - rightCondition.frontDamageTaken) * rightCondition.skillAmounts[rightCondition.monstersLost];
         }
         

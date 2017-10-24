@@ -71,7 +71,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 currentSkill = monsterReference[availableHeroes[m]].skill.type;
                 newHeroArmies.push_back(oldPureArmies[i]);
                 newHeroArmies.back().add(availableHeroes[m]);
-                newHeroArmies.back().lastFightData.valid = (currentSkill == pAoe || currentSkill == friends || currentSkill == berserk || currentSkill == adapt); // These skills are self centered
+                newHeroArmies.back().lastFightData.valid = (currentSkill == P_AOE || currentSkill == FRIENDS || currentSkill == BERSERK || currentSkill == ADAPT); // These skills are self centered
             }
         }
     }
@@ -84,7 +84,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 for (m = 0; m < availableHeroesSize; m++) {
                     if (oldHeroArmies[i].monsters[j] == availableHeroes[m]) {
                         currentSkill = monsterReference[oldHeroArmies[i].monsters[j]].skill.type;
-                        globalAbilityInfluence |= (currentSkill == friends || currentSkill == rainbow);
+                        globalAbilityInfluence |= (currentSkill == FRIENDS || currentSkill == RAINBOW);
                         usedHeroes[m] = true;
                         break;
                     }
@@ -100,7 +100,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                     currentSkill = monsterReference[availableHeroes[m]].skill.type;
                     newHeroArmies.push_back(oldHeroArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = (currentSkill == pAoe || currentSkill == friends || currentSkill == berserk || currentSkill == adapt); // These skills are self centered
+                    newHeroArmies.back().lastFightData.valid = (currentSkill == P_AOE || currentSkill == FRIENDS || currentSkill == BERSERK || currentSkill == ADAPT); // These skills are self centered
                 }
                 usedHeroes[m] = false;
             }

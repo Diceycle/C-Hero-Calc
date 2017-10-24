@@ -10,31 +10,31 @@
 
 // Define types of HeroSkills and Elements
 enum SkillType {
-    nothing,    // Base Skill used by normal monsters
-    buff,       // Increases Damage of own army
-    protect,    // Reduces incoming damage vs the own army
-    aoe,        // Damages the entire opposing army every turn
-    pAoe,       // If this monster attacks it also damages every monster behind the attacked
-    heal,       // Heals the entire own army every turn
-    berserk,    // Every attack this monster makes multiplies its own damage 
-    friends,    // This monster receives a damage multiplicator for every NORMAL monster behind it
-    champion,   // This monster has the buff and protect ability at the same time
-    adapt,      // This monster deals more damage vs certain elements
-    rainbow,    // This monster receives a damage buff if monsters of every element are behind it
-    training,   // This monster receives a damage buff for every turn that passed
-    wither,     // This monster's hp decrease after every attack it survives
-    revenge     // After this onster dies it damages the entire opposing army
+    NOTHING,    // Base Skill used by normal monsters
+    BUFF,       // Increases Damage of own army
+    PROTECT,    // Reduces incoming damage vs the own army
+    AOE,        // Damages the entire opposing army every turn
+    P_AOE,       // If this monster attacks it also damages every monster behind the attacked
+    HEAL,       // Heals the entire own army every turn
+    BERSERK,    // Every attack this monster makes multiplies its own damage 
+    FRIENDS,    // This monster receives a damage multiplicator for every NORMAL monster behind it
+    CHAMPION,   // This monster has the buff and protect ability at the same time
+    ADAPT,      // This monster deals more damage vs certain elements
+    RAINBOW,    // This monster receives a damage buff if monsters of every element are behind it
+    TRAINING,   // This monster receives a damage buff for every turn that passed
+    WITHER,     // This monster's hp decrease after every attack it survives
+    REVENGE     // After this onster dies it damages the entire opposing army
 };
 
 enum Element {
-    earth   = 0,
-    air     = 1, 
-    water   = 2, 
-    fire    = 3, // Discrete Values needed to quickly determine counters
-    all,         
-    self         // These Values are used to specify targets of hero skills
+    EARTH   = 0,
+    AIR     = 1, 
+    WATER   = 2, 
+    FIRE    = 3, // Discrete Values needed to quickly determine counters
+    ALL,         
+    SELF         // These Values are used to specify targets of hero skills
 };
-const Element counter [] { fire, earth, air, water, self, self }; // Elemental Advantages earth = 0 -> counter[0] = fire -> fire has advantage over earth
+const Element counter [] { FIRE, EARTH, AIR, WATER, SELF, SELF }; // Elemental Advantages earth = 0 -> counter[0] = fire -> fire has advantage over earth
 
 // Defines Skills of Heros
 struct HeroSkill {
@@ -43,7 +43,7 @@ struct HeroSkill {
     Element sourceElement;
     float amount;
 };
-static HeroSkill none = HeroSkill({nothing, air, air, 1}); // base skill used for normal monsters
+static HeroSkill NONE = HeroSkill({NOTHING, AIR, AIR, 1}); // base skill used for normal monsters
 
 // Defines a Monster or Hero
 class Monster {
@@ -56,7 +56,7 @@ class Monster {
         Element element;
         HeroSkill skill;
         
-        Monster(int hp, int damage, int cost, std::string name, Element element, HeroSkill skill = none);
+        Monster(int hp, int damage, int cost, std::string name, Element element, HeroSkill skill = NONE);
         Monster();
 };
 

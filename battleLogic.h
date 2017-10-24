@@ -68,7 +68,7 @@ inline void ArmyCondition::init(const Army & army) {
         
         skill = &(this->lineup[i]->skill);
         this->skillTypes[i] = skill->type;
-        if (skill->type == rainbow) {
+        if (skill->type == RAINBOW) {
             this->rainbowCondition = 0;
         }
         this->skillTargets[i] = skill->target;
@@ -78,7 +78,7 @@ inline void ArmyCondition::init(const Army & army) {
 
 // Handle death of the front-most monster
 inline void ArmyCondition::afterDeath() {
-    if (this->skillTypes[this->monstersLost] == revenge) {
+    if (this->skillTypes[this->monstersLost] == REVENGE) {
         this->turnData.revengeDamage = (int) ceil(this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
     }
     this->monstersLost++;
@@ -108,20 +108,20 @@ inline bool ArmyCondition::startNewTurn() {
                 this->afterDeath();
             }
         } else {
-            if (this->skillTypes[i] == nothing) {
+            if (this->skillTypes[i] == NOTHING) {
                 pureMonsters++; // count for friends ability
-            } else if (this->skillTypes[i] == protect && (this->skillTargets[i] == all || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
+            } else if (this->skillTypes[i] == PROTECT && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
                 this->turnData.protection += this->skillAmounts[i];
-            } else if (this->skillTypes[i] == buff && (this->skillTargets[i] == all || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
+            } else if (this->skillTypes[i] == BUFF && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
                 this->turnData.buffDamage += this->skillAmounts[i];
-            } else if (this->skillTypes[i] == champion && (this->skillTargets[i] == all || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
+            } else if (this->skillTypes[i] == CHAMPION && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
                 this->turnData.buffDamage += this->skillAmounts[i];
                 this->turnData.protection += this->skillAmounts[i];
-            } else if (this->skillTypes[i] == heal) {
+            } else if (this->skillTypes[i] == HEAL) {
                 this->turnData.healing += this->skillAmounts[i];
-            } else if (this->skillTypes[i] == aoe) {
+            } else if (this->skillTypes[i] == AOE) {
                 this->turnData.aoeDamage += this->skillAmounts[i];
-            } else if (this->skillTypes[i] == pAoe && i == this->monstersLost) {
+            } else if (this->skillTypes[i] == P_AOE && i == this->monstersLost) {
                 this->turnData.paoeDamage += this->lineup[i]->damage;
             }
         }
@@ -146,15 +146,15 @@ inline void ArmyCondition::getDamage(const int8_t turncounter, const Element opp
     this->turnData.baseDamage = this->lineup[this->monstersLost]->damage; // Get Base damage
     
     // Handle Monsters with skills berserk or friends or training etc.
-    if (this->skillTypes[this->monstersLost] == friends) {
+    if (this->skillTypes[this->monstersLost] == FRIENDS) {
         this->turnData.baseDamage *= pow(this->skillAmounts[this->monstersLost], this->pureMonsters);
-    } else if (this->skillTypes[this->monstersLost] == training) {
+    } else if (this->skillTypes[this->monstersLost] == TRAINING) {
         this->turnData.baseDamage += this->skillAmounts[this->monstersLost] * turncounter;
-    } else if (this->skillTypes[this->monstersLost] == rainbow && this->rainbowCondition == 15) {
+    } else if (this->skillTypes[this->monstersLost] == RAINBOW && this->rainbowCondition == 15) {
         this->turnData.baseDamage += this->skillAmounts[this->monstersLost];
-    } else if (this->skillTypes[this->monstersLost] == adapt && opposingElement == this->skillTargets[this->monstersLost]) {
+    } else if (this->skillTypes[this->monstersLost] == ADAPT && opposingElement == this->skillTargets[this->monstersLost]) {
         this->turnData.baseDamage *= this->skillAmounts[this->monstersLost];
-    } else if (this->skillTypes[this->monstersLost] == berserk) {
+    } else if (this->skillTypes[this->monstersLost] == BERSERK) {
         this->turnData.baseDamage *= pow(this->skillAmounts[this->monstersLost], this->berserkProcs);
         this->berserkProcs++;
     }
