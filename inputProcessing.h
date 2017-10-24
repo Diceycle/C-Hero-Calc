@@ -9,6 +9,8 @@
 
 #include "cosmosDefines.h"
 
+const size_t STANDARD_CMD_WIDTH = 80;
+
 const std::string heroVersion = "2.7.2";
 const std::string heroLevelFileName = "heroLevels" + heroVersion;
 
@@ -16,6 +18,15 @@ const std::string welcomeMessage = "Welcome to Diceycle's PvE Instance Solver!";
 const std::string helpMessage = "If you don't know what to do you can type help at any time to get an explanation about the current step.";
 
 enum QueryType {question, integer, raw}; // Types of command line promts
+
+const std::string POSITIVE_ANSWER = "y";
+const std::string NEGATIVE_ANSWER = "n";
+
+const std::string TOKEN_SEPARATOR = " ";
+const std::string ELEMENT_SEPARATOR = ",";
+const std::string COMMENT_DELIMITOR = "//";
+const std::string QUEST_PREFIX = "quest";
+const std::string QUEST_NUMBER_SEPARTOR = "-";
 
 // An instance to be solved by the program
 struct Instance {
@@ -37,15 +48,15 @@ const std::string heroInputHelp =
     "  Enter the Level of the hero whose name is displayed on the left. If you don't own that hero, enter 0.\n";
 
 const std::string lineupInputHelp = 
-    "  Enter Monsters separated by commas.\n"
+    "  Enter Monsters separated by " + ELEMENT_SEPARATOR + " .\n"
     "  Normal monsters are written with their element (a,e,w,f) and their tier number. So the level 5 water monster is w5.\n"
-    "  Heroes are written first with their full name and a colon(:) followed by their level. For example: forestdruid:50\n"
-    "  Full example: a1,geror:22,f13,w2,ladyoftwilight:1\n"
+    "  Heroes are written first with their full name and a " + HEROLEVEL_SEPARATOR + " followed by their level. For example, forestdruid" + HEROLEVEL_SEPARATOR + "50\n"
+    "  Full example: a1" + ELEMENT_SEPARATOR + "geror" + HEROLEVEL_SEPARATOR + "22" + ELEMENT_SEPARATOR + "f13" + ELEMENT_SEPARATOR + "w2" + ELEMENT_SEPARATOR + "ladyoftwilight" + HEROLEVEL_SEPARATOR + "1\n"
     "  The other alternative is selecting a quest from the game. "
-    "For example: Typing quest23-3 loads the lineup for the 23rd quest and tries to beat it with 4 monsters or less.\n"
+    "For example: Typing " + QUEST_PREFIX + "23" + QUEST_NUMBER_SEPARTOR + "3 loads the lineup for the 23rd quest and tries to beat it with 4 monsters or less.\n"
     "  You can also enter multiple lineups at once. Do so by separating them with spaces.\n"
-    "  Example: quest5-3 quest6-3 quest7-2 a1,a2,a3 quest8-1\n"
-    "  In this Example the program will calculate those five lineups one after another.\n";
+    "  Example: " + QUEST_PREFIX + "5" + QUEST_NUMBER_SEPARTOR + "3 a1" + ELEMENT_SEPARATOR + "a2" + ELEMENT_SEPARATOR + "a3 " + QUEST_PREFIX + "8" + QUEST_NUMBER_SEPARTOR + "1\n"
+    "  In this Example the program will calculate those three lineups one after another.\n";
     
 const std::string minimumMonsterCostHelp = 
     "  This determines how expensive a monster needs to be in order for the calculator to consider it for a solution.\n"

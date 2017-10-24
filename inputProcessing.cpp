@@ -7,6 +7,9 @@ bool useMacroFile;
 bool showQueries = true;
 ifstream macroFile;
 
+// Length 
+const size_t FINISH_MESSAGE_LENGTH = 20;
+
 // Initialize a macro file provided by filename
 void initMacroFile(string macroFileName, bool showInput) {
     macroFile.open(macroFileName);
@@ -27,7 +30,7 @@ void haltExecution() {
 // Method for handling ALL input. Gives access to help, error resistance and macro file for input.
 string getResistantInput(string query, string help, QueryType queryType) {
     string inputString;
-    string firstElement;
+    string firstToken;
     while (true) {
         // Check first if there is still a line in the macro file
         if (useMacroFile) {
@@ -43,21 +46,21 @@ string getResistantInput(string query, string help, QueryType queryType) {
         }
         
         // Process Input
-        inputString = split(toLower(inputString), "//")[0]; // trim potential comments in a macrofile and convert to lowercase
-        firstElement = split(inputString, " ")[0]; // except for rare input only the first string till a space is used
+        inputString = split(toLower(inputString), COMMENT_DELIMITOR)[0]; // trim potential comments in a macrofile and convert to lowercase
+        firstToken = split(inputString, TOKEN_SEPARATOR)[0]; // except for rare input only the first string till a space is used
         if (useMacroFile && showQueries) {
             cout << inputString << endl; // Show input if a macro file is used
         }
-        if (firstElement == "help") {
+        if (firstToken == "help") {
             cout << help;
         } else {
-            if (queryType == question && (firstElement == "y" || firstElement == "n")) {
-                return firstElement;
+            if (queryType == question && (firstToken == POSITIVE_ANSWER || firstToken == NEGATIVE_ANSWER)) {
+                return firstToken;
             }
             if (queryType == integer) {
                 try {
-                    stoi(firstElement);
-                    return firstElement;
+                    stoi(firstToken);
+                    return firstToken;
                 } catch (const exception & e) {}
             }
             if (queryType == raw) {
@@ -69,11 +72,11 @@ string getResistantInput(string query, string help, QueryType queryType) {
 
 // Ask the user a question that they can answer via command line
 bool askYesNoQuestion(string questionMessage, string help) {
-    string inputString = getResistantInput(questionMessage + " (y/n): ", help, question);
-    if (inputString == "n") {
+    string inputString = getResistantInput(questionMessage + " (" + POSITIVE_ANSWER + "/" + NEGATIVE_ANSWER + "): ", help, question);
+    if (inputString == NEGATIVE_ANSWER) {
         return false;
     }
-    if (inputString == "y") {
+    if (inputString == POSITIVE_ANSWER) {
         return true;
     }
     return false;
@@ -83,10 +86,10 @@ bool askYesNoQuestion(string questionMessage, string help) {
 void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLastOutput, bool finishLine) {
     if (shouldOutput) { 
         if (finishLastOutput) {
-            cout << "Done! (" << right << setw(3) << time(NULL) - timeStamp << " seconds)" << endl; // Exactly 20 bytes long
+            cout << "Done! (" << right << setw(3) << time(NULL) - timeStamp << " seconds)" << endl; // Exactly 20 characters long
         }
         if (message != "") {
-            cout << left << setw(60) << message; // With 60 there is exactly enough space to fit the finish message in on a windows cmd
+            cout << left << setw(STANDARD_CMD_WIDTH - FINISH_MESSAGE_LENGTH) << message; // With 60 there is exactly enough space to fit the finish message in on a windows cmd
             if (finishLine) {
                 cout << endl;
             }
@@ -108,7 +111,7 @@ vector<int> takeHerolevelInput() {
         try {
             heroFile.open(heroLevelFileName, fstream::in);
             heroFile >> input;
-            stringLevels = split(input, ",");
+            stringLevels = split(input, ELEMENT_SEPARATOR);
             for (size_t i = 0; i < stringLevels.size(); i++) {
                 levels.push_back(stoi(stringLevels[i]));
             }
@@ -130,7 +133,7 @@ vector<int> takeHerolevelInput() {
         // Write Hero Levels to file to use next time
         heroFile.open(heroLevelFileName, fstream::out);
         for (size_t i = 0; i < levels.size()-1; i++) {
-            heroFile << levels[i] << ',';
+            heroFile << levels[i] << ELEMENT_SEPARATOR;
 		}
 		heroFile << levels[levels.size()-1];
 		heroFile.close();
@@ -151,7 +154,7 @@ vector<Instance> takeInstanceInput(string prompt) {
     while (true) {
         input = getResistantInput(prompt, lineupInputHelp, raw);
         instances.clear();
-        instanceStrings = split(input, " ");
+        instanceStrings = split(input, TOKEN_SEPARATOR);
         try {
             for (size_t i = 0; i < instanceStrings.size(); i++) {
                 instances.push_back(makeInstanceFromString(instanceStrings[i]));
@@ -164,17 +167,16 @@ vector<Instance> takeInstanceInput(string prompt) {
 // Convert a lineup string into an actual instance to solve
 Instance makeInstanceFromString(string instanceString) {
     Instance instance;
-    string questString = "quest";
-    int dashPosition = instanceString.find("-");
+    int dashPosition = instanceString.find(QUEST_NUMBER_SEPARTOR);
     
-    if (instanceString.compare(0, questString.length(), questString) == 0) {
-        int questNumber = stoi(instanceString.substr(questString.length(), dashPosition-questString.length()));
+    if (instanceString.compare(0, QUEST_PREFIX.length(), QUEST_PREFIX) == 0) {
+        int questNumber = stoi(instanceString.substr(QUEST_PREFIX.length(), dashPosition-QUEST_PREFIX.length()));
         instance.target = makeArmyFromStrings(quests[questNumber]);
-        instance.maxCombatants = 7 - stoi(instanceString.substr(dashPosition+1, 1));
+        instance.maxCombatants = ARMY_MAX_SIZE - (stoi(instanceString.substr(dashPosition+1, 1)) - 1);
     } else {
-        vector<string> stringLineup = split(instanceString, ",");
+        vector<string> stringLineup = split(instanceString, ELEMENT_SEPARATOR);
         instance.target = makeArmyFromStrings(stringLineup);
-        instance.maxCombatants = 6;
+        instance.maxCombatants = ARMY_MAX_SIZE;
     }
     instance.targetSize = instance.target.monsterAmount;
     return instance;
@@ -186,7 +188,7 @@ Army makeArmyFromStrings(vector<string> stringMonsters) {
     pair<Monster, int> heroData;
     
     for(size_t i = 0; i < stringMonsters.size(); i++) {
-        if(stringMonsters[i].find(":") != stringMonsters[i].npos) {
+        if(stringMonsters[i].find(HEROLEVEL_SEPARATOR) != stringMonsters[i].npos) {
             heroData = parseHeroString(stringMonsters[i]);
             army.add(addLeveledHero(heroData.first, heroData.second));
         } else {
@@ -198,14 +200,14 @@ Army makeArmyFromStrings(vector<string> stringMonsters) {
 
 // Parse hero input from a string into its name and level
 pair<Monster, int> parseHeroString(string heroString) {
-    string name = heroString.substr(0, heroString.find(':'));
+    string name = heroString.substr(0, heroString.find(HEROLEVEL_SEPARATOR));
 	Monster hero;
 	for (size_t i = 0; i < baseHeroes.size(); i++) {
 		if (baseHeroes[i].name == name) {
 			hero = baseHeroes[i];
 		}
 	}
-    int level = stoi(heroString.substr(heroString.find(':')+1));
+    int level = stoi(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR)+1));
     return pair<Monster, int>(hero, level);
 }
 

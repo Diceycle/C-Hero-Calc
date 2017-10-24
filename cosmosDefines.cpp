@@ -51,7 +51,7 @@ Monster getLeveledHero(const Monster & m, int level) {
         round(m.hp + points * ((double)m.hp) / value),
         m.damage + round(points * ((double)m.damage) / value),
         m.cost,
-        m.name + ":" + std::to_string(level),
+        m.name + HEROLEVEL_SEPARATOR + std::to_string(level),
         m.element,
         m.skill
     );

@@ -11,6 +11,8 @@
 const size_t ARMY_MAX_SIZE = 6;
 const size_t ARMY_MAX_BRUTEFORCEABLE_SIZE = 4;
 
+const std::string HEROLEVEL_SEPARATOR = ":";
+
 // Define types of HeroSkills and Elements
 enum SkillType {
     NOTHING,    // Base Skill used by normal monsters
