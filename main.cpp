@@ -110,7 +110,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
 
 // Use a greedy method to get a first upper bound on follower cost for the solution
 // Greedy approach for 4 or less monsters is obsolete, as bruteforce is still fast enough
-void getQuickSolutions(Instance instance, int outputLevel) {
+void getQuickSolutions(Instance & instance, int outputLevel) {
     Army tempArmy = Army();
     vector<int8_t> greedy {};
     vector<int8_t> greedyHeroes {};
@@ -163,7 +163,7 @@ void getQuickSolutions(Instance instance, int outputLevel) {
 }
 
 // Main method for solving an instance. Returns time taken to calculate in seconds
-int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
+void solveInstance(Instance & instance, size_t firstDominance, OutputLevel outputLevel) {
     Army tempArmy = Army();
     int startTime;
     int tempTime;
@@ -252,7 +252,7 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
                 } else {
                     cout << "Could not find a solution yet!" << endl;
                 }
-                if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return 0;}
+                if (!askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n")) {return;}
                 startTime = time(NULL);
                 tempTime = startTime;
                 debugOutput(tempTime, "\nPreparing to work on loop for armies of size " + to_string(armySize+1), outputLevel > BASIC_OUTPUT, false, true);
@@ -375,7 +375,26 @@ int solveInstance(Instance instance, size_t firstDominance, int outputLevel) {
         }
         debugOutput(tempTime, "", outputLevel > BASIC_OUTPUT, true, true);
     }
-    return time(NULL) - startTime;
+    instance.calculationTime = time(NULL) - startTime;
+}
+
+void outputSolution(Instance instance) {
+    cout << endl << "Solution for " << instance.target.toString() << ":" << endl;
+            
+    // Announce the result
+    if (best.monsterAmount > 0) {
+        cout << "  " << best.toString() << endl;
+        best.lastFightData.valid = false;
+        simulateFight(best, instance.target); // Sanity check on the solution
+        if (best.lastFightData.rightWon) {
+            cout << "  This does not beat the lineup!!!" << endl;
+            cout << "FATAL ERROR!!! Please comment this output in the Forums!" << endl;
+        }
+    } else {
+        cout << endl << "Could not find a solution that beats this lineup." << endl;
+    }
+    cout << "  " << totalFightsSimulated << " Fights simulated." << endl;
+    cout << "  Total Calculation Time: " << instance.calculationTime << endl;
 }
 
 int main(int argc, char** argv) {
@@ -385,7 +404,7 @@ int main(int argc, char** argv) {
     int32_t minimumMonsterCost;
     int32_t userFollowerUpperBound;
     vector<Instance> instances;
-    int outputLevel;
+    OutputLevel outputLevel;
     bool userWantsContinue;
  
     // Define User Input Data
@@ -456,28 +475,8 @@ int main(int argc, char** argv) {
             if (instances.size() > 1) {
                 outputLevel = NO_OUTPUT;
             }
-            int totalTime = solveInstance(instances[i], firstDominance, outputLevel);
-            
-            cout << endl << "Solution for " << instances[i].target.toString() << ":" << endl;
-            
-            // Announce the result
-            if (best.monsterAmount > 0) {
-                cout << "  " << best.toString() << endl;
-                best.lastFightData.valid = false;
-                simulateFight(best, instances[i].target); // Sanity check on the solution
-                if (best.lastFightData.rightWon) {
-                    cout << "  This does not beat the lineup!!!";
-                    for (int i = 1; i <= 10; i++) {
-                        cout << "ERROR";
-                    } cout << endl;
-                    haltExecution();
-                    return EXIT_FAILURE;
-                }
-            } else {
-                cout << endl << "Could not find a solution that beats this lineup." << endl;
-            }
-            cout << "  " << totalFightsSimulated << " Fights simulated." << endl;
-            cout << "  Total Calculation Time: " << totalTime << endl;
+            solveInstance(instances[i], firstDominance, outputLevel);
+            outputSolution(instances[i]);
         }
         userWantsContinue = askYesNoQuestion("Do you want to calculate more lineups?", "");
     } while (userWantsContinue);

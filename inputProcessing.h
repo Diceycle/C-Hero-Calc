@@ -33,6 +33,7 @@ struct Instance {
     Army target;
     size_t targetSize;
     size_t maxCombatants;
+    int calculationTime;
 };
 
 const std::string heroFileNotFoundErrorMessage = 

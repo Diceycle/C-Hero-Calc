@@ -7,7 +7,7 @@ bool useMacroFile;
 bool showQueries = true;
 ifstream macroFile;
 
-// Length 
+// Length of timestamp in debug messages
 const size_t FINISH_MESSAGE_LENGTH = 20;
 
 // Initialize a macro file provided by filename
