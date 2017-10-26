@@ -45,7 +45,7 @@ void initializeUserHeroes(std::vector<int> levels) {
 // Create a new hero with leveled stats and return it
 Monster getLeveledHero(const Monster & m, int level) {
     HeroRarity rarity = rarities.at(m.name);
-    int points = rarity * level-1;
+    int points = rarity * (level-1);
     int value = m.hp + m.damage;
     return Monster(
         round(m.hp + points * ((double)m.hp) / value),

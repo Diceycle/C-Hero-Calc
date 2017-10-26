@@ -412,8 +412,8 @@ int main(int argc, char** argv) {
     string macroFileName = "default.cqinput";               // Path to default macro file
 
     // Flow Control Variables
-    bool useDefaultMacroFile = false;    // Set this to true to always use the specified macro file
-    bool showMacroFileInput = true;    // Set this to true to see what the macrofile inputs
+    bool useDefaultMacroFile = false;   // Set this to true to always use the specified macro file
+    bool showMacroFileInput = true;     // Set this to true to see what the macrofile inputs
     bool individual = false;            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
     
     // -------------------------------------------- Program Start --------------------------------------------
@@ -458,7 +458,7 @@ int main(int argc, char** argv) {
     
     do {
         instances = takeInstanceInput("Enter Enemy Lineup(s): ");
-        cout << "Calculating with " << availableMonsters.size() << " available Monsters and " << availableHeroes.size() << " enabled Heroes." << endl;
+        cout << endl << "Calculating with " << availableMonsters.size() << " available Monsters and " << availableHeroes.size() << " enabled Heroes." << endl;
         
         for (size_t i = 0; i < instances.size(); i++) {
             // Reset solution Data
