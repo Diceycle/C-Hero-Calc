@@ -6,10 +6,12 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <ostream>
 
 #include "cosmosDefines.h"
 
 const size_t STANDARD_CMD_WIDTH = 80;
+const int INDENT_WIDTH = 2;
 
 const std::string heroVersion = "2.7.2";
 const std::string heroLevelFileName = "heroLevels" + heroVersion;
@@ -28,12 +30,55 @@ const std::string COMMENT_DELIMITOR = "//";
 const std::string QUEST_PREFIX = "quest";
 const std::string QUEST_NUMBER_SEPARTOR = "-";
 
+// Enum to control the amount of output generate
+enum OutputLevel {
+    VITAL_OUTPUT    = 0,
+    SERVER_OUTPUT   = 1,
+    CMD_OUTPUT      = 2,
+    SOLUTION_OUTPUT = 3,
+    BASIC_OUTPUT    = 4,
+    DETAILED_OUTPUT = 5
+};
+
 // An instance to be solved by the program
 struct Instance {
     Army target;
     size_t targetSize;
     size_t maxCombatants;
     int calculationTime;
+};
+
+class IOManager {
+    private:
+        bool useMacroFile;
+        bool showQueries = true;
+        std::ifstream macroFile;
+
+        int lastTimedOutput = -1;
+        std::ostringstream outputStream;
+        
+        std::string getIndent(int indent);
+        void printBuffer(OutputLevel urgency);
+        bool shouldOutput(OutputLevel urgency);
+        
+    public:
+        OutputLevel outputLevel;
+        
+        IOManager();
+        
+        void initMacroFile(std::string macroFileName, bool showInput);
+        std::string getResistantInput(std::string query, std::string help, QueryType queryType = raw);
+        bool askYesNoQuestion(std::string question, std::string help, OutputLevel urgency, std::string defaultAnswer);
+        std::vector<int> takeHerolevelInput();
+        std::vector<Instance> takeInstanceInput(std::string promt);
+        
+        void outputMessage(std::string message, OutputLevel urgency, int indent = 0, bool linebreak = true);
+        void timedOutput(std::string message, OutputLevel urgency, int indent = 0, bool reset = false);
+        void suspendTimedOutputs(OutputLevel urgency);
+        void resumeTimedOutputs(OutputLevel urgency);
+        void finishTimedOutput(OutputLevel urgency);
+        
+        void haltExecution();
 };
 
 const std::string heroFileNotFoundErrorMessage = 
@@ -72,27 +117,6 @@ const std::string maxFollowerHelp =
     "  You can enter your followers here if you think that it speeds up calculation. "
     "But then you won't be able to know how many followers you are missing to beat the lineup. Your choice.\n"
     "  Enter -1 if you don't want to set the limit yourself.\n";
-    
-// Initialize a config file provided by filename
-void initMacroFile(std::string macroFileName, bool showInput);
-
-// Wait for user input before continuing. Used to stop program from colsing outside of a command line.
-void haltExecution();
-
-// Method for handling ALL input. Gives access to help, error resistance and macro file for input.
-std::string getResistantInput(std::string query, std::string help, QueryType queryType = raw);
-
-// Ask the user a question that they can answer via command line
-bool askYesNoQuestion(std::string question, std::string help);
-
-// Output things on the command line. Using shouldOutput this can be easily controlled globally
-void debugOutput(int timeStamp, std::string message, bool shouldOutput, bool finishLastOutput, bool finishLine);
-
-// Promt the User via command line to input his hero levels and return them as a vector<int>
-std::vector<int> takeHerolevelInput();
-
-// Promts the user to input instance(s) to be solved 
-std::vector<Instance> takeInstanceInput(std::string promt);
 
 // Convert a lineup string into an actual instance to solve
 Instance makeInstanceFromString(std::string instanceString);

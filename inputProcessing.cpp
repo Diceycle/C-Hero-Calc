@@ -2,53 +2,102 @@
 
 using namespace std;
 
-// Global data related to using macro files
-bool useMacroFile;
-bool showQueries = true;
-ifstream macroFile;
-
 // Length of timestamp in debug messages
 const size_t FINISH_MESSAGE_LENGTH = 20;
 
-// Initialize a macro file provided by filename
-void initMacroFile(string macroFileName, bool showInput) {
-    macroFile.open(macroFileName);
+IOManager::IOManager() {
+    this->useMacroFile = false;
+    this->showQueries = true;
+    this->outputLevel = BASIC_OUTPUT;
     
-    useMacroFile = macroFile.good();
-    showQueries = macroFile.good() && showInput;
-    if (!macroFile.good()) {
+    this->lastTimedOutput = -1;
+}
+
+// Initialize a macro file provided by filename
+void IOManager::initMacroFile(string macroFileName, bool showInput) {
+    this->macroFile.open(macroFileName);
+    
+    this->useMacroFile = this->macroFile.good();
+    this->showQueries = this->macroFile.good() && showInput;
+    if (!this->macroFile.good()) {
         cout << "Could not find Macro File. Switching to Manual Input." << endl;
     }
 }
 
+void IOManager::printBuffer(OutputLevel urgency) {
+    if (this->shouldOutput(urgency)) {
+        cout << this->outputStream.str();
+    } 
+    this->outputStream.str("");
+    this->outputStream.clear();
+}
+
+string IOManager::getIndent(int indent) {
+    return string(indent * INDENT_WIDTH, ' ');
+}
+
+void IOManager::outputMessage(string message, OutputLevel urgency, int indent, bool linebreak) {
+    this->outputStream << this->getIndent(indent) + message;
+    if (linebreak) {
+        this->outputStream << endl;
+    }
+    this->printBuffer(urgency);
+}
+
+void IOManager::timedOutput(string message, OutputLevel urgency, int indent, bool reset) {
+    if (this->lastTimedOutput >= 0 && !reset) {
+        this->finishTimedOutput(urgency);
+    }
+    lastTimedOutput = time(NULL);
+    this->outputStream << left << setw(STANDARD_CMD_WIDTH - FINISH_MESSAGE_LENGTH) << this->getIndent(indent) + message;
+    this->printBuffer(urgency);
+}
+
+void IOManager::finishTimedOutput(OutputLevel urgency) {
+    this->outputStream << "Done! (" << right << setw(3) << time(NULL) - this->lastTimedOutput << " seconds)" << endl; // Exactly 20 characters long
+    this->printBuffer(urgency);
+}
+
+void IOManager::suspendTimedOutputs(OutputLevel urgency) {
+    this->outputStream << endl;
+    this->printBuffer(urgency);
+}
+
+void IOManager::resumeTimedOutputs(OutputLevel urgency) {
+    this->outputStream << left << setw(STANDARD_CMD_WIDTH - FINISH_MESSAGE_LENGTH) << "";
+    this->printBuffer(urgency);
+}
+
 // Wait for user input before continuing. Used to stop program from closing outside of a command line.
-void haltExecution() {
-    cout << "Press enter to exit...";
-    cin.get();
+void IOManager::haltExecution() {
+    if (this->shouldOutput(CMD_OUTPUT)) {
+        cout << "Press enter to exit...";
+        cin.get();
+    }
 }
 
 // Method for handling ALL input. Gives access to help, error resistance and macro file for input.
-string getResistantInput(string query, string help, QueryType queryType) {
+string IOManager::getResistantInput(string query, string help, QueryType queryType) {
     string inputString;
     string firstToken;
     while (true) {
         // Check first if there is still a line in the macro file
-        if (useMacroFile) {
-            useMacroFile = (bool) getline(macroFile, inputString);
+        if (this->useMacroFile) {
+            this->useMacroFile = (bool) getline(this->macroFile, inputString);
         } 
         // Print the query only if no macro file is used or specifically asked for
-        if (!useMacroFile || showQueries) {
+        if (!this->useMacroFile || this->showQueries) {
             cout << query;
         }
         // Ask for user input
-        if (!useMacroFile) {
+        if (!this->useMacroFile) {
             getline(cin, inputString);
         }
         
         // Process Input
         inputString = split(toLower(inputString), COMMENT_DELIMITOR)[0]; // trim potential comments in a macrofile and convert to lowercase
         firstToken = split(inputString, TOKEN_SEPARATOR)[0]; // except for rare input only the first string till a space is used
-        if (useMacroFile && showQueries) {
+        if (this->useMacroFile && this->showQueries) {
             cout << inputString << endl; // Show input if a macro file is used
         }
         if (firstToken == "help") {
@@ -71,8 +120,14 @@ string getResistantInput(string query, string help, QueryType queryType) {
 }
 
 // Ask the user a question that they can answer via command line
-bool askYesNoQuestion(string questionMessage, string help) {
-    string inputString = getResistantInput(questionMessage + " (" + POSITIVE_ANSWER + "/" + NEGATIVE_ANSWER + "): ", help, question);
+bool IOManager::askYesNoQuestion(string questionMessage, string help, OutputLevel urgency, string defaultAnswer) {
+    string inputString;
+    if (!this->shouldOutput(urgency)) {
+        inputString = defaultAnswer;
+    } else {
+        inputString = this->getResistantInput(questionMessage + " (" + POSITIVE_ANSWER + "/" + NEGATIVE_ANSWER + "): ", help, question);
+    }
+    
     if (inputString == NEGATIVE_ANSWER) {
         return false;
     }
@@ -82,23 +137,8 @@ bool askYesNoQuestion(string questionMessage, string help) {
     return false;
 }
 
-// Output things on the command line. Using shouldOutput this can be easily controlled globally
-void debugOutput(int timeStamp, string message, bool shouldOutput, bool finishLastOutput, bool finishLine) {
-    if (shouldOutput) { 
-        if (finishLastOutput) {
-            cout << "Done! (" << right << setw(3) << time(NULL) - timeStamp << " seconds)" << endl; // Exactly 20 characters long
-        }
-        if (message != "") {
-            cout << left << setw(STANDARD_CMD_WIDTH - FINISH_MESSAGE_LENGTH) << message; // With 60 there is exactly enough space to fit the finish message in on a windows cmd
-            if (finishLine) {
-                cout << endl;
-            }
-        } 
-    }   
-}
-
 // Promt the User via command line to input his hero levels and return them as a vector<int>
-vector<int> takeHerolevelInput() {
+vector<int> IOManager::takeHerolevelInput() {
     vector<string> stringLevels;
     vector<int> levels {};
     string input;
@@ -106,7 +146,7 @@ vector<int> takeHerolevelInput() {
     heroFile.exceptions(fstream::failbit);
     bool fileInput;
     
-    fileInput = askYesNoQuestion(heroInputModeQuestion, heroInputModeHelp);
+    fileInput = this->askYesNoQuestion(heroInputModeQuestion, heroInputModeHelp, VITAL_OUTPUT, POSITIVE_ANSWER);
     if (fileInput) {
         try {
             heroFile.open(heroLevelFileName, fstream::in);
@@ -122,11 +162,11 @@ vector<int> takeHerolevelInput() {
         }
     }
     if (!fileInput) {
-        if (!useMacroFile || showQueries) {
+        if (!this->useMacroFile || this->showQueries) {
             cout << "Enter the level of the hero, whose name is shown." << endl;
         }
         for (size_t i = 0; i < baseHeroes.size(); i++) {
-            input = getResistantInput(baseHeroes[i].name + ": ", heroInputHelp, integer);
+            input = this->getResistantInput(baseHeroes[i].name + ": ", heroInputHelp, integer);
             levels.push_back(stoi(input));
         }
         
@@ -137,7 +177,7 @@ vector<int> takeHerolevelInput() {
 		}
 		heroFile << levels[levels.size()-1];
 		heroFile.close();
-        if (!useMacroFile || showQueries) {
+        if (!this->useMacroFile || this->showQueries) {
             cout << "Hero Levels have been saved in a file. Next time you use this program you can load them from file." << endl;
         }
     }
@@ -145,14 +185,14 @@ vector<int> takeHerolevelInput() {
 }
 
 // Promts the user to input instance(s) to be solved 
-vector<Instance> takeInstanceInput(string prompt) {
+vector<Instance> IOManager::takeInstanceInput(string prompt) {
     vector<Instance> instances;
     vector<string> instanceStrings;
     
     string input;
     
     while (true) {
-        input = getResistantInput(prompt, lineupInputHelp, raw);
+        input = this->getResistantInput(prompt, lineupInputHelp, raw);
         instances.clear();
         instanceStrings = split(input, TOKEN_SEPARATOR);
         try {
@@ -162,6 +202,10 @@ vector<Instance> takeInstanceInput(string prompt) {
             return instances;
         } catch (const exception & e) {}
     }
+}
+
+bool IOManager::shouldOutput(OutputLevel urgency) {
+    return (this->outputLevel >= urgency);
 }
 
 // Convert a lineup string into an actual instance to solve
