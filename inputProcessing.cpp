@@ -138,50 +138,30 @@ bool IOManager::askYesNoQuestion(string questionMessage, string help, OutputLeve
 }
 
 // Promt the User via command line to input his hero levels and return them as a vector<int>
-vector<int> IOManager::takeHerolevelInput() {
-    vector<string> stringLevels;
-    vector<int> levels {};
+vector<int8_t> IOManager::takeHerolevelInput() {
+    vector<int8_t> heroes {};
     string input;
-    fstream heroFile;
-    heroFile.exceptions(fstream::failbit);
-    bool fileInput;
+    pair<Monster, int> heroData;
     
-    fileInput = this->askYesNoQuestion(heroInputModeQuestion, heroInputModeHelp, VITAL_OUTPUT, POSITIVE_ANSWER);
-    if (fileInput) {
-        try {
-            heroFile.open(heroLevelFileName, fstream::in);
-            heroFile >> input;
-            stringLevels = split(input, ELEMENT_SEPARATOR);
-            for (size_t i = 0; i < stringLevels.size(); i++) {
-                levels.push_back(stoi(stringLevels[i]));
-            }
-            heroFile.close();
-        } catch (const exception & e) {
-            cout << heroFileNotFoundErrorMessage;
-            fileInput = false;
-        }
+    if (!this->useMacroFile || this->showQueries) {
+        cout << "Enter your Heroes with levels. Press enter after every Hero." << endl;
+        cout << "Press enter twice or type done to proceed without inputting additional Heroes." << endl;
     }
-    if (!fileInput) {
-        if (!this->useMacroFile || this->showQueries) {
-            cout << "Enter the level of the hero, whose name is shown." << endl;
+    int cancelCounter = 0;
+    do {
+        input = this->getResistantInput("Enter Hero " + to_string(heroes.size()+1) + ": ", heroInputHelp, rawFirst);
+        if (input == "") {
+            cancelCounter++;
+        } else {
+            cancelCounter = 0;
+            try {
+                heroData = parseHeroString(input);
+                heroes.push_back(addLeveledHero(heroData.first, heroData.second));
+            } catch (const exception & e) {};
         }
-        for (size_t i = 0; i < baseHeroes.size(); i++) {
-            input = this->getResistantInput(baseHeroes[i].name + ": ", heroInputHelp, integer);
-            levels.push_back(stoi(input));
-        }
-        
-        // Write Hero Levels to file to use next time
-        heroFile.open(heroLevelFileName, fstream::out);
-        for (size_t i = 0; i < levels.size()-1; i++) {
-            heroFile << levels[i] << ELEMENT_SEPARATOR;
-		}
-		heroFile << levels[levels.size()-1];
-		heroFile.close();
-        if (!this->useMacroFile || this->showQueries) {
-            cout << "Hero Levels have been saved in a file. Next time you use this program you can load them from file." << endl;
-        }
-    }
-    return levels;
+    } while (input != "done" && cancelCounter < 2);
+    
+    return heroes;
 }
 
 // Promts the user to input instance(s) to be solved 

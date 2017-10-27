@@ -443,13 +443,12 @@ int main(int argc, char** argv) {
     }
     
     // Collect the Data via Command Line
-    heroLevels = iomanager.takeHerolevelInput();
+    availableHeroes = iomanager.takeHerolevelInput();
     minimumMonsterCost = stoi(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
     userFollowerUpperBound = stoi(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
     
     // Fill monster arrays with relevant monsters
     filterMonsterData(minimumMonsterCost);
-    initializeUserHeroes(heroLevels);
     
     do {
         instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");

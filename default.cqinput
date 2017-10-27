@@ -1,55 +1,7 @@
-n // Make Sure not to load Heroes from File
-0 // james
-0 // hunter
-0 // shaman
-0 // alpha
-0 // carl
-0 // nimue
-0 // athos
-0 // jet
-0 // geron
-0 // rei
-0 // ailen
-0 // faefyr
-0 // auri
-0 // k41ry
-0 // t4urus
-0 // tr0n1x
-0 // aquortis
-0 // aeris
-0 // geum
-0 // rudean
-0 // aural
-0 // geror
-0 // ourea
-0 // erebus
-0 // pontus
-0 // oymos
-0 // xarth
-0 // atzar
-0 // ladyoftwilight
-0 // tiny
-0 // nebra
-0 // veildur
-0 // brynhildr
-0 // groth
-0 // zeth
-0 // koth
-0 // gurth
-0 // spyke
-0 // aoyuki
-0 // gaiabyte
-0 // valor
-0 // rokka
-0 // pyromancer
-0 // bewat
-0 // nicte
-0 // forestdruid
-0 // ignitor
-0 // undine
-0 // chroma
-0 // petry
-0 // zaytus
-0 // Lower Follower Limit
--1 // Upper Follower Limit
-a1,a2,a3,a4,a5,a6 // Enemy Lineup goes here
+hunter:1                // Example Hero input
+ladyoftwilight:1        // Hero 2
+valor:99                // Hero 3
+done                    // End Hero input
+0                       // Lower Follower Limit
+-1                      // Upper Follower Limit
+a1,a2,a3,a4,a5,a6       // Enemy Lineup goes here

@@ -292,9 +292,6 @@ void initMonsterData();
 // Filter MonsterList by cost. User can specify if he wants to exclude cheap monsters
 void filterMonsterData(int minimumMonsterCost);
 
-// Initialize Hero Data. Must be called after filterMonsterData
-void initializeUserHeroes(std::vector<int> levels);
-
 // Create a new hero with leveled stats and return it
 Monster getLeveledHero(const Monster & m, int level);
 

@@ -19,7 +19,7 @@ const std::string heroLevelFileName = "heroLevels" + heroVersion;
 const std::string welcomeMessage = "Welcome to Diceycle's PvE Instance Solver!";
 const std::string helpMessage = "If you don't know what to do you can type help at any time to get an explanation about the current step.";
 
-enum QueryType {question, integer, raw}; // Types of command line promts
+enum QueryType {question, integer, raw, rawFirst}; // Types of command line promts
 
 const std::string POSITIVE_ANSWER = "y";
 const std::string NEGATIVE_ANSWER = "n";
@@ -69,7 +69,7 @@ class IOManager {
         void initMacroFile(std::string macroFileName, bool showInput);
         std::string getResistantInput(std::string query, std::string help, QueryType queryType = raw);
         bool askYesNoQuestion(std::string question, std::string help, OutputLevel urgency, std::string defaultAnswer);
-        std::vector<int> takeHerolevelInput();
+        std::vector<int8_t> takeHerolevelInput();
         std::vector<Instance> takeInstanceInput(std::string promt);
         
         void outputMessage(std::string message, OutputLevel urgency, int indent = 0, bool linebreak = true);

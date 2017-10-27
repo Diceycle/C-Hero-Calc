@@ -33,21 +33,12 @@ void filterMonsterData(int minimumMonsterCost) {
     }
 }
 
-// Initialize Hero Data. Must be called after filterMonsterData
-void initializeUserHeroes(std::vector<int> levels) {
-    for (size_t i = 0; i < baseHeroes.size(); i++) {
-        if (levels[i] > 0) {
-            availableHeroes.push_back(addLeveledHero(baseHeroes[i], levels[i]));
-        }
-    }
-}
-
 // Create a new hero with leveled stats and return it
 Monster getLeveledHero(const Monster & m, int level) {
     HeroRarity rarity = rarities.at(m.name);
     int points = rarity * (level-1);
     int value = m.hp + m.damage;
-    return Monster(
+    Monster hero =  Monster(
         round(m.hp + points * ((double)m.hp) / value),
         m.damage + round(points * ((double)m.damage) / value),
         m.cost,
@@ -55,6 +46,8 @@ Monster getLeveledHero(const Monster & m, int level) {
         m.element,
         m.skill
     );
+    hero.baseName = m.name;
+    return hero;
 }
 
 // Add a leveled hero to the databse and return its corresponding index
