@@ -22,72 +22,91 @@ extern std::vector<int8_t> availableHeroes; // Contains all user heroes' indices
 
 static std::vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual Objects
     Monster( 20,   8,    1000,  "a1", AIR),
-    Monster( 48,   6,    3900,  "a2", AIR),
-    Monster( 36,  12,    8000,  "a3", AIR),
-    Monster( 24,  26,   15000,  "a4", AIR),
-    Monster( 60,  20,   41000,  "a5", AIR),
-    Monster( 62,  34,   96000,  "a6", AIR),
-    Monster(106,  26,  144000,  "a7", AIR),
-    Monster( 78,  52,  257000,  "a8", AIR),
-    Monster(116,  54,  495000,  "a9", AIR),
-    Monster(142,  60,  785000, "a10", AIR),
-    Monster(114, 110, 1403000, "a11", AIR),
-    Monster(164,  88, 1733000, "a12", AIR),
-    Monster(210,  94, 2772000, "a13", AIR),
-    Monster(200, 142, 4785000, "a14", AIR),
-    Monster(226, 190, 8897000, "a15", AIR),
-
-    Monster( 30,   6,    1400,  "w1", WATER),
-    Monster( 24,  12,    3900,  "w2", WATER),
-    Monster( 18,  24,    8000,  "w3", WATER),
-    Monster( 36,  20,   18000,  "w4", WATER),
-    Monster( 78,  18,   52000,  "w5", WATER),
-    Monster( 44,  44,   84000,  "w6", WATER),
-    Monster( 92,  32,  159000,  "w7", WATER),
-    Monster(108,  36,  241000,  "w8", WATER),
-    Monster( 80,  70,  418000,  "w9", WATER),
-    Monster(110,  70,  675000, "w10", WATER),
-    Monster(152,  79, 1315000, "w11", WATER),
-    Monster(188,  78, 1775000, "w12", WATER),
-    Monster(140, 128, 2398000, "w13", WATER),
-    Monster(212, 122, 4159000, "w14", WATER),
-    Monster(276, 142, 7758000, "w15", WATER),
-
     Monster( 44,   4,    1300,  "e1", EARTH),
-    Monster( 30,   8,    2700,  "e2", EARTH),
-    Monster( 26,  16,    7500,  "e3", EARTH),
-    Monster( 72,  10,   18000,  "e4", EARTH),
-    Monster( 36,  40,   54000,  "e5", EARTH),
-    Monster( 72,  24,   71000,  "e6", EARTH),
-    Monster( 66,  36,  115000,  "e7", EARTH),
-    Monster( 60,  60,  215000,  "e8", EARTH),
-    Monster(120,  48,  436000,  "e9", EARTH),
-    Monster(122,  64,  689000, "e10", EARTH),
-    Monster(134,  81, 1130000, "e11", EARTH),
-    Monster(128, 120, 1903000, "e12", EARTH),
-    Monster(190, 132, 3971000, "e13", EARTH),
-    Monster(244, 136, 6044000, "e14", EARTH),
-    Monster(200, 186, 7173000, "e15", EARTH),
-
     Monster( 16,  10,    1000,  "f1", FIRE),
-    Monster( 18,  16,    3900,  "f2", FIRE),
-    Monster( 54,   8,    8000,  "f3", FIRE),
-    Monster( 52,  16,   23000,  "f4", FIRE),
-    Monster( 42,  24,   31000,  "f5", FIRE),
-    Monster(104,  20,   94000,  "f6", FIRE),
-    Monster( 54,  44,  115000,  "f7", FIRE),
-    Monster( 94,  50,  321000,  "f8", FIRE),
-    Monster(102,  58,  454000,  "f9", FIRE),
-    Monster(104,  82,  787000, "f10", FIRE),
-    Monster(164,  70, 1229000, "f11", FIRE),
-    Monster(156,  92, 1718000, "f12", FIRE),
-    Monster(166, 130, 3169000, "f13", FIRE),
-    Monster(168, 168, 4741000, "f14", FIRE),
-    Monster(234, 136, 5676000, "f15", FIRE)
-};
-static std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Objects
-    Monster( 50, 12, 0, "james",             EARTH, {P_AOE,          ALL, EARTH, 1}),
+    Monster( 30,   6,    1400,  "w1", WATER),
     
+    Monster( 48,   6,    3900,  "a2", AIR),
+    Monster( 30,   8,    2700,  "e2", EARTH),
+    Monster( 18,  16,    3900,  "f2", FIRE),
+    Monster( 24,  12,    3900,  "w2", WATER),
+    
+    Monster( 36,  12,    8000,  "a3", AIR),
+    Monster( 26,  16,    7500,  "e3", EARTH),
+    Monster( 54,   8,    8000,  "f3", FIRE),
+    Monster( 18,  24,    8000,  "w3", WATER),
+    
+    Monster( 24,  26,   15000,  "a4", AIR),
+    Monster( 72,  10,   18000,  "e4", EARTH),
+    Monster( 52,  16,   23000,  "f4", FIRE),
+    Monster( 36,  20,   18000,  "w4", WATER),
+    
+    Monster( 60,  20,   41000,  "a5", AIR),
+    Monster( 36,  40,   54000,  "e5", EARTH),
+    Monster( 42,  24,   31000,  "f5", FIRE),
+    Monster( 78,  18,   52000,  "w5", WATER),
+    
+    Monster( 62,  34,   96000,  "a6", AIR),
+    Monster( 72,  24,   71000,  "e6", EARTH),
+    Monster(104,  20,   94000,  "f6", FIRE),
+    Monster( 44,  44,   84000,  "w6", WATER),
+    
+    Monster(106,  26,  144000,  "a7", AIR),
+    Monster( 66,  36,  115000,  "e7", EARTH),
+    Monster( 54,  44,  115000,  "f7", FIRE),
+    Monster( 92,  32,  159000,  "w7", WATER),
+    
+    Monster( 78,  52,  257000,  "a8", AIR),
+    Monster( 60,  60,  215000,  "e8", EARTH),
+    Monster( 94,  50,  321000,  "f8", FIRE),
+    Monster(108,  36,  241000,  "w8", WATER),
+    
+    Monster(116,  54,  495000,  "a9", AIR),
+    Monster(120,  48,  436000,  "e9", EARTH),
+    Monster(102,  58,  454000,  "f9", FIRE),
+    Monster( 80,  70,  418000,  "w9", WATER),
+    
+    Monster(142,  60,  785000, "a10", AIR),
+    Monster(122,  64,  689000, "e10", EARTH),
+    Monster(104,  82,  787000, "f10", FIRE),
+    Monster(110,  70,  675000, "w10", WATER),
+    
+    Monster(114, 110, 1403000, "a11", AIR),
+    Monster(134,  81, 1130000, "e11", EARTH),
+    Monster(164,  70, 1229000, "f11", FIRE),
+    Monster(152,  79, 1315000, "w11", WATER),
+    
+    Monster(164,  88, 1733000, "a12", AIR),
+    Monster(128, 120, 1903000, "e12", EARTH),
+    Monster(156,  92, 1718000, "f12", FIRE),
+    Monster(188,  78, 1775000, "w12", WATER),
+    
+    Monster(210,  94, 2772000, "a13", AIR),
+    Monster(190, 132, 3971000, "e13", EARTH),
+    Monster(166, 130, 3169000, "f13", FIRE),
+    Monster(140, 128, 2398000, "w13", WATER),
+    
+    Monster(200, 142, 4785000, "a14", AIR),
+    Monster(244, 136, 6044000, "e14", EARTH),
+    Monster(168, 168, 4741000, "f14", FIRE),
+    Monster(212, 122, 4159000, "w14", WATER),
+    
+    Monster(226, 190, 8897000, "a15", AIR),
+    Monster(200, 186, 7173000, "e15", EARTH),
+    Monster(234, 136, 5676000, "f15", FIRE),
+    Monster(276, 142, 7758000, "w15", WATER)
+};
+
+static std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Objects
+    Monster( 45, 20, 0, "ladyoftwilight",    AIR,   {PROTECT,       ALL, AIR, 1}),
+    Monster( 70, 30, 0, "tiny",              EARTH, {AOE,           ALL, EARTH, 2}),
+    Monster( 90, 40, 0, "nebra",             FIRE,  {BUFF,          ALL, FIRE, 8}),
+ 
+    Monster( 20, 10, 0, "valor",             AIR,   {PROTECT,       AIR, AIR, 1}),
+    Monster( 30,  8, 0, "rokka",             EARTH, {PROTECT,       EARTH, EARTH, 1}),
+    Monster( 24, 12, 0, "pyromancer",        FIRE,  {PROTECT,       FIRE, FIRE, 1}),
+    Monster( 50,  6, 0, "bewat",             WATER, {PROTECT,       WATER, WATER, 1}),
+   
     Monster( 22, 14, 0, "hunter",            AIR,   {BUFF,          AIR, AIR, 2}),
     Monster( 40, 20, 0, "shaman",            EARTH, {PROTECT,       EARTH, EARTH , 2}),
     Monster( 82, 22, 0, "alpha",             FIRE,  {AOE,           ALL, FIRE, 1}),
@@ -104,55 +123,49 @@ static std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actua
     Monster( 50, 18, 0, "faefyr",            FIRE,  {PROTECT,       FIRE, FIRE, 2}),
     Monster( 60, 32, 0, "auri",              WATER, {HEAL,          ALL, WATER, 2}),
     
+    Monster( 22, 32, 0, "nicte",             AIR,   {BUFF,          AIR, AIR, 4}),
+   
+    Monster( 50, 12, 0, "james",             EARTH, {P_AOE,          ALL, EARTH, 1}),
+   
     Monster( 28, 16, 0, "k41ry",             AIR,   {BUFF,          AIR, AIR, 3}),
     Monster( 46, 20, 0, "t4urus",            EARTH, {BUFF,          ALL, EARTH, 1}),
     Monster(100, 20, 0, "tr0n1x",            FIRE,  {AOE,           ALL, FIRE, 3}),
-    
+       
     Monster( 58,  8, 0, "aquortis",          WATER, {BUFF,          WATER, WATER, 3}),
     Monster( 30, 32, 0, "aeris",             AIR,   {HEAL,          ALL, AIR, 1}),
     Monster( 75,  2, 0, "geum",              EARTH, {BERSERK,       SELF, EARTH, 2}),
+    
+    Monster( 46, 16, 0, "forestdruid",       EARTH, {BUFF,          EARTH, EARTH, 4}),
+    Monster( 32, 24, 0, "ignitor",           FIRE,  {BUFF,          FIRE, FIRE, 4}),
+    Monster( 58, 14, 0, "undine",            WATER, {BUFF,          WATER, WATER, 4}),
     
     Monster( 38, 12, 0, "rudean",            FIRE,  {BUFF,          FIRE, FIRE, 3}),
     Monster( 18, 50, 0, "aural",             WATER, {BERSERK,       SELF, WATER, 1.2}),
     Monster( 46, 46, 0, "geror",             AIR,   {FRIENDS,       SELF, AIR, 1.2}),
     
+    Monster( 66, 44, 0, "veildur",           EARTH, {CHAMPION,      ALL, EARTH, 3}),
+    Monster( 72, 48, 0, "brynhildr",         AIR,   {CHAMPION,      ALL, AIR, 4}),
+    Monster( 78, 52, 0, "groth",             FIRE,  {CHAMPION,      ALL, FIRE, 5}),
+    
     Monster( 30, 16, 0, "ourea",             EARTH, {BUFF,          EARTH, EARTH, 3}),
     Monster( 48, 20, 0, "erebus",            FIRE,  {CHAMPION,      FIRE, FIRE, 2}),
     Monster( 62, 36, 0, "pontus",            WATER, {ADAPT,         WATER, WATER, 2}),
+
+    Monster( 52, 20, 0, "chroma",            AIR,   {PROTECT,       AIR, AIR, 4}),
+    Monster( 26, 44, 0, "petry",             EARTH, {PROTECT,       EARTH, EARTH, 4}),
+    Monster( 58, 22, 0, "zaytus",            FIRE,  {PROTECT,       FIRE, FIRE, 4}),
+
+    Monster( 75, 45, 0, "spyke",             AIR,   {TRAINING,      SELF, AIR, 5}),
+    Monster( 70, 55, 0, "aoyuki",            WATER, {RAINBOW,       SELF, WATER, 50}),
+    Monster( 50,100, 0, "gaiabyte",          EARTH, {WITHER,        SELF, EARTH, 0.5}),
     
     Monster( 36, 14, 0, "oymos",             AIR,   {BUFF,          AIR, AIR, 4}),
     Monster( 32, 32, 0, "xarth",             EARTH, {CHAMPION,      EARTH, EARTH, 2}),
     Monster( 76, 32, 0, "atzar",             FIRE,  {ADAPT,         FIRE, FIRE, 2}),
     
-    Monster( 45, 20, 0, "ladyoftwilight",    AIR,   {PROTECT,       ALL, AIR, 1}),
-    Monster( 70, 30, 0, "tiny",              EARTH, {AOE,           ALL, EARTH, 2}),
-    Monster( 90, 40, 0, "nebra",             FIRE,  {BUFF,          ALL, FIRE, 8}),
-    
-    Monster( 66, 44, 0, "veildur",           EARTH, {CHAMPION,      ALL, EARTH, 3}),
-    Monster( 72, 48, 0, "brynhildr",         AIR,   {CHAMPION,      ALL, AIR, 4}),
-    Monster( 78, 52, 0, "groth",             FIRE,  {CHAMPION,      ALL, FIRE, 5}),
-    
     Monster( 70, 42, 0, "zeth",              WATER, {REVENGE,       ALL, WATER, 0.1}),
     Monster( 76, 46, 0, "koth",              EARTH, {REVENGE,       ALL, EARTH, 0.15}),
     Monster( 82, 50, 0, "gurth",             AIR,   {REVENGE,       ALL, AIR, 0.2}),
-    
-    Monster( 75, 45, 0, "spyke",             AIR,   {TRAINING,      SELF, AIR, 5}),
-    Monster( 70, 55, 0, "aoyuki",            WATER, {RAINBOW,       SELF, WATER, 50}),
-    Monster( 50,100, 0, "gaiabyte",          EARTH, {WITHER,        SELF, EARTH, 0.5}),
-    
-    Monster( 20, 10, 0, "valor",             AIR,   {PROTECT,       AIR, AIR, 1}),
-    Monster( 30,  8, 0, "rokka",             EARTH, {PROTECT,       EARTH, EARTH, 1}),
-    Monster( 24, 12, 0, "pyromancer",        FIRE,  {PROTECT,       FIRE, FIRE, 1}),
-    Monster( 50,  6, 0, "bewat",             WATER, {PROTECT,       WATER, WATER, 1}),
-    
-    Monster( 22, 32, 0, "nicte",             AIR,   {BUFF,          AIR, AIR, 4}),
-    Monster( 46, 16, 0, "forestdruid",       EARTH, {BUFF,          EARTH, EARTH, 4}),
-    Monster( 32, 24, 0, "ignitor",           FIRE,  {BUFF,          FIRE, FIRE, 4}),
-    Monster( 58, 14, 0, "undine",            WATER, {BUFF,          WATER, WATER, 4}),
-    
-    Monster( 52, 20, 0, "chroma",            AIR,   {PROTECT,       AIR, AIR, 4}),
-    Monster( 26, 44, 0, "petry",             EARTH, {PROTECT,       EARTH, EARTH, 4}),
-    Monster( 58, 22, 0, "zaytus",            FIRE,  {PROTECT,       FIRE, FIRE, 4}),
 };
 
 static std::map<std::string, HeroRarity> rarities { // Hero Rarities: 0 = Common, 1 = Rare, 2 = Legendary
