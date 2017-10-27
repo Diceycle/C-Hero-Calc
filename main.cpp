@@ -249,6 +249,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                 if (!iomanager.askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n", DETAILED_OUTPUT, POSITIVE_ANSWER)) {return;}
                 startTime = time(NULL);
                 iomanager.outputMessage("\nPreparing to work on loop for armies of size " + to_string(armySize+1), BASIC_OUTPUT);
+                iomanager.outputMessage("Currently considering " + to_string(pureMonsterArmies.size()) + " normal and " + to_string(heroMonsterArmies.size()) + " hero armies.", BASIC_OUTPUT);
             }
                 
             if (firstDominance <= armySize) {
