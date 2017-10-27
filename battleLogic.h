@@ -81,7 +81,7 @@ inline void ArmyCondition::init(const Army & army) {
 // Handle death of the front-most monster
 inline void ArmyCondition::afterDeath() {
     if (this->skillTypes[this->monstersLost] == REVENGE) {
-        this->turnData.revengeDamage = (int) ceil(this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
+        this->turnData.revengeDamage = (int) round(this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
     }
     this->monstersLost++;
     this->berserkProcs = 0;
