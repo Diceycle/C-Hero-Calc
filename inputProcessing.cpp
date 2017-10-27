@@ -115,6 +115,9 @@ string IOManager::getResistantInput(string query, string help, QueryType queryTy
             if (queryType == raw) {
                 return inputString;
             }
+            if (queryType == rawFirst) {
+                return firstToken;
+            }
         }
     }
 }

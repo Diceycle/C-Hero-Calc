@@ -57,6 +57,7 @@ class Monster {
         int damage;
         int cost;
         bool isHero;
+        std::string baseName;
         std::string name;
         Element element;
         HeroSkill skill;

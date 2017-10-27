@@ -391,7 +391,6 @@ int main(int argc, char** argv) {
     int32_t minimumMonsterCost;
     int32_t userFollowerUpperBound;
     vector<Instance> instances;
-    OutputLevel outputLevel;
     bool userWantsContinue;
  
     // Define User Input Data

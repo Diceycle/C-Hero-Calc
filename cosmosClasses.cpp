@@ -6,6 +6,7 @@ Monster::Monster(int hp, int damage, int cost, std::string name, Element element
     this->hp = hp;
     this->damage = damage;
     this->cost = cost;
+    this->baseName = name;
     this->name = name;
     this->element = element;
     this->skill = skill;
