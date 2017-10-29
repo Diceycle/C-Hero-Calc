@@ -31,7 +31,7 @@ const std::string COMMENT_DELIMITOR = "//";
 const std::string QUEST_PREFIX = "quest";
 const std::string QUEST_NUMBER_SEPARTOR = "-";
 
-const std::string REPLAY_EMPTY_SPOT = "-1";
+const int REPLAY_EMPTY_SPOT = -1;
 
 // Enum to control the amount of output generate
 enum OutputLevel {

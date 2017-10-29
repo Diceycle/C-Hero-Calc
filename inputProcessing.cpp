@@ -263,7 +263,7 @@ string getReplaySetup(Army setup) {
         if ((int) (i % ARMY_MAX_SIZE) < setup.monsterAmount) {
             stringSetup << getReplayMonsterNumber(monsterReference[setup.monsters[setup.monsterAmount - (i % ARMY_MAX_SIZE) - 1]]);
         } else {
-            stringSetup << REPLAY_EMPTY_SPOT;
+            stringSetup << to_string(REPLAY_EMPTY_SPOT);
         }
         if (i < ARMY_MAX_SIZE * TOURNAMENT_LINES - 1) {
             stringSetup << ",";
