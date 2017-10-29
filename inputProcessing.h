@@ -9,6 +9,7 @@
 #include <ostream>
 
 #include "cosmosDefines.h"
+#include "base64.h"
 
 const size_t STANDARD_CMD_WIDTH = 80;
 const int INDENT_WIDTH = 2;
@@ -29,6 +30,8 @@ const std::string ELEMENT_SEPARATOR = ",";
 const std::string COMMENT_DELIMITOR = "//";
 const std::string QUEST_PREFIX = "quest";
 const std::string QUEST_NUMBER_SEPARTOR = "-";
+
+const std::string REPLAY_EMPTY_SPOT = "-1";
 
 // Enum to control the amount of output generate
 enum OutputLevel {
@@ -126,6 +129,11 @@ Army makeArmyFromStrings(std::vector<std::string> stringMonsters);
 
 // Parse hero input from a string into its name and level
 std::pair<Monster, int> parseHeroString(std::string heroString);
+
+std::string makeBattleReplay(Army friendly, Army hostile);
+std::string getReplaySetup(Army setup);
+std::string getReplayMonsterNumber(Monster monster);
+std::string getReplayHeroes(Army setup);
 
 // Splits strings into a vector of strings. No need to optimize, only used for input.
 std::vector<std::string> split(std::string target, std::string separator);

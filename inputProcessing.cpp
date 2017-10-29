@@ -238,6 +238,82 @@ pair<Monster, int> parseHeroString(string heroString) {
     return pair<Monster, int>(hero, level);
 }
 
+string makeBattleReplay(Army friendly, Army hostile) {
+    stringstream replay;
+    replay << "{";
+        replay << "\"winner\""  << ":" << "\"Unknown\"" << ",";
+        replay << "\"left\""    << ":" << "\"Solution\"" << ",";
+        replay << "\"right\""   << ":" << "\"Instance\"" << ",";
+        replay << "\"date\""    << ":" << time(NULL) << ",";
+        replay << "\"title\""   << ":" << "\"Proposed Solution\"" << ",";
+        replay << "\"setup\""   << ":" << getReplaySetup(friendly) << ",";
+        replay << "\"shero\""   << ":" << getReplayHeroes(friendly) << ",";
+        replay << "\"player\""  << ":" << getReplaySetup(hostile) << ",";
+        replay << "\"phero\""   << ":" << getReplayHeroes(hostile);
+    replay << "}";
+    string unencoded = replay.str();
+    return base64_encode((const unsigned char*) unencoded.c_str(), (int) unencoded.size());
+}
+
+string getReplaySetup(Army setup) {
+    stringstream stringSetup;
+    size_t i;
+    stringSetup << "[";
+    for (i = 0; i < ARMY_MAX_SIZE * TOURNAMENT_LINES; i++) {
+        if ((int) (i % ARMY_MAX_SIZE) < setup.monsterAmount) {
+            stringSetup << getReplayMonsterNumber(monsterReference[setup.monsters[setup.monsterAmount - (i % ARMY_MAX_SIZE) - 1]]);
+        } else {
+            stringSetup << REPLAY_EMPTY_SPOT;
+        }
+        if (i < ARMY_MAX_SIZE * TOURNAMENT_LINES - 1) {
+            stringSetup << ",";
+        }
+    }
+    stringSetup << "]";
+    return stringSetup.str();
+}
+
+string getReplayMonsterNumber(Monster monster) {
+    int8_t index = REPLAY_EMPTY_SPOT;
+    size_t i;
+    if(monster.isHero) {
+        for (i = 0; i < baseHeroes.size(); i++) {
+            if (baseHeroes[i].baseName == monster.baseName) {
+                index = -i - 2;
+            }
+        }
+    } else {
+        for (i = 0; i < monsterBaseList.size(); i++) {
+            if (monster.name == monsterBaseList[i].name) {
+                index = i;
+            }
+        }
+    }
+    return to_string(index);
+}
+
+string getReplayHeroes(Army setup) {
+    stringstream heroes;
+    Monster monster;
+    int level;
+    heroes << "[";
+    for (size_t i = 0; i < baseHeroes.size(); i++) {
+        level = 0;
+        for (int j = 0; j < setup.monsterAmount; j++) {
+            monster = monsterReference[setup.monsters[j]];
+            if (monster.isHero && monster.baseName == baseHeroes[i].baseName) {
+                level = parseHeroString(monster.name).second;
+            }
+        }
+        heroes << to_string(level);
+        if (i < baseHeroes.size()-1) {
+            heroes << ",";
+        }
+    }
+    heroes << "]";
+    return heroes.str();
+}
+
 // Splits strings into a vector of strings.
 vector<string> split(string target, string separator) {
     vector<string> output;

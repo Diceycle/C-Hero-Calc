@@ -9,6 +9,7 @@
 #include <sstream>
 
 const size_t ARMY_MAX_SIZE = 6;
+const size_t TOURNAMENT_LINES = 5;
 const size_t ARMY_MAX_BRUTEFORCEABLE_SIZE = 4;
 
 const std::string HEROLEVEL_SEPARATOR = ":";
