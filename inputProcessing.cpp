@@ -194,7 +194,7 @@ bool IOManager::shouldOutput(OutputLevel urgency) {
 // Convert a lineup string into an actual instance to solve
 Instance makeInstanceFromString(string instanceString) {
     Instance instance;
-    int dashPosition = instanceString.find(QUEST_NUMBER_SEPARTOR);
+    int dashPosition = (int) instanceString.find(QUEST_NUMBER_SEPARTOR);
     
     if (instanceString.compare(0, QUEST_PREFIX.length(), QUEST_PREFIX) == 0) {
         int questNumber = stoi(instanceString.substr(QUEST_PREFIX.length(), dashPosition-QUEST_PREFIX.length()));
@@ -334,7 +334,7 @@ vector<string> split(string target, string separator) {
 // Convert a string to lowercase where available
 string toLower(string input) {
     for (size_t i = 0; i < input.length(); i++) {
-        input[i] = tolower(input[i]);
+        input[i] = tolower(input[i], locale());
     }
     return input;
 }

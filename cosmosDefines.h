@@ -140,8 +140,8 @@ static std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actua
     Monster( 58, 14, 0, "undine",            WATER, {BUFF,          WATER, WATER, 4}),
     
     Monster( 38, 12, 0, "rudean",            FIRE,  {BUFF,          FIRE, FIRE, 3}),
-    Monster( 18, 50, 0, "aural",             WATER, {BERSERK,       SELF, WATER, 1.2}),
-    Monster( 46, 46, 0, "geror",             AIR,   {FRIENDS,       SELF, AIR, 1.2}),
+    Monster( 18, 50, 0, "aural",             WATER, {BERSERK,       SELF, WATER, 1.2f}),
+    Monster( 46, 46, 0, "geror",             AIR,   {FRIENDS,       SELF, AIR, 1.2f}),
     
     Monster( 66, 44, 0, "veildur",           EARTH, {CHAMPION,      ALL, EARTH, 3}),
     Monster( 72, 48, 0, "brynhildr",         AIR,   {CHAMPION,      ALL, AIR, 4}),
@@ -157,15 +157,15 @@ static std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actua
 
     Monster( 75, 45, 0, "spyke",             AIR,   {TRAINING,      SELF, AIR, 5}),
     Monster( 70, 55, 0, "aoyuki",            WATER, {RAINBOW,       SELF, WATER, 50}),
-    Monster( 50,100, 0, "gaiabyte",          EARTH, {WITHER,        SELF, EARTH, 0.5}),
+    Monster( 50,100, 0, "gaiabyte",          EARTH, {WITHER,        SELF, EARTH, 0.5f}),
     
     Monster( 36, 14, 0, "oymos",             AIR,   {BUFF,          AIR, AIR, 4}),
     Monster( 32, 32, 0, "xarth",             EARTH, {CHAMPION,      EARTH, EARTH, 2}),
     Monster( 76, 32, 0, "atzar",             FIRE,  {ADAPT,         FIRE, FIRE, 2}),
     
-    Monster( 70, 42, 0, "zeth",              WATER, {REVENGE,       ALL, WATER, 0.1}),
-    Monster( 76, 46, 0, "koth",              EARTH, {REVENGE,       ALL, EARTH, 0.15}),
-    Monster( 82, 50, 0, "gurth",             AIR,   {REVENGE,       ALL, AIR, 0.2}),
+    Monster( 70, 42, 0, "zeth",              WATER, {REVENGE,       ALL, WATER, 0.1f}),
+    Monster( 76, 46, 0, "koth",              EARTH, {REVENGE,       ALL, EARTH, 0.15f}),
+    Monster( 82, 50, 0, "gurth",             AIR,   {REVENGE,       ALL, AIR, 0.2f}),
 };
 
 static std::map<std::string, HeroRarity> rarities { // Hero Rarities: 0 = Common, 1 = Rare, 2 = Legendary

@@ -28,7 +28,7 @@ void initMonsterData() {
 void filterMonsterData(int minimumMonsterCost) {
     for (size_t i = 0; i < monsterBaseList.size(); i++) {
         if (minimumMonsterCost <= monsterBaseList[i].cost) {
-            availableMonsters.push_back(i); // Kinda Dirty but I know that the normal mobs come first in the reference
+            availableMonsters.push_back((int8_t) i); // Kinda Dirty but I know that the normal mobs come first in the reference
         }
     }
 }
@@ -39,8 +39,8 @@ Monster getLeveledHero(const Monster & m, int level) {
     int points = rarity * (level-1);
     int value = m.hp + m.damage;
     Monster hero =  Monster(
-        round(m.hp + points * ((double)m.hp) / value),
-        m.damage + round(points * ((double)m.damage) / value),
+        m.hp + (int) round((float) points * (float) m.hp / (float) value),
+        m.damage + (int) round((float) points * (float) m.damage / (float) value),
         m.cost,
         m.name + HEROLEVEL_SEPARATOR + std::to_string(level),
         m.element,
@@ -55,5 +55,5 @@ int8_t addLeveledHero(Monster hero, int level) {
     Monster m = getLeveledHero(hero, level);
     monsterReference.emplace_back(m);
     
-    return monsterReference.size() - 1;
+    return (int8_t) (monsterReference.size() - 1);
 }
