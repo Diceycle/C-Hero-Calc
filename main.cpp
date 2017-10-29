@@ -162,7 +162,7 @@ void getQuickSolutions(Instance & instance) {
 // Main method for solving an instance. Returns time taken to calculate in seconds
 void solveInstance(Instance & instance, size_t firstDominance) {
     Army tempArmy = Army();
-    int startTime;
+    time_t startTime;
     
     size_t i, j, sj, si;
 

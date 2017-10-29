@@ -48,7 +48,7 @@ struct Instance {
     Army target;
     size_t targetSize;
     size_t maxCombatants;
-    int calculationTime;
+    time_t calculationTime;
 };
 
 class IOManager {
@@ -57,7 +57,7 @@ class IOManager {
         bool showQueries = true;
         std::ifstream macroFile;
 
-        int lastTimedOutput = -1;
+        time_t lastTimedOutput = -1;
         std::ostringstream outputStream;
         
         std::string getIndent(int indent);
