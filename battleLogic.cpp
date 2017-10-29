@@ -11,8 +11,6 @@ bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
     }
 }
 
-ArmyCondition::ArmyCondition() {}
-
 ArmyCondition leftCondition = ArmyCondition();
 ArmyCondition rightCondition = ArmyCondition();
 int turncounter;

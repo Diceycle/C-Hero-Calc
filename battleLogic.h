@@ -42,8 +42,6 @@ class ArmyCondition {
         
         TurnData turnData;
         
-        ArmyCondition();
-        
         inline void init(const Army & army);
         inline void afterDeath();
         inline bool startNewTurn();
