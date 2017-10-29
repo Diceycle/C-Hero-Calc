@@ -7,7 +7,7 @@ bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
     if (a->element == b->element) {
         return (a->damage >= b->damage) && (a->hp >= b->hp);
     } else { // a needs to be better than b even when b has elemental advantage, or a is at disadvantage
-        return !considerAbilities && (a->damage >= b->damage * elementalBoost) && (a->hp >= b->hp * elementalBoost);
+        return !considerAbilities && (a->damage >= (int16_t) ((float) b->damage * elementalBoost)) && (a->hp >= (int16_t) ((float) b->hp * elementalBoost));
     }
 }
 
@@ -15,7 +15,7 @@ ArmyCondition::ArmyCondition() {}
 
 ArmyCondition leftCondition = ArmyCondition();
 ArmyCondition rightCondition = ArmyCondition();
-int8_t turncounter;
+int turncounter;
 bool leftDied, rightDied;
 
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
@@ -30,8 +30,6 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     //  5. Protection of enemy Side     (protect, champion)
     //  6. AOE of friendly Side         (aoe, paoe)
     //  7. Healing of enemy Side        (healing)
-    
-    
     totalFightsSimulated++;
     
     turncounter = 0;
@@ -85,10 +83,10 @@ void simulateFight(Army & left, Army & right, bool verbose) {
         
         // Handle wither ability
         if (!leftDied && leftCondition.skillTypes[leftCondition.monstersLost] == WITHER) {
-            leftCondition.frontDamageTaken += (leftCondition.lineup[leftCondition.monstersLost]->hp - leftCondition.frontDamageTaken) * leftCondition.skillAmounts[leftCondition.monstersLost];
+            leftCondition.frontDamageTaken += (int) ((float) (leftCondition.lineup[leftCondition.monstersLost]->hp - leftCondition.frontDamageTaken) * leftCondition.skillAmounts[leftCondition.monstersLost]);
         }
         if (!rightDied && rightCondition.skillTypes[rightCondition.monstersLost] == WITHER) {
-            rightCondition.frontDamageTaken += (rightCondition.lineup[rightCondition.monstersLost]->hp - rightCondition.frontDamageTaken) * rightCondition.skillAmounts[rightCondition.monstersLost];
+            rightCondition.frontDamageTaken += (int) ((float) (rightCondition.lineup[rightCondition.monstersLost]->hp - rightCondition.frontDamageTaken) * rightCondition.skillAmounts[rightCondition.monstersLost]);
         }
         
         // Output detailed fight Data for debugging
@@ -101,19 +99,19 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     
     // write all the results into a FightResult
     left.lastFightData.dominated = false;
-    left.lastFightData.turncounter = turncounter;
-    left.lastFightData.leftAoeDamage = leftCondition.aoeDamageTaken;
-    left.lastFightData.rightAoeDamage = rightCondition.aoeDamageTaken;
+    left.lastFightData.turncounter = (int8_t) turncounter;
+    left.lastFightData.leftAoeDamage = (int16_t) leftCondition.aoeDamageTaken;
+    left.lastFightData.rightAoeDamage = (int16_t) rightCondition.aoeDamageTaken;
     
     if (leftCondition.monstersLost >= leftCondition.armySize) { //draws count as right wins. 
         left.lastFightData.rightWon = true;
-        left.lastFightData.monstersLost = rightCondition.monstersLost; 
-        left.lastFightData.damage = rightCondition.frontDamageTaken;
-        left.lastFightData.berserk = rightCondition.berserkProcs;
+        left.lastFightData.monstersLost = (int8_t) rightCondition.monstersLost; 
+        left.lastFightData.damage = (int16_t) rightCondition.frontDamageTaken;
+        left.lastFightData.berserk = (int8_t) rightCondition.berserkProcs;
     } else {
         left.lastFightData.rightWon = false;
-        left.lastFightData.monstersLost = leftCondition.monstersLost; 
-        left.lastFightData.damage = leftCondition.frontDamageTaken;
-        left.lastFightData.berserk = leftCondition.berserkProcs;
+        left.lastFightData.monstersLost = (int8_t) leftCondition.monstersLost; 
+        left.lastFightData.damage = (int16_t) leftCondition.frontDamageTaken;
+        left.lastFightData.berserk = (int8_t) leftCondition.berserkProcs;
     }
 }
