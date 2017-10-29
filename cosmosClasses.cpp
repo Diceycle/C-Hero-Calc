@@ -2,38 +2,33 @@
 
 std::vector<Monster> monsterReference {}; // Will be filled with leveled heroes if needed (determined by input)
 
-Monster::Monster(int hp, int damage, int cost, std::string name, Element element, HeroSkill skill) {
-    this->hp = hp;
-    this->damage = damage;
-    this->cost = cost;
-    this->baseName = name;
-    this->name = name;
-    this->element = element;
-    this->skill = skill;
-    
+Monster::Monster(int someHp, int someDamage, int aCost, std::string aName, Element anElement, HeroSkill aSkill) : 
+    hp(someHp),
+    damage(someDamage),
+    cost(aCost),
+    name(aName),
+    baseName(aName),
+    element(anElement),
+    skill(aSkill)
+{
     this->isHero = (skill.type != NOTHING);
-};
-
-Monster::Monster() {
-    isHero = false;
 }
+
+Monster::Monster() : isHero(false) {}
 
 // Function for sorting Monsters by cost (ascending)
 bool isCheaper(const Monster & a, const Monster & b) {
     return a.cost < b.cost;
 }
 
-FightResult::FightResult() {
-    this->valid = false;
-}
+FightResult::FightResult() : valid(false) {}
 
-Army::Army(std::vector<int8_t> monsters) {
-    this->followerCost = 0;
-    this->monsterAmount = 0;
-    this->lastFightData = FightResult();
-    
-    for(size_t i = 0; i < monsters.size(); i++) {
-        this->add(monsters[i]);
+Army::Army(std::vector<int8_t> someMonsters) :
+    followerCost(0),
+    monsterAmount(0)
+{
+    for(size_t i = 0; i < someMonsters.size(); i++) {
+        this->add(someMonsters[i]);
     }
 }
 
