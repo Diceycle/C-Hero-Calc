@@ -103,8 +103,8 @@ const std::string heroInputHelp =
 const std::string lineupInputHelp = 
     "  Enter Monsters separated by " + ELEMENT_SEPARATOR + " .\n"
     "  Normal monsters are written with their element (a,e,w,f) and their tier number. So the level 5 water monster is w5.\n"
-    "  Heroes are written first with their full name and a " + HEROLEVEL_SEPARATOR + " followed by their level. For example, forestdruid" + HEROLEVEL_SEPARATOR + "50\n"
-    "  Full example: a1" + ELEMENT_SEPARATOR + "geror" + HEROLEVEL_SEPARATOR + "22" + ELEMENT_SEPARATOR + "f13" + ELEMENT_SEPARATOR + "w2" + ELEMENT_SEPARATOR + "ladyoftwilight" + HEROLEVEL_SEPARATOR + "1\n"
+    "  Heroes are written first with their full name and a " + HEROLEVEL_SEPARATOR() + " followed by their level. For example, forestdruid" + HEROLEVEL_SEPARATOR() + "50\n"
+    "  Full example: a1" + ELEMENT_SEPARATOR + "geror" + HEROLEVEL_SEPARATOR() + "22" + ELEMENT_SEPARATOR + "f13" + ELEMENT_SEPARATOR + "w2" + ELEMENT_SEPARATOR + "ladyoftwilight" + HEROLEVEL_SEPARATOR() + "1\n"
     "  The other alternative is selecting a quest from the game. "
     "For example: Typing " + QUEST_PREFIX + "23" + QUEST_NUMBER_SEPARTOR + "3 loads the lineup for the 23rd quest and tries to beat it with 4 monsters or less.\n"
     "  You can also enter multiple lineups at once. Do so by separating them with spaces.\n"

@@ -5,15 +5,8 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-#include <cmath>
 
 #include "cosmosClasses.h"
-
-enum HeroRarity { 
-    COMMON = 1, 
-    RARE = 2, 
-    LEGENDARY = 6 // Values define how many stat points per level a hero of this rarity gets
-};
 
 extern std::map<std::string, int8_t> monsterMap; // // Maps monster Names to their indices in monsterReference from cosmosClasses
 
@@ -97,148 +90,78 @@ static std::vector<Monster> monsterBaseList { // Raw Monster Data, holds the act
     Monster(276, 142, 7758000, "w15", WATER)
 };
 
-static std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Objects
-    Monster( 45, 20, 0, "ladyoftwilight",    AIR,   {PROTECT,       ALL, AIR, 1}),
-    Monster( 70, 30, 0, "tiny",              EARTH, {AOE,           ALL, EARTH, 2}),
-    Monster( 90, 40, 0, "nebra",             FIRE,  {BUFF,          ALL, FIRE, 8}),
+static const std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds actual Objects
+    Monster( 45, 20, "ladyoftwilight",    AIR,   COMMON,    {PROTECT,       ALL, AIR, 1}),
+    Monster( 70, 30, "tiny",              EARTH, RARE,      {AOE,           ALL, EARTH, 2}),
+    Monster( 90, 40, "nebra",             FIRE,  LEGENDARY, {BUFF,          ALL, FIRE, 8}),
  
-    Monster( 20, 10, 0, "valor",             AIR,   {PROTECT,       AIR, AIR, 1}),
-    Monster( 30,  8, 0, "rokka",             EARTH, {PROTECT,       EARTH, EARTH, 1}),
-    Monster( 24, 12, 0, "pyromancer",        FIRE,  {PROTECT,       FIRE, FIRE, 1}),
-    Monster( 50,  6, 0, "bewat",             WATER, {PROTECT,       WATER, WATER, 1}),
+    Monster( 20, 10, "valor",             AIR,   COMMON,    {PROTECT,       AIR, AIR, 1}),
+    Monster( 30,  8, "rokka",             EARTH, COMMON,    {PROTECT,       EARTH, EARTH, 1}),
+    Monster( 24, 12, "pyromancer",        FIRE,  COMMON,    {PROTECT,       FIRE, FIRE, 1}),
+    Monster( 50,  6, "bewat",             WATER, COMMON,    {PROTECT,       WATER, WATER, 1}),
    
-    Monster( 22, 14, 0, "hunter",            AIR,   {BUFF,          AIR, AIR, 2}),
-    Monster( 40, 20, 0, "shaman",            EARTH, {PROTECT,       EARTH, EARTH , 2}),
-    Monster( 82, 22, 0, "alpha",             FIRE,  {AOE,           ALL, FIRE, 1}),
+    Monster( 22, 14, "hunter",            AIR,   COMMON,    {BUFF,          AIR, AIR, 2}),
+    Monster( 40, 20, "shaman",            EARTH, RARE,      {PROTECT,       EARTH, EARTH , 2}),
+    Monster( 82, 22, "alpha",             FIRE,  LEGENDARY, {AOE,           ALL, FIRE, 1}),
     
-    Monster( 28, 12, 0, "carl",              WATER, {BUFF,          WATER, WATER , 2}),
-    Monster( 38, 22, 0, "nimue",             AIR,   {PROTECT,       AIR, AIR, 2}),
-    Monster( 70, 26, 0, "athos",             EARTH, {PROTECT,       ALL, EARTH, 2}),
+    Monster( 28, 12, "carl",              WATER, COMMON,    {BUFF,          WATER, WATER , 2}),
+    Monster( 38, 22, "nimue",             AIR,   RARE,      {PROTECT,       AIR, AIR, 2}),
+    Monster( 70, 26, "athos",             EARTH, LEGENDARY, {PROTECT,       ALL, EARTH, 2}),
     
-    Monster( 24, 16, 0, "jet",               FIRE,  {BUFF,          FIRE, FIRE, 2}),
-    Monster( 36, 24, 0, "geron",             WATER, {PROTECT,       WATER, WATER, 2}),
-    Monster( 46, 40, 0, "rei",               AIR,   {BUFF,          ALL, AIR, 2}),
+    Monster( 24, 16, "jet",               FIRE,  COMMON,    {BUFF,          FIRE, FIRE, 2}),
+    Monster( 36, 24, "geron",             WATER, RARE,      {PROTECT,       WATER, WATER, 2}),
+    Monster( 46, 40, "rei",               AIR,   LEGENDARY, {BUFF,          ALL, AIR, 2}),
     
-    Monster( 19, 22, 0, "ailen",             EARTH, {BUFF,          EARTH, EARTH, 2}),
-    Monster( 50, 18, 0, "faefyr",            FIRE,  {PROTECT,       FIRE, FIRE, 2}),
-    Monster( 60, 32, 0, "auri",              WATER, {HEAL,          ALL, WATER, 2}),
+    Monster( 19, 22, "ailen",             EARTH, COMMON,    {BUFF,          EARTH, EARTH, 2}),
+    Monster( 50, 18, "faefyr",            FIRE,  RARE,      {PROTECT,       FIRE, FIRE, 2}),
+    Monster( 60, 32, "auri",              WATER, LEGENDARY, {HEAL,          ALL, WATER, 2}),
     
-    Monster( 22, 32, 0, "nicte",             AIR,   {BUFF,          AIR, AIR, 4}),
+    Monster( 22, 32, "nicte",             AIR,   RARE,      {BUFF,          AIR, AIR, 4}),
    
-    Monster( 50, 12, 0, "james",             EARTH, {P_AOE,          ALL, EARTH, 1}),
+    Monster( 50, 12, "james",             EARTH, LEGENDARY, {P_AOE,          ALL, EARTH, 1}),
    
-    Monster( 28, 16, 0, "k41ry",             AIR,   {BUFF,          AIR, AIR, 3}),
-    Monster( 46, 20, 0, "t4urus",            EARTH, {BUFF,          ALL, EARTH, 1}),
-    Monster(100, 20, 0, "tr0n1x",            FIRE,  {AOE,           ALL, FIRE, 3}),
+    Monster( 28, 16, "k41ry",             AIR,   COMMON,    {BUFF,          AIR, AIR, 3}),
+    Monster( 46, 20, "t4urus",            EARTH, RARE,      {BUFF,          ALL, EARTH, 1}),
+    Monster(100, 20, "tr0n1x",            FIRE,  LEGENDARY, {AOE,           ALL, FIRE, 3}),
        
-    Monster( 58,  8, 0, "aquortis",          WATER, {BUFF,          WATER, WATER, 3}),
-    Monster( 30, 32, 0, "aeris",             AIR,   {HEAL,          ALL, AIR, 1}),
-    Monster( 75,  2, 0, "geum",              EARTH, {BERSERK,       SELF, EARTH, 2}),
+    Monster( 58,  8, "aquortis",          WATER, COMMON,    {BUFF,          WATER, WATER, 3}),
+    Monster( 30, 32, "aeris",             AIR,   RARE,      {HEAL,          ALL, AIR, 1}),
+    Monster( 75,  2, "geum",              EARTH, LEGENDARY, {BERSERK,       SELF, EARTH, 2}),
     
-    Monster( 46, 16, 0, "forestdruid",       EARTH, {BUFF,          EARTH, EARTH, 4}),
-    Monster( 32, 24, 0, "ignitor",           FIRE,  {BUFF,          FIRE, FIRE, 4}),
-    Monster( 58, 14, 0, "undine",            WATER, {BUFF,          WATER, WATER, 4}),
+    Monster( 46, 16, "forestdruid",       EARTH, RARE,      {BUFF,          EARTH, EARTH, 4}),
+    Monster( 32, 24, "ignitor",           FIRE,  RARE,      {BUFF,          FIRE, FIRE, 4}),
+    Monster( 58, 14, "undine",            WATER, RARE,      {BUFF,          WATER, WATER, 4}),
     
-    Monster( 38, 12, 0, "rudean",            FIRE,  {BUFF,          FIRE, FIRE, 3}),
-    Monster( 18, 50, 0, "aural",             WATER, {BERSERK,       SELF, WATER, 1.2f}),
-    Monster( 46, 46, 0, "geror",             AIR,   {FRIENDS,       SELF, AIR, 1.2f}),
+    Monster( 38, 12, "rudean",            FIRE,  COMMON,    {BUFF,          FIRE, FIRE, 3}),
+    Monster( 18, 50, "aural",             WATER, RARE,      {BERSERK,       SELF, WATER, 1.2f}),
+    Monster( 46, 46, "geror",             AIR,   LEGENDARY, {FRIENDS,       SELF, AIR, 1.2f}),
     
-    Monster( 66, 44, 0, "veildur",           EARTH, {CHAMPION,      ALL, EARTH, 3}),
-    Monster( 72, 48, 0, "brynhildr",         AIR,   {CHAMPION,      ALL, AIR, 4}),
-    Monster( 78, 52, 0, "groth",             FIRE,  {CHAMPION,      ALL, FIRE, 5}),
+    Monster( 66, 44, "veildur",           EARTH, LEGENDARY, {CHAMPION,      ALL, EARTH, 3}),
+    Monster( 72, 48, "brynhildr",         AIR,   LEGENDARY, {CHAMPION,      ALL, AIR, 4}),
+    Monster( 78, 52, "groth",             FIRE,  LEGENDARY, {CHAMPION,      ALL, FIRE, 5}),
     
-    Monster( 30, 16, 0, "ourea",             EARTH, {BUFF,          EARTH, EARTH, 3}),
-    Monster( 48, 20, 0, "erebus",            FIRE,  {CHAMPION,      FIRE, FIRE, 2}),
-    Monster( 62, 36, 0, "pontus",            WATER, {ADAPT,         WATER, WATER, 2}),
+    Monster( 30, 16, "ourea",             EARTH, COMMON,    {BUFF,          EARTH, EARTH, 3}),
+    Monster( 48, 20, "erebus",            FIRE,  RARE,      {CHAMPION,      FIRE, FIRE, 2}),
+    Monster( 62, 36, "pontus",            WATER, LEGENDARY, {ADAPT,         WATER, WATER, 2}),
 
-    Monster( 52, 20, 0, "chroma",            AIR,   {PROTECT,       AIR, AIR, 4}),
-    Monster( 26, 44, 0, "petry",             EARTH, {PROTECT,       EARTH, EARTH, 4}),
-    Monster( 58, 22, 0, "zaytus",            FIRE,  {PROTECT,       FIRE, FIRE, 4}),
+    Monster( 52, 20, "chroma",            AIR,   RARE,      {PROTECT,       AIR, AIR, 4}),
+    Monster( 26, 44, "petry",             EARTH, RARE,      {PROTECT,       EARTH, EARTH, 4}),
+    Monster( 58, 22, "zaytus",            FIRE,  RARE,      {PROTECT,       FIRE, FIRE, 4}),
 
-    Monster( 75, 45, 0, "spyke",             AIR,   {TRAINING,      SELF, AIR, 5}),
-    Monster( 70, 55, 0, "aoyuki",            WATER, {RAINBOW,       SELF, WATER, 50}),
-    Monster( 50,100, 0, "gaiabyte",          EARTH, {WITHER,        SELF, EARTH, 0.5f}),
+    Monster( 75, 45, "spyke",             AIR,   LEGENDARY, {TRAINING,      SELF, AIR, 5}),
+    Monster( 70, 55, "aoyuki",            WATER, LEGENDARY, {RAINBOW,       SELF, WATER, 50}),
+    Monster( 50,100, "gaiabyte",          EARTH, LEGENDARY, {WITHER,        SELF, EARTH, 0.5f}),
     
-    Monster( 36, 14, 0, "oymos",             AIR,   {BUFF,          AIR, AIR, 4}),
-    Monster( 32, 32, 0, "xarth",             EARTH, {CHAMPION,      EARTH, EARTH, 2}),
-    Monster( 76, 32, 0, "atzar",             FIRE,  {ADAPT,         FIRE, FIRE, 2}),
+    Monster( 36, 14, "oymos",             AIR,   COMMON,    {BUFF,          AIR, AIR, 4}),
+    Monster( 32, 32, "xarth",             EARTH, RARE,      {CHAMPION,      EARTH, EARTH, 2}),
+    Monster( 76, 32, "atzar",             FIRE,  LEGENDARY, {ADAPT,         FIRE, FIRE, 2}),
     
-    Monster( 70, 42, 0, "zeth",              WATER, {REVENGE,       ALL, WATER, 0.1f}),
-    Monster( 76, 46, 0, "koth",              EARTH, {REVENGE,       ALL, EARTH, 0.15f}),
-    Monster( 82, 50, 0, "gurth",             AIR,   {REVENGE,       ALL, AIR, 0.2f}),
+    Monster( 70, 42, "zeth",              WATER, LEGENDARY, {REVENGE,       ALL, WATER, 0.1f}),
+    Monster( 76, 46, "koth",              EARTH, LEGENDARY, {REVENGE,       ALL, EARTH, 0.15f}),
+    Monster( 82, 50, "gurth",             AIR,   LEGENDARY, {REVENGE,       ALL, AIR, 0.2f}),
 };
 
-static std::map<std::string, HeroRarity> rarities { // Hero Rarities: 0 = Common, 1 = Rare, 2 = Legendary
-    {"james",       LEGENDARY},  
-  
-    {"hunter",      COMMON},
-    {"shaman",      RARE},
-    {"alpha",       LEGENDARY},
-    
-    {"carl",        COMMON},
-    {"nimue",       RARE},
-    {"athos",       LEGENDARY},
-    
-    {"jet",         COMMON},
-    {"geron",       RARE},
-    {"rei",         LEGENDARY},
-    
-    {"ailen",       COMMON},
-    {"faefyr",      RARE},
-    {"auri",        LEGENDARY},
-    
-    {"k41ry",       COMMON},
-    {"t4urus",      RARE},
-    {"tr0n1x",      LEGENDARY},
-    
-    {"aquortis",    COMMON},
-    {"aeris",       RARE},
-    {"geum",        LEGENDARY},
-    
-    {"rudean",      COMMON},
-    {"aural",       RARE},
-    {"geror",       LEGENDARY},
-    
-    {"ourea",       COMMON},
-    {"erebus",      RARE},
-    {"pontus",      LEGENDARY},
-    
-    {"oymos",       COMMON},
-    {"xarth",       RARE},
-    {"atzar",       LEGENDARY},
-    
-    {"ladyoftwilight",COMMON},
-    {"tiny",        RARE},
-    {"nebra",       LEGENDARY},
-    
-    {"veildur",     LEGENDARY},
-    {"brynhildr",   LEGENDARY},
-    {"groth",       LEGENDARY},
-    
-    {"zeth",        LEGENDARY},
-    {"koth",        LEGENDARY},
-    {"gurth",       LEGENDARY},
-    
-    {"spyke",       LEGENDARY},
-    {"aoyuki",      LEGENDARY},
-    {"gaiabyte",    LEGENDARY},
-    
-    {"valor",       COMMON},
-    {"rokka",       COMMON},
-    {"pyromancer",  COMMON},
-    {"bewat",       COMMON},
-    
-    {"nicte",       RARE},
-    {"forestdruid", RARE},
-    {"ignitor",     RARE},
-    {"undine",      RARE},
-    
-    {"chroma",      RARE},
-    {"petry",       RARE},
-    {"zaytus",      RARE}
-};
-
-static std::vector<std::vector<std::string>> quests { // Contains all quest lineups for easy referencing
+static const std::vector<std::vector<std::string>> quests { // Contains all quest lineups for easy referencing
 	{""},
 	{"w5"},
 	{"f1", "a1", "f1", "a1", "f1", "a1"},
@@ -305,10 +228,7 @@ void initMonsterData();
 // Filter MonsterList by cost. User can specify if he wants to exclude cheap monsters
 void filterMonsterData(int minimumMonsterCost);
 
-// Create a new hero with leveled stats and return it
-Monster getLeveledHero(const Monster & m, int level);
-
 // Add a leveled hero to the databse and return its corresponding index
-int8_t addLeveledHero(Monster hero, int level);
+int8_t addLeveledHero(Monster & hero, int level);
 
 #endif

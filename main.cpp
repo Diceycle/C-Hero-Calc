@@ -300,7 +300,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                     leftHeroListSize = 0;
                     for (si = 0; si < armySize; si++) {
                         leftMonster = heroMonsterArmies[i].monsters[si];
-                        if (monsterReference[leftMonster].isHero) {
+                        if (monsterReference[leftMonster].rarity != NO_HERO) {
                             leftHeroList[leftHeroListSize] = leftMonster;
                             leftHeroListSize++;
                         }
@@ -325,7 +325,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                                 for (sj = 0; sj < armySize; sj++) { // for every hero in j there must be the same hero in i
                                     leftUsedHero = false; 
                                     rightMonster = heroMonsterArmies[j].monsters[sj];
-                                    if (monsterReference[rightMonster].isHero) { // mob is a hero
+                                    if (monsterReference[rightMonster].rarity != NO_HERO) {
                                         for (si = 0; si < leftHeroListSize; si++) {
                                             if (leftHeroList[si] == rightMonster) {
                                                 leftUsedHero = true;

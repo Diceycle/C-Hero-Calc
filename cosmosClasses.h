@@ -7,12 +7,13 @@
 #include <iomanip>
 #include <cstdint>
 #include <sstream>
+#include <cmath>
 
 const size_t ARMY_MAX_SIZE = 6;
 const size_t TOURNAMENT_LINES = 5;
 const size_t ARMY_MAX_BRUTEFORCEABLE_SIZE = 4;
 
-const std::string HEROLEVEL_SEPARATOR = ":";
+std::string& HEROLEVEL_SEPARATOR();
 
 // Define types of HeroSkills and Elements
 enum SkillType {
@@ -49,21 +50,37 @@ struct HeroSkill {
     Element sourceElement;
     float amount;
 };
-static HeroSkill NONE = HeroSkill({NOTHING, AIR, AIR, 1}); // base skill used for normal monsters
+static HeroSkill NO_SKILL = HeroSkill({NOTHING, AIR, AIR, 1}); // base skill used for normal monsters
+
+enum HeroRarity { 
+    NO_HERO = 0,
+    COMMON = 1, 
+    RARE = 2, 
+    LEGENDARY = 6 // Values define how many stat points per level a hero of this rarity gets
+};
 
 // Defines a Monster or Hero
 class Monster {
+    private:
+        Monster(int hp, int damage, int cost, std::string name, Element element, HeroRarity rarity, HeroSkill skill, int level);
+        
     public :
         int hp;
         int damage;
         int cost;
-        bool isHero;
-        std::string name;
         std::string baseName;
         Element element;
-        HeroSkill skill;
         
-        Monster(int hp, int damage, int cost, std::string name, Element element, HeroSkill skill = NONE);
+        // Hero Stuff
+        HeroRarity rarity;
+        HeroSkill skill;
+        int level;
+        
+        std::string name;
+        
+        Monster(int hp, int damage, int cost, std::string name, Element element);
+        Monster(int hp, int damage, std::string name, Element element, HeroRarity rarity, HeroSkill skill);
+        Monster(const Monster & baseHero, int level);
         Monster();
 };
 

@@ -215,7 +215,7 @@ Army makeArmyFromStrings(vector<string> stringMonsters) {
     pair<Monster, int> heroData;
     
     for(size_t i = 0; i < stringMonsters.size(); i++) {
-        if(stringMonsters[i].find(HEROLEVEL_SEPARATOR) != stringMonsters[i].npos) {
+        if(stringMonsters[i].find(HEROLEVEL_SEPARATOR()) != stringMonsters[i].npos) {
             heroData = parseHeroString(stringMonsters[i]);
             army.add(addLeveledHero(heroData.first, heroData.second));
         } else {
@@ -227,14 +227,14 @@ Army makeArmyFromStrings(vector<string> stringMonsters) {
 
 // Parse hero input from a string into its name and level
 pair<Monster, int> parseHeroString(string heroString) {
-    string name = heroString.substr(0, heroString.find(HEROLEVEL_SEPARATOR));
+    string name = heroString.substr(0, heroString.find(HEROLEVEL_SEPARATOR()));
 	Monster hero;
 	for (size_t i = 0; i < baseHeroes.size(); i++) {
-		if (baseHeroes[i].name == name) {
-			hero = baseHeroes[i];
+		if (baseHeroes[i].baseName == name) {
+            hero = baseHeroes[i];
 		}
 	}
-    int level = stoi(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR)+1));
+    int level = stoi(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR())+1));
     return pair<Monster, int>(hero, level);
 }
 
@@ -276,16 +276,16 @@ string getReplaySetup(Army setup) {
 string getReplayMonsterNumber(Monster monster) {
     int8_t index = REPLAY_EMPTY_SPOT;
     size_t i;
-    if(monster.isHero) {
+    if(monster.rarity != NO_HERO) {
         for (i = 0; i < baseHeroes.size(); i++) {
             if (baseHeroes[i].baseName == monster.baseName) {
-                index = -i - 2;
+                index = (int8_t) (-i - 2);
             }
         }
     } else {
         for (i = 0; i < monsterBaseList.size(); i++) {
             if (monster.name == monsterBaseList[i].name) {
-                index = i;
+                index = (int8_t) i;
             }
         }
     }
@@ -301,8 +301,8 @@ string getReplayHeroes(Army setup) {
         level = 0;
         for (int j = 0; j < setup.monsterAmount; j++) {
             monster = monsterReference[setup.monsters[j]];
-            if (monster.isHero && monster.baseName == baseHeroes[i].baseName) {
-                level = parseHeroString(monster.name).second;
+            if (monster.rarity != NO_HERO) {
+                level = monster.level;
             }
         }
         heroes << to_string(level);

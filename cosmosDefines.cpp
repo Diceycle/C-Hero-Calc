@@ -33,26 +33,9 @@ void filterMonsterData(int minimumMonsterCost) {
     }
 }
 
-// Create a new hero with leveled stats and return it
-Monster getLeveledHero(const Monster & m, int level) {
-    HeroRarity rarity = rarities.at(m.name);
-    int points = rarity * (level-1);
-    int value = m.hp + m.damage;
-    Monster hero =  Monster(
-        m.hp + (int) round((float) points * (float) m.hp / (float) value),
-        m.damage + (int) round((float) points * (float) m.damage / (float) value),
-        m.cost,
-        m.name + HEROLEVEL_SEPARATOR + std::to_string(level),
-        m.element,
-        m.skill
-    );
-    hero.baseName = m.name;
-    return hero;
-}
-
 // Add a leveled hero to the databse and return its corresponding index
-int8_t addLeveledHero(Monster hero, int level) {
-    Monster m = getLeveledHero(hero, level);
+int8_t addLeveledHero(Monster & hero, int level) {
+    Monster m(hero, level);
     monsterReference.emplace_back(m);
     
     return (int8_t) (monsterReference.size() - 1);
