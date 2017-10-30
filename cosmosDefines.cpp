@@ -35,8 +35,29 @@ void filterMonsterData(int minimumMonsterCost) {
 
 // Initialize Hero Data. Must be called after filterMonsterData
 void initializeUserHeroes(std::vector<int> levels) {
+    std::vector<int> strenghs,istrenghs;
+    strenghs.resize(levels.size());
+    istrenghs.resize(levels.size());
     for (size_t i = 0; i < baseHeroes.size(); i++) {
         if (levels[i] > 0) {
+            Monster m = getLeveledHero(baseHeroes[i], levels[i]);
+            strenghs[i] = m.hp + m.damage;
+        } else {
+            strenghs[i] = 0;
+        }
+        istrenghs[i] = i;
+    }
+
+    size_t nkeep = 15;
+    nkeep = std::min(nkeep,baseHeroes.size());
+    std::partial_sort( istrenghs.begin(), istrenghs.begin()+nkeep, istrenghs.end(),
+                        [strenghs](int a, int b){return strenghs[a] > strenghs[b];});
+
+    for (size_t i = nkeep; i < baseHeroes.size(); i++) {
+            strenghs[istrenghs[i]] = 0;
+    }
+    for (size_t i = 0; i < baseHeroes.size(); i++) {
+        if (strenghs[i] > 0) {
             availableHeroes.push_back(addLeveledHero(baseHeroes[i], levels[i]));
         }
     }
