@@ -48,6 +48,10 @@ struct Instance {
     Army target;
     size_t targetSize;
     size_t maxCombatants;
+    
+    int followerUpperBound;
+    Army bestSolution;
+    
     time_t calculationTime;
 };
 

@@ -11,29 +11,25 @@
 
 using namespace std;
 
-// Define global variables used to track the best result
-int32_t followerUpperBound;
-Army best;
-
 IOManager iomanager;
 
 // Simulates fights with all armies against the target. Armies will contain Army objects with the results written in.
-void simulateMultipleFights(vector<Army> & armies, Army target) {
+void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
     bool newFound = false;
     size_t i = 0;
     size_t armyAmount = armies.size();
     
     for (i = 0; i < armyAmount; i++) {
-        simulateFight(armies[i], target);
+        simulateFight(armies[i], instance.target);
         if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
-            if (armies[i].followerCost < followerUpperBound) {
+            if (armies[i].followerCost < instance.followerUpperBound) {
                 if (!newFound) {
                     iomanager.suspendTimedOutputs(DETAILED_OUTPUT);
                 }
                 newFound = true;
-                followerUpperBound = armies[i].followerCost;
-                best = armies[i];
-                iomanager.outputMessage(best.toString(), DETAILED_OUTPUT, 2);
+                instance.followerUpperBound = armies[i].followerCost;
+                instance.bestSolution = armies[i];
+                iomanager.outputMessage(instance.bestSolution.toString(), DETAILED_OUTPUT, 2);
             }
         }
     }
@@ -46,7 +42,7 @@ void simulateMultipleFights(vector<Army> & armies, Army target) {
 // Armies that are dominated are ignored.
 void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
             vector<Army> & oldPureArmies, vector<Army> & oldHeroArmies, 
-            size_t currentArmySize) {
+            size_t currentArmySize, Instance & instance) {
 
     int remainingFollowers;
     size_t availableMonstersSize = availableMonsters.size();
@@ -58,7 +54,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     
     for (i = 0; i < oldPureArmies.size(); i++) {
         if (!oldPureArmies[i].lastFightData.dominated) {
-            remainingFollowers = followerUpperBound - oldPureArmies[i].followerCost;
+            remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
                 newPureArmies.push_back(oldPureArmies[i]);
                 newPureArmies.back().add(availableMonsters[m]);
@@ -76,7 +72,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     for (i = 0; i < oldHeroArmies.size(); i++) {
         if (!oldHeroArmies[i].lastFightData.dominated) {
             globalAbilityInfluence = false;
-            remainingFollowers = followerUpperBound - oldHeroArmies[i].followerCost;
+            remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
             for (j = 0; j < currentArmySize; j++) {
                 for (m = 0; m < availableHeroesSize; m++) {
                     if (oldHeroArmies[i].monsters[j] == availableHeroes[m]) {
@@ -131,9 +127,9 @@ void getQuickSolutions(Instance & instance) {
             invalid = greedy.size() < instance.maxCombatants;
         }
         if (!invalid) {
-            best = tempArmy;
-            if (followerUpperBound > tempArmy.followerCost) {
-                followerUpperBound = tempArmy.followerCost;
+            instance.bestSolution = tempArmy;
+            if (instance.followerUpperBound > tempArmy.followerCost) {
+                instance.followerUpperBound = tempArmy.followerCost;
             }
             
             // Try to replace monsters in the setup with heroes to save followers
@@ -151,9 +147,9 @@ void getQuickSolutions(Instance & instance) {
                 }
             }
             tempArmy = Army(greedyHeroes);
-            best = tempArmy;
-            if (followerUpperBound > tempArmy.followerCost) { // Take care not to override custom follower counts
-                followerUpperBound = tempArmy.followerCost;
+            instance.bestSolution = tempArmy;
+            if (instance.followerUpperBound > tempArmy.followerCost) { // Take care not to override custom follower counts
+                instance.followerUpperBound = tempArmy.followerCost;
             }
         }
     }
@@ -174,7 +170,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
     vector<Army> pureMonsterArmies {}; // initialize with all monsters
     vector<Army> heroMonsterArmies {}; // initialize with all heroes
     for (i = 0; i < availableMonsters.size(); i++) {
-        if (monsterReference[availableMonsters[i]].cost <= followerUpperBound) {
+        if (monsterReference[availableMonsters[i]].cost <= instance.followerUpperBound) {
             pureMonsterArmies.push_back(Army( {availableMonsters[i]} ));
         }
     }
@@ -220,14 +216,14 @@ void solveInstance(Instance & instance, size_t firstDominance) {
         
         // Run Fights for non-Hero setups
         iomanager.timedOutput("Simulating " + to_string(pureMonsterArmiesSize) + " non-hero Fights... ", DETAILED_OUTPUT, 1, true);
-        simulateMultipleFights(pureMonsterArmies, instance.target);
+        simulateMultipleFights(pureMonsterArmies, instance);
         
         // Run fights for setups with heroes
         iomanager.timedOutput("Simulating " + to_string(heroMonsterArmiesSize) + " hero Fights... ", DETAILED_OUTPUT, 1);
-        simulateMultipleFights(heroMonsterArmies, instance.target);
+        simulateMultipleFights(heroMonsterArmies, instance);
         
         // If we have a valid solution with 0 followers there is no need to continue
-        if (best.monsterAmount > 0 && best.followerCost == 0) { break; }
+        if (instance.bestSolution.monsterAmount > 0 && instance.bestSolution.followerCost == 0) { break; }
         
         if (armySize < instance.maxCombatants) { 
             // Sort the results by follower cost for some optimization
@@ -240,9 +236,9 @@ void solveInstance(Instance & instance, size_t firstDominance) {
             }
             if (armySize == firstDominance) {
                 iomanager.outputMessage("", DETAILED_OUTPUT);
-                if (best.monsterAmount > 0) {
+                if (instance.bestSolution.monsterAmount > 0) {
                     iomanager.outputMessage("Best Solution so far:", DETAILED_OUTPUT);
-                    iomanager.outputMessage(best.toString(), DETAILED_OUTPUT, 1);
+                    iomanager.outputMessage(instance.bestSolution.toString(), DETAILED_OUTPUT, 1);
                 } else {
                     iomanager.outputMessage("Could not find a solution yet!", DETAILED_OUTPUT);
                 }
@@ -355,7 +351,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
             iomanager.timedOutput("Expanding Lineups by one... ", DETAILED_OUTPUT, 1);
             vector<Army> nextPureArmies;
             vector<Army> nextHeroArmies;
-            expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies, armySize);
+            expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies, armySize, instance);
 
             iomanager.timedOutput("Moving Data... ", DETAILED_OUTPUT, 1);
             pureMonsterArmies = move(nextPureArmies);
@@ -370,11 +366,11 @@ void outputSolution(Instance instance) {
     cout << endl << "Solution for " << instance.target.toString() << ":" << endl;
             
     // Announce the result
-    if (best.monsterAmount > 0) {
-        cout << "  " << best.toString() << endl;
-        best.lastFightData.valid = false;
-        simulateFight(best, instance.target); // Sanity check on the solution
-        if (best.lastFightData.rightWon) {
+    if (instance.bestSolution.monsterAmount > 0) {
+        cout << "  " << instance.bestSolution.toString() << endl;
+        instance.bestSolution.lastFightData.valid = false;
+        simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
+        if (instance.bestSolution.lastFightData.rightWon) {
             cout << "  This does not beat the lineup!!!" << endl;
             cout << "FATAL ERROR!!! Please comment this output in the Forums!" << endl;
         }
@@ -463,14 +459,12 @@ int main(int argc, char** argv) {
         }
         
         for (size_t i = 0; i < instances.size(); i++) {
-            // Reset solution Data
-            best = Army();
             totalFightsSimulated = 0;
             
             if (userFollowerUpperBound < 0) {
-                followerUpperBound = numeric_limits<int>::max();
+                instances[i].followerUpperBound = numeric_limits<int>::max();
             } else {
-                followerUpperBound = userFollowerUpperBound;
+                instances[i].followerUpperBound = userFollowerUpperBound;
             }
             
             solveInstance(instances[i], firstDominance);
