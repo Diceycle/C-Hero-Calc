@@ -117,6 +117,13 @@ inline bool ArmyCondition::startNewTurn() {
             } else if (this->skillTypes[i] == CHAMPION && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
                 this->turnData.buffDamage += (int) this->skillAmounts[i];
                 this->turnData.protection += (int) this->skillAmounts[i];
+            } else if (this->skillTypes[i] == PROTECT_L && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
+                this->turnData.protection += lineup[i]->level / (int) this->skillAmounts[i];
+            } else if (this->skillTypes[i] == BUFF_L && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
+                this->turnData.buffDamage += lineup[i]->level / (int) this->skillAmounts[i];
+            } else if (this->skillTypes[i] == CHAMPION_L && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
+                this->turnData.buffDamage += lineup[i]->level / (int) this->skillAmounts[i];
+                this->turnData.protection += lineup[i]->level / (int) this->skillAmounts[i];
             } else if (this->skillTypes[i] == HEAL) {
                 this->turnData.healing += (int) this->skillAmounts[i];
             } else if (this->skillTypes[i] == AOE) {

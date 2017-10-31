@@ -159,6 +159,10 @@ static const std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds
     Monster( 70, 42, "zeth",              WATER, LEGENDARY, {REVENGE,       ALL, WATER, 0.1f}),
     Monster( 76, 46, "koth",              EARTH, LEGENDARY, {REVENGE,       ALL, EARTH, 0.15f}),
     Monster( 82, 50, "gurth",             AIR,   LEGENDARY, {REVENGE,       ALL, AIR, 0.2f}),
+    
+    Monster( 35, 25, "werewolf",          EARTH, COMMON,    {PROTECT_L,     ALL, EARTH, 9}),
+    Monster( 55, 35, "jackoknight",       AIR,   RARE,      {BUFF_L,        ALL, AIR, 9}),
+    Monster( 75, 45, "dullahan",          FIRE,  LEGENDARY, {CHAMPION_L,    ALL, FIRE, 9}),
 };
 
 static const std::vector<std::vector<std::string>> quests { // Contains all quest lineups for easy referencing

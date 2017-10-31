@@ -19,13 +19,16 @@ std::string& HEROLEVEL_SEPARATOR();
 enum SkillType {
     NOTHING,    // Base Skill used by normal monsters
     BUFF,       // Increases Damage of own army
+    BUFF_L,     // Buff ability that scales with level
     PROTECT,    // Reduces incoming damage vs the own army
+    PROTECT_L,  // Protect ability that scales with level
     AOE,        // Damages the entire opposing army every turn
-    P_AOE,       // If this monster attacks it also damages every monster behind the attacked
+    P_AOE,      // If this monster attacks it also damages every monster behind the attacked
     HEAL,       // Heals the entire own army every turn
     BERSERK,    // Every attack this monster makes multiplies its own damage 
     FRIENDS,    // This monster receives a damage multiplicator for every NORMAL monster behind it
     CHAMPION,   // This monster has the buff and protect ability at the same time
+    CHAMPION_L, // Champion ability that scales with level
     ADAPT,      // This monster deals more damage vs certain elements
     RAINBOW,    // This monster receives a damage buff if monsters of every element are behind it
     TRAINING,   // This monster receives a damage buff for every turn that passed
