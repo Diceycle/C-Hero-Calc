@@ -134,6 +134,7 @@ Army makeArmyFromStrings(std::vector<std::string> stringMonsters);
 // Parse hero input from a string into its name and level
 std::pair<Monster, int> parseHeroString(std::string heroString);
 
+// Functions for making a valid ingame replay string
 std::string makeBattleReplay(Army friendly, Army hostile);
 std::string getReplaySetup(Army setup);
 std::string getReplayMonsterNumber(Monster monster);

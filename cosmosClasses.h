@@ -71,7 +71,7 @@ class Monster {
         int hp;
         int damage;
         int cost;
-        std::string baseName;
+        std::string baseName; // Hero names without levels
         Element element;
         
         // Hero Stuff
@@ -79,7 +79,7 @@ class Monster {
         HeroSkill skill;
         int level;
         
-        std::string name;
+        std::string name; // display name
         
         Monster(int hp, int damage, int cost, std::string name, Element element);
         Monster(int hp, int damage, std::string name, Element element, HeroRarity rarity, HeroSkill skill);

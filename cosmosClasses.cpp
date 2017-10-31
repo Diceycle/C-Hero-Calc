@@ -2,11 +2,13 @@
 
 std::vector<Monster> monsterReference {}; // Will be filled with leveled heroes if needed (determined by input)
 
+// Necessary to put in a functions to avoid static initilazation order fiasco
 std::string& HEROLEVEL_SEPARATOR() {
     static std::string * separator = new std::string(":");
     return *separator;
 }
 
+// Private constructor that is called by all public ones. Fully initializes all attributes
 Monster::Monster(int someHp, int someDamage, int aCost, std::string aName, Element anElement, HeroRarity aRarity, HeroSkill aSkill, int aLevel) : 
     hp(someHp),
     damage(someDamage),
@@ -27,12 +29,15 @@ Monster::Monster(int someHp, int someDamage, int aCost, std::string aName, Eleme
     }
 }
 
+// Contructor for normal Monsters
 Monster::Monster(int someHp, int someDamage, int aCost, std::string aName, Element anElement) : 
     Monster(someHp, someDamage, aCost, aName, anElement, NO_HERO, NO_SKILL, 0) {}
 
+// Constructor for Heroes
 Monster::Monster(int someHp, int someDamage, std::string aName, Element anElement, HeroRarity aRarity, HeroSkill aSkill) :
     Monster(someHp, someDamage, 0, aName, anElement, aRarity, aSkill, 1) {}
 
+// Constructor for leveled heroes
 Monster::Monster(const Monster & baseHero, int aLevel) :
     Monster(baseHero.hp, baseHero.damage, baseHero.cost, baseHero.baseName, baseHero.element, baseHero.rarity, baseHero.skill, aLevel) {}
 

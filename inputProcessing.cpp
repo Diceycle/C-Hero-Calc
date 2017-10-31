@@ -13,6 +13,10 @@ IOManager::IOManager() {
     this->lastTimedOutput = -1;
 }
 
+bool IOManager::shouldOutput(OutputLevel urgency) {
+    return (this->outputLevel >= urgency);
+}
+
 // Initialize a macro file provided by filename
 void IOManager::initMacroFile(string macroFileName, bool showInput) {
     this->macroFile.open(macroFileName);
@@ -24,6 +28,7 @@ void IOManager::initMacroFile(string macroFileName, bool showInput) {
     }
 }
 
+// Output method called only by class. takes an output level to determine if it should be printed or not
 void IOManager::printBuffer(OutputLevel urgency) {
     if (this->shouldOutput(urgency)) {
         cout << this->outputStream.str();
@@ -32,10 +37,12 @@ void IOManager::printBuffer(OutputLevel urgency) {
     this->outputStream.clear();
 }
 
+// Returns the correct amount of spaces for indentation
 string IOManager::getIndent(int indent) {
     return string(indent * INDENT_WIDTH, ' ');
 }
 
+// Output simple message
 void IOManager::outputMessage(string message, OutputLevel urgency, int indent, bool linebreak) {
     this->outputStream << this->getIndent(indent) + message;
     if (linebreak) {
@@ -44,6 +51,7 @@ void IOManager::outputMessage(string message, OutputLevel urgency, int indent, b
     this->printBuffer(urgency);
 }
 
+// Output message that will be terminated by a timestamp by the next timed message
 void IOManager::timedOutput(string message, OutputLevel urgency, int indent, bool reset) {
     if (this->lastTimedOutput >= 0 && !reset) {
         this->finishTimedOutput(urgency);
@@ -53,16 +61,19 @@ void IOManager::timedOutput(string message, OutputLevel urgency, int indent, boo
     this->printBuffer(urgency);
 }
 
+// Finish the final timed message without adding another
 void IOManager::finishTimedOutput(OutputLevel urgency) {
     this->outputStream << "Done! (" << right << setw(3) << time(NULL) - this->lastTimedOutput << " seconds)" << endl; // Exactly 20 characters long
     this->printBuffer(urgency);
 }
 
+// Stop timed messages for a time. used to have properly formatted output when outputting substeps
 void IOManager::suspendTimedOutputs(OutputLevel urgency) {
     this->outputStream << endl;
     this->printBuffer(urgency);
 }
 
+// Start timed outputs again.
 void IOManager::resumeTimedOutputs(OutputLevel urgency) {
     this->outputStream << left << setw(STANDARD_CMD_WIDTH - FINISH_MESSAGE_LENGTH) << "";
     this->printBuffer(urgency);
@@ -140,7 +151,7 @@ bool IOManager::askYesNoQuestion(string questionMessage, string help, OutputLeve
     return false;
 }
 
-// Promt the User via command line to input his hero levels and return them as a vector<int>
+// Promt the User via command line to input his hero levels and return a vector of their indices
 vector<int8_t> IOManager::takeHerolevelInput() {
     vector<int8_t> heroes {};
     string input;
@@ -185,10 +196,6 @@ vector<Instance> IOManager::takeInstanceInput(string prompt) {
             return instances;
         } catch (const exception & e) {}
     }
-}
-
-bool IOManager::shouldOutput(OutputLevel urgency) {
-    return (this->outputLevel >= urgency);
 }
 
 // Convert a lineup string into an actual instance to solve
@@ -238,6 +245,7 @@ pair<Monster, int> parseHeroString(string heroString) {
     return pair<Monster, int>(hero, level);
 }
 
+// Create valid string to be used ingame to view the battle between armies friendly and hostile
 string makeBattleReplay(Army friendly, Army hostile) {
     stringstream replay;
     replay << "{";
@@ -255,6 +263,7 @@ string makeBattleReplay(Army friendly, Army hostile) {
     return base64_encode((const unsigned char*) unencoded.c_str(), (int) unencoded.size());
 }
 
+// Get lineup in ingame indices
 string getReplaySetup(Army setup) {
     stringstream stringSetup;
     size_t i;
@@ -273,6 +282,7 @@ string getReplaySetup(Army setup) {
     return stringSetup.str();
 }
 
+// Get ingame index of monster. 0 and Positive for monsters and -1 to negative for heroes
 string getReplayMonsterNumber(Monster monster) {
     int8_t index = REPLAY_EMPTY_SPOT;
     size_t i;
@@ -292,6 +302,7 @@ string getReplayMonsterNumber(Monster monster) {
     return to_string(index);
 }
 
+// Get list of relevant herolevels in ingame format
 string getReplayHeroes(Army setup) {
     stringstream heroes;
     Monster monster;

@@ -415,13 +415,13 @@ int main(int argc, char** argv) {
         iomanager.initMacroFile(macroFileName, showMacroFileInput);
     }
     
-    // -------------------------------------------- Program Start --------------------------------------------
+    // Initialize global Data
+    initMonsterData();
+    
+    // -------------------------------------------- Program Start --------------------------------------------    
     
     iomanager.outputMessage(welcomeMessage, CMD_OUTPUT);
     iomanager.outputMessage(helpMessage, CMD_OUTPUT);
-    
-    // Initialize global Data
-    initMonsterData();
     
     if (individual && !serverMode) { // custom input mode
         iomanager.outputMessage("Simulating individual Figths", CMD_OUTPUT);
