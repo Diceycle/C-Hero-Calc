@@ -158,7 +158,7 @@ vector<int8_t> IOManager::takeHerolevelInput() {
     pair<Monster, int> heroData;
     
     if (!this->useMacroFile || this->showQueries) {
-        cout << "Enter your Heroes with levels. Press enter after every Hero." << endl;
+        cout << endl << "Enter your Heroes with levels. Press enter after every Hero." << endl;
         cout << "Press enter twice or type done to proceed without inputting additional Heroes." << endl;
     }
     int cancelCounter = 0;

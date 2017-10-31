@@ -379,6 +379,7 @@ void outputSolution(Instance instance) {
     }
     cout << "  " << totalFightsSimulated << " Fights simulated." << endl;
     cout << "  Total Calculation Time: " << instance.calculationTime << endl << endl;
+    cout << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(instance.bestSolution, instance.target) << endl << endl;
 }
 
 int main(int argc, char** argv) {
@@ -395,7 +396,7 @@ int main(int argc, char** argv) {
     string macroFileName = "default.cqinput";               // Path to default macro file
 
     // Flow Control Variables
-    bool useDefaultMacroFile = false;   // Set this to true to always use the specified macro file
+    bool useDefaultMacroFile = true;   // Set this to true to always use the specified macro file
     bool showMacroFileInput = true;     // Set this to true to see what the macrofile inputs
     bool individual = false;            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
     bool serverMode = false;            // Set this to true to get a completely silent program that only outputs the final solution as json
@@ -448,7 +449,7 @@ int main(int argc, char** argv) {
     
     do {
         instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
-        iomanager.outputMessage("Calculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", CMD_OUTPUT);
+        iomanager.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", CMD_OUTPUT);
         
         if (iomanager.outputLevel == CMD_OUTPUT) {
             if (instances.size() > 1) {
