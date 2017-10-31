@@ -14,9 +14,6 @@
 const size_t STANDARD_CMD_WIDTH = 80;
 const int INDENT_WIDTH = 2;
 
-const std::string heroVersion = "2.7.2";
-const std::string heroLevelFileName = "heroLevels" + heroVersion;
-
 const std::string welcomeMessage = "Welcome to Diceycle's PvE Instance Solver!";
 const std::string helpMessage = "If you don't know what to do you can type help at any time to get an explanation about the current step.";
 
@@ -87,18 +84,10 @@ class IOManager {
         
         void haltExecution();
 };
-
-const std::string heroFileNotFoundErrorMessage = 
-    "  Could not find Hero File or Hero File is deprecated. (Were there any new Heroes added recently?)\n"
-    "  Switching to manual input mode...\n";
-    
-const std::string heroInputModeQuestion = "Do you want to load hero levels from file?";
-const std::string heroInputModeHelp =
-    "  If YES is selected the hero levels will be loaded from the " + heroLevelFileName + "-file in this folder.\n"
-    "  If this is your first time using this calculator then that file will be created for you when you select NO.\n";
     
 const std::string heroInputHelp = 
-    "  Enter the Level of the hero whose name is displayed on the left. If you don't own that hero, enter 0.\n";
+    "  Enter any heroes you want to enable. in the format name" + HEROLEVEL_SEPARATOR() + "level. Press enter after every hero.\n"
+    "  To finish entering heroes, simply press enter twice or type done and press enter.\n";
 
 const std::string lineupInputHelp = 
     "  Enter Monsters separated by " + ELEMENT_SEPARATOR + " .\n"
