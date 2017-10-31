@@ -124,7 +124,7 @@ void getQuickSolutions(Instance & instance) {
                     break;
                 }
             }
-            invalid = greedy.size() < instance.maxCombatants;
+            invalid = greedy.size() < instance.maxCombatants && tempArmy.followerCost <= followerUpperBound;
         }
         if (!invalid) {
             instance.bestSolution = tempArmy;
