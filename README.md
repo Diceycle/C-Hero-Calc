@@ -7,8 +7,8 @@ My goal is to provide a Calculator that is usable even on difficult problems in 
 Game forum and disscusuion thread [here](http://www.kongregate.com/forums/910715-cosmos-quest/topics/933801-version-2-7-3-who-is-ready-for-some-controversial-changes).
 
 Other Repos that might be interesting:
-[Latas' UI for automatic generation of macro files](https://github.com/Wiedmolol/CQMacroCreator)
-[Malizia's version of the calc](https://github.com/Maliziacat/C-Hero-Calc)
+* [Latas' UI for automatic generation of macro files](https://github.com/Wiedmolol/CQMacroCreator)
+* [Malizia's version of the calc](https://github.com/Maliziacat/C-Hero-Calc)
 
 ### Features
 * C++ based Calcultor for solving PvE instances
@@ -25,10 +25,11 @@ Other Repos that might be interesting:
 ### What's New?
 **Controversional Changes Everybody!**
 * **Hero Files do no longer exist!**
-* Hero input is now done like you would in a lineup (f.e. jackolantern:53)
+* Hero input is now done like you would in a lineup (f.e. `jackolantern:53`)
 * Enter a hero, press enter, continue until you have all heroes entered, then press enter twice or type `done`
 * As this can get tiring, I reccomend everyone to either use macrofiles or use Latas' UI (Links further up)
 * Per default, the program now takes the `default.cqinput` file as input. If you want to input data manually you will have to remove that file from the folder. If you want to use a differntly named file you need to start the program via command line and pass the name as an argument.
+
 Why did I do that? Hero files are messy, they can't be read easily, deprecate whenever new heroes come out and really only have been a relic from when i took up development of this tool.
 
 Marco files on the other hand are straight forward and can be edited by anyone just by looking at them. Completely switching usage to them also cleans up my input handling and can potentially be verified.
