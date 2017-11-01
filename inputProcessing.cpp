@@ -312,11 +312,12 @@ string getReplayHeroes(Army setup) {
         level = 0;
         for (int j = 0; j < setup.monsterAmount; j++) {
             monster = monsterReference[setup.monsters[j]];
-            if (monster.rarity != NO_HERO) {
+            if (monster.rarity != NO_HERO && monster.baseName == baseHeroes[i].baseName) {
                 level = monster.level;
+                break;
             }
         }
-        heroes << to_string(level);
+        heroes << level;
         if (i < baseHeroes.size()-1) {
             heroes << ",";
         }
