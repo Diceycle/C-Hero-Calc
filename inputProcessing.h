@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <fstream>
 #include <ostream>
+#include <stdexcept>
 
 #include "cosmosDefines.h"
 #include "base64.h"

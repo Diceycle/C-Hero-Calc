@@ -235,14 +235,15 @@ Army makeArmyFromStrings(vector<string> stringMonsters) {
 // Parse hero input from a string into its name and level
 pair<Monster, int> parseHeroString(string heroString) {
     string name = heroString.substr(0, heroString.find(HEROLEVEL_SEPARATOR()));
+    int level = stoi(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR())+1));
+    
 	Monster hero;
 	for (size_t i = 0; i < baseHeroes.size(); i++) {
 		if (baseHeroes[i].baseName == name) {
-            hero = baseHeroes[i];
+            return pair<Monster, int>(baseHeroes[i], level);
 		}
 	}
-    int level = stoi(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR())+1));
-    return pair<Monster, int>(hero, level);
+    throw out_of_range("Hero Name Not Found");
 }
 
 // Create valid string to be used ingame to view the battle between armies friendly and hostile
