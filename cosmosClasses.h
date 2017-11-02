@@ -93,30 +93,29 @@ extern std::vector<Monster> monsterReference; // Will be filled with leveled her
 bool isCheaper(const Monster & a, const Monster & b);
 
 // Defines the results of a fight between two armies; monstersLost and damage desribe the condition of the winning side
-class FightResult {
-    public :
-        int16_t damage;             // how much damage dealt to the current leading mob of the winning side
-        int16_t leftAoeDamage;      // how much aoe damage left took
-        int16_t rightAoeDamage;     // how much aoe damage right took
-        int8_t berserk;            // berserk multiplier, if there is a berserker in the front
-        int8_t monstersLost;    // how many mobs lost on the winning side (the other side lost all)
-        int8_t turncounter;     // how many turns have passed since the battle started
-        bool valid;             // If the result is valid
-        bool rightWon;          // false -> left win, true -> right win.
-        bool dominated;         // If the result is worse than another
-                    
-        FightResult() : valid(false) {}
-        
-        bool operator <=(const FightResult & toCompare) const { // both results are expected to not have won
-            if(this->leftAoeDamage < toCompare.leftAoeDamage || this->rightAoeDamage > toCompare.rightAoeDamage) {
-                return false; // left is not certainly worse than right
-            }
-            if (this->monstersLost == toCompare.monstersLost) {
-                return this->damage <= toCompare.damage; // less damage dealt to the enemy -> left is worse
-            } else {
-                return this->monstersLost < toCompare.monstersLost; // less monsters destroyed on the enemy side -> left is worse
-            }
-        } 
+struct FightResult {
+    int16_t damage;             // how much damage dealt to the current leading mob of the winning side
+    int16_t leftAoeDamage;      // how much aoe damage left took
+    int16_t rightAoeDamage;     // how much aoe damage right took
+    int8_t berserk;            // berserk multiplier, if there is a berserker in the front
+    int8_t monstersLost;    // how many mobs lost on the winning side (the other side lost all)
+    int8_t turncounter;     // how many turns have passed since the battle started
+    bool valid;             // If the result is valid
+    bool rightWon;          // false -> left win, true -> right win.
+    bool dominated;         // If the result is worse than another
+                
+    FightResult() : valid(false) {}
+    
+    bool operator <=(const FightResult & toCompare) const { // both results are expected to not have won
+        if(this->leftAoeDamage < toCompare.leftAoeDamage || this->rightAoeDamage > toCompare.rightAoeDamage) {
+            return false; // left is not certainly worse than right
+        }
+        if (this->monstersLost == toCompare.monstersLost) {
+            return this->damage <= toCompare.damage; // less damage dealt to the enemy -> left is worse
+        } else {
+            return this->monstersLost < toCompare.monstersLost; // less monsters destroyed on the enemy side -> left is worse
+        }
+    } 
 };
 
 // Defines a single lineup of monsters
