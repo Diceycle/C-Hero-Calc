@@ -142,6 +142,7 @@ class Army {
             this->monsterAmount++;
         }
         
+        bool isEmpty();
         std::string toString();
 };
 

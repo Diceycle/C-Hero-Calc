@@ -48,6 +48,10 @@ bool isCheaper(const Monster & a, const Monster & b) {
     return a.cost < b.cost;
 }
 
+bool Army::isEmpty() {
+    return (this->monsterAmount == 0);
+}
+
 std::string Army::toString() {
     std::stringstream s;
     s << "[Followers: " << std::setw(7) << this->followerCost << " | ";

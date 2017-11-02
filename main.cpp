@@ -236,7 +236,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
             }
             if (armySize == firstDominance) {
                 iomanager.outputMessage("", DETAILED_OUTPUT);
-                if (instance.bestSolution.monsterAmount > 0) {
+                if (!instance.bestSolution.isEmpty()) {
                     iomanager.outputMessage("Best Solution so far:", DETAILED_OUTPUT);
                     iomanager.outputMessage(instance.bestSolution.toString(), DETAILED_OUTPUT, 1);
                 } else {
@@ -366,7 +366,7 @@ void outputSolution(Instance instance) {
     cout << endl << "Solution for " << instance.target.toString() << ":" << endl;
             
     // Announce the result
-    if (instance.bestSolution.monsterAmount > 0) {
+    if (!instance.bestSolution.isEmpty()) {
         cout << "  " << instance.bestSolution.toString() << endl;
         instance.bestSolution.lastFightData.valid = false;
         simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
