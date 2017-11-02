@@ -43,6 +43,18 @@ Monster::Monster(const Monster & baseHero, int aLevel) :
 
 Monster::Monster() {}
 
+std::string Monster::toJSON() {
+    std::stringstream s;
+    s << "{";
+        s << "\"name\""  << ":" << "\"" << this->baseName << "\"";
+        if (this->rarity != NO_HERO) {
+            s << ",";
+            s << "\"level\""  << ":" << this->level;
+        }
+    s << "}";
+    return s.str();
+}
+
 // Function for sorting Monsters by cost (ascending)
 bool isCheaper(const Monster & a, const Monster & b) {
     return a.cost < b.cost;
@@ -61,4 +73,21 @@ std::string Army::toString() {
     return s.str();
 }
 
+std::string Army::toJSON() {
+    if (this->isEmpty()) {return "null";}
+    
+    std::stringstream s;
+    s << "{";
+        s << "\"followers\"" << ":" << this->followerCost << ",";
+        s << "\"monsters\"" << ":";
+        s << "[";
+        for (int i = this->monsterAmount-1; i >= 0; i--) {
+            s << monsterReference[this->monsters[i]].toJSON();
+            if (i > 0) {
+                s << ",";
+            }
+        }
+        s << "]";
+    s << "}";
+    return s.str();
 }

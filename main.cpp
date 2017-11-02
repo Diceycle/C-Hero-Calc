@@ -363,23 +363,20 @@ void solveInstance(Instance & instance, size_t firstDominance) {
 }
 
 void outputSolution(Instance instance) {
-    cout << endl << "Solution for " << instance.target.toString() << ":" << endl;
-            
-    // Announce the result
-    if (!instance.bestSolution.isEmpty()) {
-        cout << "  " << instance.bestSolution.toString() << endl;
-        instance.bestSolution.lastFightData.valid = false;
-        simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
-        if (instance.bestSolution.lastFightData.rightWon) {
-            cout << "  This does not beat the lineup!!!" << endl;
-            cout << "FATAL ERROR!!! Please comment this output in the Forums!" << endl;
-        }
+    instance.bestSolution.lastFightData.valid = false;
+    simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
+    bool sane = !instance.bestSolution.lastFightData.rightWon;
+    
+    if (iomanager.outputLevel == SERVER_OUTPUT) {
+        iomanager.outputMessage(instance.toJSON(), SERVER_OUTPUT, 0);
     } else {
-        cout << endl << "Could not find a solution that beats this lineup." << endl;
+        iomanager.outputMessage(instance.toString(), CMD_OUTPUT, 0);
     }
-    cout << "  " << totalFightsSimulated << " Fights simulated." << endl;
-    cout << "  Total Calculation Time: " << instance.calculationTime << endl << endl;
-    cout << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(instance.bestSolution, instance.target) << endl << endl;
+
+    if (!sane) {
+        cout << "  This does not beat the lineup!!!" << endl;
+        cout << "FATAL ERROR!!! Please comment this output in the Forums!" << endl;
+    }
 }
 
 int main(int argc, char** argv) {
@@ -399,14 +396,12 @@ int main(int argc, char** argv) {
     bool useDefaultMacroFile = true;   // Set this to true to always use the specified macro file
     bool showMacroFileInput = true;     // Set this to true to see what the macrofile inputs
     bool individual = false;            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
-    bool serverMode = false;            // Set this to true to get a completely silent program that only outputs the final solution as json
     
     iomanager = IOManager();
     iomanager.outputLevel = CMD_OUTPUT;
     // Check if the user provided a filename to be used as a macro file
     if (argc >= 2) {
         if (argc >= 3 && (string) argv[2] == "-server") {
-            serverMode = true;
             showMacroFileInput = false;
             iomanager.outputLevel = SERVER_OUTPUT;
         }
@@ -424,7 +419,7 @@ int main(int argc, char** argv) {
     iomanager.outputMessage(welcomeMessage, CMD_OUTPUT);
     iomanager.outputMessage(helpMessage, CMD_OUTPUT);
     
-    if (individual && !serverMode) { // custom input mode
+    if (individual) { // custom input mode
         iomanager.outputMessage("Simulating individual Figths", CMD_OUTPUT);
         while (true) {
             Army left = iomanager.takeInstanceInput("Enter friendly lineup: ")[0].target;
@@ -460,7 +455,7 @@ int main(int argc, char** argv) {
         }
         
         for (size_t i = 0; i < instances.size(); i++) {
-            totalFightsSimulated = 0;
+            totalFightsSimulated = &(instances[i].totalFightsSimulated);
             
             if (userFollowerUpperBound < 0) {
                 instances[i].followerUpperBound = numeric_limits<int>::max();

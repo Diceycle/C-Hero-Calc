@@ -1,6 +1,6 @@
 #include "battleLogic.h"
 
-int totalFightsSimulated = 0;
+int * totalFightsSimulated;
 
 // Prototype function! Currently not used. Function determining if a monster is strictly better than another
 bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
@@ -28,7 +28,7 @@ void simulateFight(Army & left, Army & right, bool verbose) {
     //  5. Protection of enemy Side     (protect, champion)
     //  6. AOE of friendly Side         (aoe, paoe)
     //  7. Healing of enemy Side        (healing)
-    totalFightsSimulated++;
+    (*totalFightsSimulated)++;
     
     turncounter = 0;
     

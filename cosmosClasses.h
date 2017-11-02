@@ -85,6 +85,8 @@ class Monster {
         Monster(int hp, int damage, std::string name, Element element, HeroRarity rarity, HeroSkill skill);
         Monster(const Monster & baseHero, int level);
         Monster();
+        
+        std::string toJSON();
 };
 
 extern std::vector<Monster> monsterReference; // Will be filled with leveled heroes if needed (determined by input)
@@ -144,6 +146,7 @@ class Army {
         
         bool isEmpty();
         std::string toString();
+        std::string toJSON();
 };
 
 // Function for sorting FightResults by followers (ascending)

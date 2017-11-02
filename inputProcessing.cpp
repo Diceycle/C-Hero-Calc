@@ -327,6 +327,37 @@ string getReplayHeroes(Army setup) {
     return heroes.str();
 }
 
+string Instance::toJSON() {
+    stringstream s;
+    s << "{";
+        s << "\"target\""  << ":" << this->target.toJSON() << ",";
+        s << "\"solution\""  << ":" << this->bestSolution.toJSON() << ",";
+        s << "\"time\""  << ":" << this->calculationTime << ",";
+        s << "\"fights\"" << ":" << this->totalFightsSimulated << ",";
+        s << "\"replay\"" << ":" << "\"" << makeBattleReplay(this->bestSolution, this->target) << "\"";
+    s << "}";
+    return s.str();
+}
+
+string Instance::toString() {
+    stringstream s;
+        
+    s << endl << "Solution for " << this->target.toString() << ":" << endl;
+    // Announce the result
+    if (!this->bestSolution.isEmpty()) {
+        s << "  " << this->bestSolution.toString() << endl;
+    } else {
+        s << endl << "Could not find a solution that beats this lineup." << endl;
+    }
+    s << "  " << this->totalFightsSimulated << " Fights simulated." << endl;
+    s << "  Total Calculation Time: " << this->calculationTime << endl << endl;
+    if (!this->bestSolution.isEmpty()) {
+        s << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(this->bestSolution, this->target) << endl << endl;
+    }
+    
+    return s.str();
+}
+
 // Splits strings into a vector of strings.
 vector<string> split(string target, string separator) {
     vector<string> output;

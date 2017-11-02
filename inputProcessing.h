@@ -51,6 +51,10 @@ struct Instance {
     Army bestSolution;
     
     time_t calculationTime;
+    int totalFightsSimulated = 0;
+    
+    std::string toString();
+    std::string toJSON();
 };
 
 class IOManager {
