@@ -365,12 +365,12 @@ void solveInstance(Instance & instance, size_t firstDominance) {
 void outputSolution(Instance instance) {
     instance.bestSolution.lastFightData.valid = false;
     simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
-    bool sane = !instance.bestSolution.lastFightData.rightWon;
+    bool sane = !instance.bestSolution.lastFightData.rightWon || instance.bestSolution.isEmpty();
     
     if (iomanager.outputLevel == SERVER_OUTPUT) {
-        iomanager.outputMessage(instance.toJSON(), SERVER_OUTPUT, 0);
+        iomanager.outputMessage(instance.toJSON(), SERVER_OUTPUT);
     } else {
-        iomanager.outputMessage(instance.toString(), CMD_OUTPUT, 0);
+        iomanager.outputMessage(instance.toString(), CMD_OUTPUT);
     }
 
     if (!sane) {
@@ -419,7 +419,7 @@ int main(int argc, char** argv) {
     iomanager.outputMessage(welcomeMessage, CMD_OUTPUT);
     iomanager.outputMessage(helpMessage, CMD_OUTPUT);
     
-    if (individual) { // custom input mode
+    if (individual) {
         iomanager.outputMessage("Simulating individual Figths", CMD_OUTPUT);
         while (true) {
             Army left = iomanager.takeInstanceInput("Enter friendly lineup: ")[0].target;
@@ -431,7 +431,7 @@ int main(int argc, char** argv) {
                 break;
             }
         }
-        return 0;
+        return EXIT_SUCCESS;
     }
     
     // Collect the Data via Command Line
