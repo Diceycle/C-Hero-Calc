@@ -397,7 +397,6 @@ int main(int argc, char** argv) {
     bool showMacroFileInput = true;     // Set this to true to see what the macrofile inputs
     bool individual = false;            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
     
-    iomanager = IOManager();
     iomanager.outputLevel = CMD_OUTPUT;
     // Check if the user provided a filename to be used as a macro file
     if (argc >= 2) {
