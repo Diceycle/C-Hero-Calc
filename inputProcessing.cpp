@@ -369,19 +369,26 @@ string getReplayHeroes(Army setup) {
     return heroes.str();
 }
 
-string Instance::toJSON() {
+string Instance::toJSON(bool valid) {
     stringstream s;
-    s << "{";
-        s << "\"target\""  << ":" << this->target.toJSON() << ",";
-        s << "\"solution\""  << ":" << this->bestSolution.toJSON() << ",";
-        s << "\"time\""  << ":" << this->calculationTime << ",";
-        s << "\"fights\"" << ":" << this->totalFightsSimulated << ",";
-        s << "\"replay\"" << ":" << "\"" << makeBattleReplay(this->bestSolution, this->target) << "\"";
+    s << "{\"validSolution\" : {";
+            s << "\"target\""  << ":" << this->target.toJSON() << ",";
+            s << "\"solution\""  << ":" << this->bestSolution.toJSON() << ",";
+            s << "\"time\""  << ":" << this->calculationTime << ",";
+            s << "\"fights\"" << ":" << this->totalFightsSimulated << ",";
+            s << "\"replay\"" << ":" << "\"" << makeBattleReplay(this->bestSolution, this->target) << "\"";
+        s << "}";
+    if (!valid) {
+        s << ",\"error\" : {";
+            s << "\"message\"" << ":" << "\"Fatal Internal Error: Solution not valid!!!\"" << ",";
+            s << "\"errorType\"" << ":" << "\"SANITY_CHECK_FAILED\"";
+        s << "}";
+    }
     s << "}";
     return s.str();
 }
 
-string Instance::toString() {
+string Instance::toString(bool valid) {
     stringstream s;
         
     s << endl << "Solution for " << this->target.toString() << ":" << endl;
@@ -396,7 +403,10 @@ string Instance::toString() {
     if (!this->bestSolution.isEmpty()) {
         s << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(this->bestSolution, this->target) << endl << endl;
     }
-    
+    if (!valid) {
+        s << "This does not beat the lineup!!!" << endl;
+        s << "FATAL ERROR!!! Please comment this output in the Forums!" << endl;
+    }
     return s.str();
 }
 

@@ -368,14 +368,9 @@ void outputSolution(Instance instance) {
     bool sane = !instance.bestSolution.lastFightData.rightWon || instance.bestSolution.isEmpty();
     
     if (iomanager.outputLevel == SERVER_OUTPUT) {
-        iomanager.outputMessage(instance.toJSON(), SERVER_OUTPUT);
+        iomanager.outputMessage(instance.toJSON(sane), SERVER_OUTPUT);
     } else {
-        iomanager.outputMessage(instance.toString(), CMD_OUTPUT);
-    }
-
-    if (!sane) {
-        cout << "  This does not beat the lineup!!!" << endl;
-        cout << "FATAL ERROR!!! Please comment this output in the Forums!" << endl;
+        iomanager.outputMessage(instance.toString(sane), CMD_OUTPUT);
     }
 }
 

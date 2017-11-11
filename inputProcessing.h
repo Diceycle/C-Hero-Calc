@@ -51,8 +51,8 @@ struct Instance {
     time_t calculationTime;
     int totalFightsSimulated = 0;
     
-    std::string toString();
-    std::string toJSON();
+    std::string toString(bool valid);
+    std::string toJSON(bool valid);
 };
 
 // TODO: Detect double hero inputs
