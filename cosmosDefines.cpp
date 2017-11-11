@@ -9,9 +9,6 @@ std::vector<int8_t> availableHeroes {}; // Contains all user heroes' indices
 // Also fills the map used to parse strings into monsters
 // Must be called before any input can be processed
 void initMonsterData() {
-    // Sort MonsterList by followers
-    sort(monsterBaseList.begin(), monsterBaseList.end(), isCheaper);
-
     // Initialize Monster Data
     monsterReference.clear();
     monsterMap.clear();
@@ -26,8 +23,10 @@ void initMonsterData() {
 
 // Filter MonsterList by cost. User can specify if he wants to exclude cheap monsters
 void filterMonsterData(int minimumMonsterCost) {
-    for (size_t i = 0; i < monsterBaseList.size(); i++) {
-        if (minimumMonsterCost <= monsterBaseList[i].cost) {
+    std::vector<Monster> tempMonsterList = {monsterBaseList}; // Get a temporary list to sort
+    sort(tempMonsterList.begin(), tempMonsterList.end(), isCheaper);
+    for (size_t i = 0; i < tempMonsterList.size(); i++) {
+        if (minimumMonsterCost <= tempMonsterList[i].cost) {
             availableMonsters.push_back((int8_t) i); // Kinda Dirty but I know that the normal mobs come first in the reference
         }
     }
