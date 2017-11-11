@@ -29,8 +29,6 @@ const std::string COMMENT_DELIMITOR = "//";
 const std::string QUEST_PREFIX = "quest";
 const std::string QUEST_NUMBER_SEPARTOR = "-";
 
-const int REPLAY_EMPTY_SPOT = -1;
-
 // Enum to control the amount of output generate
 enum OutputLevel {
     VITAL_OUTPUT    = 0,
@@ -131,7 +129,6 @@ std::pair<Monster, int> parseHeroString(std::string heroString);
 // Functions for making a valid ingame replay string
 std::string makeBattleReplay(Army friendly, Army hostile);
 std::string getReplaySetup(Army setup);
-std::string getReplayMonsterNumber(Monster monster);
 std::string getReplayHeroes(Army setup);
 
 // Splits strings into a vector of strings. No need to optimize, only used for input.

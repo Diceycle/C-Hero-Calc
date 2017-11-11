@@ -13,7 +13,9 @@ extern std::map<std::string, int8_t> monsterMap; // // Maps monster Names to the
 extern std::vector<int8_t> availableMonsters; // Contains indices of raw Monster Data from a1 to f15, will be sorted by follower cost
 extern std::vector<int8_t> availableHeroes; // Contains all user heroes' indices 
 
-static std::vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual Objects
+const int INDEX_NO_MONSTER = -1;
+
+static const std::vector<Monster> monsterBaseList { // Raw Monster Data, holds the actual Objects
     Monster( 20,   8,    1000,  "a1", AIR),
     Monster( 44,   4,    1300,  "e1", EARTH),
     Monster( 16,  10,    1000,  "f1", FIRE),

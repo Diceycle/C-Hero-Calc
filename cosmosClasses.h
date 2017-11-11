@@ -90,6 +90,7 @@ class Monster {
 };
 
 extern std::vector<Monster> monsterReference; // Will be filled with leveled heroes if needed (determined by input)
+int getRealIndex(Monster & monster);
 
 // Function for sorting Monsters by cost (ascending)
 bool isCheaper(const Monster & a, const Monster & b);

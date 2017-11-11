@@ -271,9 +271,9 @@ string getReplaySetup(Army setup) {
     stringSetup << "[";
     for (i = 0; i < ARMY_MAX_SIZE * TOURNAMENT_LINES; i++) {
         if ((int) (i % ARMY_MAX_SIZE) < setup.monsterAmount) {
-            stringSetup << getReplayMonsterNumber(monsterReference[setup.monsters[setup.monsterAmount - (i % ARMY_MAX_SIZE) - 1]]);
+            stringSetup << getRealIndex(monsterReference[setup.monsters[setup.monsterAmount - (i % ARMY_MAX_SIZE) - 1]]);
         } else {
-            stringSetup << to_string(REPLAY_EMPTY_SPOT);
+            stringSetup << to_string(INDEX_NO_MONSTER);
         }
         if (i < ARMY_MAX_SIZE * TOURNAMENT_LINES - 1) {
             stringSetup << ",";
@@ -281,26 +281,6 @@ string getReplaySetup(Army setup) {
     }
     stringSetup << "]";
     return stringSetup.str();
-}
-
-// Get ingame index of monster. 0 and Positive for monsters and -1 to negative for heroes
-string getReplayMonsterNumber(Monster monster) {
-    int8_t index = REPLAY_EMPTY_SPOT;
-    size_t i;
-    if(monster.rarity != NO_HERO) {
-        for (i = 0; i < baseHeroes.size(); i++) {
-            if (baseHeroes[i].baseName == monster.baseName) {
-                index = (int8_t) (-i - 2);
-            }
-        }
-    } else {
-        for (i = 0; i < monsterBaseList.size(); i++) {
-            if (monster.name == monsterBaseList[i].name) {
-                index = (int8_t) i;
-            }
-        }
-    }
-    return to_string(index);
 }
 
 // Get list of relevant herolevels in ingame format

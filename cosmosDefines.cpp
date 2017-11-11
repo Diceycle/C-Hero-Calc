@@ -39,3 +39,23 @@ int8_t addLeveledHero(Monster & hero, int level) {
     
     return (int8_t) (monsterReference.size() - 1);
 }
+
+// Get Index corresponding to the index used ingame. monsters >= 0, heroes <= -2, empty spot = -1
+int getRealIndex(Monster & monster) {
+    int index = INDEX_NO_MONSTER;
+    size_t i;
+    if (monster.rarity != NO_HERO) {
+        for (i = 0; i < baseHeroes.size(); i++) {
+            if (baseHeroes[i].baseName == monster.baseName) {
+                index = (int) (-i - 2);
+            }
+        }
+    } else {
+        for (i = 0; i < monsterBaseList.size(); i++) {
+            if (monster.name == monsterBaseList[i].name) {
+                index = (int) i;
+            }
+        }
+    }
+    return index;
+}

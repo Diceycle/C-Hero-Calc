@@ -46,7 +46,7 @@ Monster::Monster() {}
 std::string Monster::toJSON() {
     std::stringstream s;
     s << "{";
-        s << "\"name\""  << ":" << "\"" << this->baseName << "\"";
+        s << "\"id\""  << ":" << getRealIndex(*this);
         if (this->rarity != NO_HERO) {
             s << ",";
             s << "\"level\""  << ":" << this->level;
