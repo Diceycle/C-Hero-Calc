@@ -21,10 +21,12 @@ bool IOManager::shouldOutput(OutputLevel urgency) {
 void IOManager::initMacroFile(string macroFileName, bool showInput) {
     this->macroFile.open(macroFileName);
     
-    this->useMacroFile = this->macroFile.good();
-    this->showQueries = this->macroFile.good() && showInput;
     if (!this->macroFile.good()) {
-        cout << "Could not find Macro File. Switching to Manual Input." << endl;
+        this->useMacroFile = false;
+        throw MACROFILE_MISSING;
+    } else {    
+        this->useMacroFile = true;
+        this->showQueries = showInput;
     }
 }
 
@@ -96,6 +98,10 @@ string IOManager::getResistantInput(string query, string help, QueryType queryTy
         if (this->useMacroFile) {
             this->useMacroFile = (bool) getline(this->macroFile, inputString);
         } 
+        // in sever mode the macro file has to be complete
+        if (!this->useMacroFile && this->outputLevel == SERVER_OUTPUT) {
+            throw MACROFILE_USED_UP;
+        }
         // Print the query only if no macro file is used or specifically asked for
         if (!this->useMacroFile || this->showQueries) {
             cout << query;
@@ -121,7 +127,9 @@ string IOManager::getResistantInput(string query, string help, QueryType queryTy
                 try {
                     stoi(firstToken);
                     return firstToken;
-                } catch (const exception & e) {}
+                } catch (const exception & e) {
+                    this->handleInputException(NUMBER_PARSE);
+                }
             }
             if (queryType == raw) {
                 return inputString;
@@ -171,7 +179,9 @@ vector<int8_t> IOManager::takeHerolevelInput() {
             try {
                 heroData = parseHeroString(input);
                 heroes.push_back(addLeveledHero(heroData.first, heroData.second));
-            } catch (const exception & e) {};
+            } catch (InputException e) {
+                this->handleInputException(e);
+            };
         }
     } while (input != "done" && cancelCounter < 2);
     
@@ -194,8 +204,47 @@ vector<Instance> IOManager::takeInstanceInput(string prompt) {
                 instances.push_back(makeInstanceFromString(instanceStrings[i]));
             }
             return instances;
-        } catch (const exception & e) {}
+        } catch (InputException e) {
+            this->handleInputException(e);
+        }
     }
+}
+
+void IOManager::handleInputException(InputException e) {
+//    switch (e) {
+//        case MONSTER_PARSE: cout << "monster"; break;
+//        case HERO_PARSE: cout << "hero"; break;
+//        case QUEST_PARSE: cout << "quest"; break;
+//        case NUMBER_PARSE: cout << "number"; break;
+//        case MACROFILE_MISSING: cout << "mfMissing"; break;
+//        case MACROFILE_USED_UP: cout << "mfempty"; break;
+//    } cout << endl;
+}
+
+// Output an error in JSON Fromat for server mode operation
+string IOManager::getJSONError(InputException e) {
+    stringstream s;
+    string message;
+    string errorType;
+    switch (e) {
+        case MACROFILE_MISSING: 
+            message = "Could not find Macro File!"; 
+            errorType = "MACROFILE_MISSING";
+            break;
+        case MACROFILE_USED_UP: 
+            message = "Macro File does not provide enough input!";
+            errorType = "MARCOFILE_USED_UP";
+            break;
+        default:
+            message = "Unexpected Error";
+            errorType = "UNKNOWN";
+            break;
+    }
+    s << "{\"error\" : {";
+        s << "\"message\""  << ":" << "\"" << message << "\"" <<",";
+        s << "\"errorType\""  << ":" << "\"" << errorType << "\"";
+    s << "}}";
+    return s.str();
 }
 
 // Convert a lineup string into an actual instance to solve
@@ -204,9 +253,13 @@ Instance makeInstanceFromString(string instanceString) {
     int dashPosition = (int) instanceString.find(QUEST_NUMBER_SEPARTOR);
     
     if (instanceString.compare(0, QUEST_PREFIX.length(), QUEST_PREFIX) == 0) {
-        int questNumber = stoi(instanceString.substr(QUEST_PREFIX.length(), dashPosition-QUEST_PREFIX.length()));
-        instance.target = makeArmyFromStrings(quests[questNumber]);
-        instance.maxCombatants = ARMY_MAX_SIZE - (stoi(instanceString.substr(dashPosition+1, 1)) - 1);
+        try {
+            int questNumber = stoi(instanceString.substr(QUEST_PREFIX.length(), dashPosition-QUEST_PREFIX.length()));
+            instance.target = makeArmyFromStrings(quests[questNumber]);
+            instance.maxCombatants = ARMY_MAX_SIZE - (stoi(instanceString.substr(dashPosition+1, 1)) - 1);
+        } catch (const exception & e) {
+            throw QUEST_PARSE;
+        }
     } else {
         vector<string> stringLineup = split(instanceString, ELEMENT_SEPARATOR);
         instance.target = makeArmyFromStrings(stringLineup);
@@ -226,7 +279,11 @@ Army makeArmyFromStrings(vector<string> stringMonsters) {
             heroData = parseHeroString(stringMonsters[i]);
             army.add(addLeveledHero(heroData.first, heroData.second));
         } else {
-            army.add(monsterMap.at(stringMonsters[i]));
+            try {
+                army.add(monsterMap.at(stringMonsters[i]));
+            } catch (const exception & e) {
+                throw MONSTER_PARSE;
+            }
         }
     }
     return army;
@@ -235,7 +292,12 @@ Army makeArmyFromStrings(vector<string> stringMonsters) {
 // Parse hero input from a string into its name and level
 pair<Monster, int> parseHeroString(string heroString) {
     string name = heroString.substr(0, heroString.find(HEROLEVEL_SEPARATOR()));
-    int level = stoi(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR())+1));
+    int level;
+    try {
+        level = stoi(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR())+1));
+    } catch (const exception & e) {
+        throw HERO_PARSE;
+    }
     
 	Monster hero;
 	for (size_t i = 0; i < baseHeroes.size(); i++) {
@@ -243,7 +305,7 @@ pair<Monster, int> parseHeroString(string heroString) {
             return pair<Monster, int>(baseHeroes[i], level);
 		}
 	}
-    throw out_of_range("Hero Name Not Found");
+    throw HERO_PARSE;
 }
 
 // Create valid string to be used ingame to view the battle between armies friendly and hostile

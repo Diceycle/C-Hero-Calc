@@ -55,6 +55,16 @@ struct Instance {
     std::string toJSON();
 };
 
+// TODO: Detect double hero inputs
+enum InputException {
+    MONSTER_PARSE,
+    HERO_PARSE,
+    QUEST_PARSE,
+    NUMBER_PARSE,
+    MACROFILE_MISSING,
+    MACROFILE_USED_UP
+};
+
 class IOManager {
     private:
         bool useMacroFile;
@@ -67,6 +77,7 @@ class IOManager {
         std::string getIndent(int indent);
         void printBuffer(OutputLevel urgency);
         bool shouldOutput(OutputLevel urgency);
+        void handleInputException(InputException e);
         
     public:
         OutputLevel outputLevel;
@@ -84,6 +95,8 @@ class IOManager {
         void suspendTimedOutputs(OutputLevel urgency);
         void resumeTimedOutputs(OutputLevel urgency);
         void finishTimedOutput(OutputLevel urgency);
+        
+        std::string getJSONError(InputException e);
         
         void haltExecution();
 };

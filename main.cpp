@@ -399,15 +399,28 @@ int main(int argc, char** argv) {
     
     iomanager.outputLevel = CMD_OUTPUT;
     // Check if the user provided a filename to be used as a macro file
-    if (argc >= 2) {
-        if (argc >= 3 && (string) argv[2] == "-server") {
-            showMacroFileInput = false;
-            iomanager.outputLevel = SERVER_OUTPUT;
+    try {
+        if (argc >= 2) {
+            if (argc >= 3 && (string) argv[2] == "-server") {
+                showMacroFileInput = false;
+                iomanager.outputLevel = SERVER_OUTPUT;
+            }
+            iomanager.initMacroFile(argv[1], showMacroFileInput);
         }
-        iomanager.initMacroFile(argv[1], showMacroFileInput);
-    }
-    else if (useDefaultMacroFile) {
-        iomanager.initMacroFile(macroFileName, showMacroFileInput);
+        else if (useDefaultMacroFile) {
+            iomanager.initMacroFile(macroFileName, showMacroFileInput);
+        }
+    } catch (InputException e) {
+        if (e == MACROFILE_MISSING) {
+            if (iomanager.outputLevel == SERVER_OUTPUT) {
+                iomanager.outputMessage(iomanager.getJSONError(e), SERVER_OUTPUT);
+                return EXIT_FAILURE;
+            } else {
+                iomanager.outputMessage("Macrofile not Found. Switching no manual Input...", CMD_OUTPUT);
+            }
+        } else {
+            throw e;
+        }
     }
     
     // Initialize global Data
@@ -434,15 +447,37 @@ int main(int argc, char** argv) {
     }
     
     // Collect the Data via Command Line
-    availableHeroes = iomanager.takeHerolevelInput();
-    minimumMonsterCost = stoi(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
-    userFollowerUpperBound = stoi(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
+    try {
+        availableHeroes = iomanager.takeHerolevelInput();
+        minimumMonsterCost = stoi(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
+        userFollowerUpperBound = stoi(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
+    } catch (InputException e) {
+        if (e == MACROFILE_USED_UP) {
+            if (iomanager.outputLevel == SERVER_OUTPUT) {
+                iomanager.outputMessage(iomanager.getJSONError(e), SERVER_OUTPUT);
+                return EXIT_FAILURE;
+            }
+        } else {
+            throw e;
+        }
+    }
     
     // Fill monster arrays with relevant monsters
     filterMonsterData(minimumMonsterCost);
     
     do {
-        instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
+        try {
+            instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
+        } catch (InputException e) {
+            if (e == MACROFILE_USED_UP) {
+                if (iomanager.outputLevel == SERVER_OUTPUT) {
+                    iomanager.outputMessage(iomanager.getJSONError(e), SERVER_OUTPUT);
+                    return EXIT_FAILURE;
+                }
+            } else {
+                throw e;
+            }
+        }
         iomanager.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", CMD_OUTPUT);
         
         if (iomanager.outputLevel == CMD_OUTPUT) {
