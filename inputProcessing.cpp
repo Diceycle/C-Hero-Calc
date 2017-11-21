@@ -388,7 +388,7 @@ string Instance::toJSON(bool valid) {
     return s.str();
 }
 
-string Instance::toString(bool valid) {
+string Instance::toString(bool valid, bool showReplayString) {
     stringstream s;
         
     s << endl << "Solution for " << this->target.toString() << ":" << endl;
@@ -400,7 +400,7 @@ string Instance::toString(bool valid) {
     }
     s << "  " << this->totalFightsSimulated << " Fights simulated." << endl;
     s << "  Total Calculation Time: " << this->calculationTime << endl << endl;
-    if (!this->bestSolution.isEmpty()) {
+    if (!this->bestSolution.isEmpty() && showReplayString) {
         s << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(this->bestSolution, this->target) << endl << endl;
     }
     if (!valid) {

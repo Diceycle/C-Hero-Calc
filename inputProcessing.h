@@ -51,7 +51,7 @@ struct Instance {
     time_t calculationTime;
     int totalFightsSimulated = 0;
     
-    std::string toString(bool valid);
+    std::string toString(bool valid, bool showReplayString = true);
     std::string toJSON(bool valid);
 };
 

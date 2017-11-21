@@ -362,7 +362,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
     instance.calculationTime = time(NULL) - startTime;
 }
 
-void outputSolution(Instance instance) {
+void outputSolution(Instance instance, bool replayStrings) {
     instance.bestSolution.lastFightData.valid = false;
     simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
     bool sane = !instance.bestSolution.lastFightData.rightWon || instance.bestSolution.isEmpty();
@@ -370,7 +370,7 @@ void outputSolution(Instance instance) {
     if (iomanager.outputLevel == SERVER_OUTPUT) {
         iomanager.outputMessage(instance.toJSON(sane), SERVER_OUTPUT);
     } else {
-        iomanager.outputMessage(instance.toString(sane), CMD_OUTPUT);
+        iomanager.outputMessage(instance.toString(sane, replayStrings), CMD_OUTPUT);
     }
 }
 
@@ -388,9 +388,10 @@ int main(int argc, char** argv) {
     string macroFileName = "default.cqinput";               // Path to default macro file
 
     // Flow Control Variables
-    bool useDefaultMacroFile = true;   // Set this to true to always use the specified macro file
+    bool useDefaultMacroFile = true;    // Set this to true to always use the specified macro file
     bool showMacroFileInput = true;     // Set this to true to see what the macrofile inputs
     bool individual = false;            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
+    bool showReplayStrings = true;      // Set this to true to see battle replay strings that can be used ingame
     
     iomanager.outputLevel = CMD_OUTPUT;
     // Check if the user provided a filename to be used as a macro file
@@ -493,7 +494,7 @@ int main(int argc, char** argv) {
             }
             
             solveInstance(instances[i], firstDominance);
-            outputSolution(instances[i]);
+            outputSolution(instances[i], showReplayStrings);
         }
         userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", "", CMD_OUTPUT, NEGATIVE_ANSWER);
     } while (userWantsContinue);
