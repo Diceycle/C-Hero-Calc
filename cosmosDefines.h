@@ -165,6 +165,13 @@ static const std::vector<Monster> baseHeroes { // Raw, unleveld Hero Data, holds
     Monster( 35, 25, "werewolf",          EARTH, COMMON,    {PROTECT_L,     ALL, EARTH, 9}),
     Monster( 55, 35, "jackoknight",       AIR,   RARE,      {BUFF_L,        ALL, AIR, 9}),
     Monster( 75, 45, "dullahan",          FIRE,  LEGENDARY, {CHAMPION_L,    ALL, FIRE, 9}),
+    
+    Monster( 36, 36, "ladyodelith",       WATER, RARE,      {PROTECT,       WATER, WATER, 4}),
+    
+    Monster( 34, 54, "shygu",             AIR,   LEGENDARY, {PROTECT_L,     AIR, AIR, 9}),
+    Monster( 72, 28, "thert",             EARTH, LEGENDARY, {PROTECT_L,     EARTH, EARTH, 9}),
+    Monster( 32, 64, "lordkirk",          FIRE,  LEGENDARY, {PROTECT_L,     FIRE, FIRE, 9}),
+    Monster( 30, 70, "neptunius",         WATER, LEGENDARY, {PROTECT_L,     WATER, WATER, 9}),
 };
 
 static const std::vector<std::vector<std::string>> quests { // Contains all quest lineups for easy referencing
@@ -224,6 +231,31 @@ static const std::vector<std::vector<std::string>> quests { // Contains all ques
     {"a9", "f13", "f13", "f12", "a12", "a12"},
     {"a13", "a13", "a12", "a12", "f11", "f12"},
     {"a11", "f10", "a11", "e14", "f13", "a11"}, //55
+    {"f13", "a13", "f13", "e13", "w12"},
+    {"e10", "a13", "w12", "f13", "f13", "f13"},
+    {"f7", "w11", "w13", "e14", "f13", "a14"},
+    {"a8", "f15", "a14", "f14", "w14"},
+    {"f12", "w13", "a14", "f13", "a13", "e10"}, //60
+    {"f13", "e13", "a13", "w12", "f12", "a12"},
+    {"w13", "e12", "w12", "a14", "a12", "f13"},
+    {"e15", "f14", "w14", "a15"},
+    {"e12", "a14", "e14", "w13", "e12", "f13"},
+    {"e13", "f12", "w11", "w12", "a14", "e14"}, //65
+    {"a14", "e13", "a11", "a14", "f13", "e13"},
+    {"f13", "w13", "e14", "f13", "f14", "a14"},
+    {"a15", "e15", "f15", "w15"},
+    {"f13", "a14", "e14", "f13", "a14", "f13"},
+    {"a11", "a14", "w13", "e14", "a14", "f14"}, //70
+    {"e13", "a14", "f14", "w13", "f14", "e14"},
+    {"w10", "a14", "a14", "a14", "a14", "w14"},
+    {"w13", "w13", "f14", "a15", "a15", "e13"},
+    {"a14", "e14", "e14", "e14", "e14", "e14"},
+    {"w15", "w15", "e15", "w15", "f15"},        //75
+    {"f14", "e15", "a15", "w14", "a14", "e15"},
+    {"w14", "a15", "w14", "e15", "a15", "w14"},
+    {"w15", "w15", "w15", "w15", "f15", "f15"},
+    {"a15", "a15", "a15", "a15", "a15", "w14"},
+    {"f15", "w15", "w15", "w15", "w15", "w15"},
 };
 
 // Clean up all monster related vectors and sort the monsterBaseList
