@@ -124,14 +124,15 @@ void getQuickSolutions(Instance & instance) {
                     break;
                 }
             }
-            invalid = greedy.size() < instance.maxCombatants;
+            invalid = greedy.size() < instance.maxCombatants; // if true it didnt find a monster that drew position i
         }
+        
         if (!invalid) {
-            instance.bestSolution = tempArmy;
             if (instance.followerUpperBound > tempArmy.followerCost) {
+                instance.bestSolution = tempArmy;
                 instance.followerUpperBound = tempArmy.followerCost;
             }
-            
+        
             // Try to replace monsters in the setup with heroes to save followers
             greedyHeroes = greedy;
             for (size_t m = 0; m < availableHeroes.size(); m++) {
@@ -147,8 +148,8 @@ void getQuickSolutions(Instance & instance) {
                 }
             }
             tempArmy = Army(greedyHeroes);
-            instance.bestSolution = tempArmy;
-            if (instance.followerUpperBound > tempArmy.followerCost) { // Take care not to override custom follower counts
+            if (instance.followerUpperBound > tempArmy.followerCost) {
+                instance.bestSolution = tempArmy;
                 instance.followerUpperBound = tempArmy.followerCost;
             }
         }
