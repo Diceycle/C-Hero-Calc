@@ -27,7 +27,7 @@ void filterMonsterData(int minimumMonsterCost) {
     sort(tempMonsterList.begin(), tempMonsterList.end(), isCheaper);
     for (size_t i = 0; i < tempMonsterList.size(); i++) {
         if (minimumMonsterCost <= tempMonsterList[i].cost) {
-            availableMonsters.push_back((int8_t) i); // Kinda Dirty but I know that the normal mobs come first in the reference
+            availableMonsters.push_back(monsterMap[tempMonsterList[i].name]);
         }
     }
 }
