@@ -4,7 +4,7 @@
 I took over the developement out of interest and educational purposes. Well, I also needed a good calculator and David's approach was a good place to start.
 My goal is to provide a Calculator that is usable even on difficult problems in respect to memory usage and calculation time.
 
-Game forum and disscusuion thread [here](http://www.kongregate.com/forums/910715-cosmos-quest/topics/933801-version-2-7-3-who-is-ready-for-some-controversial-changes).
+Game forum and disscusuion thread [here](https://www.kongregate.com/forums/910715-cosmos-quest/topics/948525-version-2-7-6-new-quests-and-heroes-added-to-c-calc).
 
 Other Repos that might be interesting:
 * [Latas' UI for automatic generation of macro files](https://github.com/Wiedmolol/CQMacroCreator)
@@ -23,48 +23,30 @@ Other Repos that might be interesting:
 * Precompiled exe included (Built on Windows 8.1 (64Bit), no guarantee for other operating systems)
 
 ### What's New?
-**Controversional Changes Everybody!**
-* **Hero Files do no longer exist!**
-* Hero input is now done like you would in a lineup (f.e. `jackolantern:53`)
-* Enter a hero, press enter, continue until you have all heroes entered, then press enter twice or type `done`
-* As this can get tiring, I reccomend everyone to either use macrofiles or use Latas' UI (Links further up)
-* Per default, the program now takes the `default.cqinput` file as input. If you want to input data manually you will have to remove that file from the folder. If you want to use a differntly named file you need to start the program via command line and pass the name as an argument.
 
-Why did I do that? Hero files are messy, they can't be read easily, deprecate whenever new heroes come out and really only have been a relic from when i took up development of this tool.
 
-Marco files on the other hand are straight forward and can be edited by anyone just by looking at them. Completely switching usage to them also cleans up my input handling and can potentially be verified.
-
-They also don't get overwritten everytime you input other heroes. You can just have multiple files and switch between them. Running a different lineup is as easy as changing a few characters in a text editor and then starting the program again.
-
-This should also settle debates about default answers to promts.
-
-In case you haven't noticed by the way I talk about this. **I won't go back on that change!** So don't even bother asking.
-
-What else?
-* Halloween Heroes are added.
-* After a calculation concludes, a battle replay string is printed. This string can be copied and viewed ingame just like a tournament replay. Please add this string to any report of a faulty solution as it helps me to compare ingame results with my own.
-* Lots and Lots of code changes under the hood. From upholding of conventions to modern practices. Mostly explicit type casts to fix comiler warnings though.  
 
 ## Usage
 
-For most people, only downloading the exe and running it will be enough. For those who are not on Windows they will need to download all files and compile for themselves.
+For most people, just downloading the exe and running it will be enough. For those who are not on Windows they will need to download all files and compile for themselves.
 
 ### Compiling
 Personally I get it to compile by running:
 `g++ -std=c++11 -O3 -o CosmosQuest main.cpp cosmosClasses.cpp inputProcessing.cpp cosmosDefines.cpp battleLogic.cpp base64.cpp` from the command line.
 
-**Makefile**: For those who know how to use them, I added a Makefile that BugsyLansky provided.
+**Makefile**: Base Makefile provided by BugsyLansky.
 
 ### Macro Files
-Macro files are the future!
 
 What are they?
+Macro files are the future!
 * Macro files are nothing else than your input in text file form.
-* The n-th line answers the n-th query the program asks.
+* Usually n-th line answers the n-th query the program asks.
 * When the last line of the marco file is used, the program switches back to manual input.
 * A `//` makes the programm ignore everything that comes after it.
 
 If this is too much for you please refer to Latas' UI that will automatically generate macro files and run the calc for you.
+If you want to learn, here is a [Imgur Album](https://imgur.com/a/CXy4A) explaning how to make your own macro files.
 
 How to use them?
 1. Start the program normally. It will take the `default.cqinput`-file as input
@@ -79,6 +61,7 @@ Input via command line is now mostly unavailable. Compiling yourself or or remov
 * `macroFileName` Path to your default macro file
 * `useDefaultMacroFile` Whether you want to always use the specified macro file or not
 * `showMacroFileInput` If enabled will hide any input promts that are answered by a macro file 
+* `showBattleReplayString` If disabled will hide the replay strings after every solution
 
 **If you want to use change any of those values you have to compile the program yourself!**
 
@@ -105,7 +88,6 @@ But only if the AOE Damage source dies and the heal is strong enough. Should bas
 
 ### Potential Errors:
 **bad_alloc**: You get this error when the program tries to use more RAM than your computer has available. 
-There is no fix available for this currently, but I work hard to try and reduce the general RAM usage. 
-Eventually I will release a low-RAM version that should remove most of these problems. 
+There is no fix available for this currently, but I work hard to try and reduce the general RAM usage.
 
-**The programm outputs: "ERRORERRORERROR"**: If this happens you should leave a comment in the forums because this is not normal behaviour. 
+**The programm outputs: "FATAL ERROR"**: If this happens you should leave a comment in the forums because this is not normal behaviour. 
