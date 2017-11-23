@@ -275,7 +275,7 @@ Army makeArmyFromStrings(vector<string> stringMonsters) {
     pair<Monster, int> heroData;
     
     for(size_t i = 0; i < stringMonsters.size(); i++) {
-        if(stringMonsters[i].find(HEROLEVEL_SEPARATOR()) != stringMonsters[i].npos) {
+        if(stringMonsters[i].find(HEROLEVEL_SEPARATOR) != stringMonsters[i].npos) {
             heroData = parseHeroString(stringMonsters[i]);
             army.add(addLeveledHero(heroData.first, heroData.second));
         } else {
@@ -291,10 +291,10 @@ Army makeArmyFromStrings(vector<string> stringMonsters) {
 
 // Parse hero input from a string into its name and level
 pair<Monster, int> parseHeroString(string heroString) {
-    string name = heroString.substr(0, heroString.find(HEROLEVEL_SEPARATOR()));
+    string name = heroString.substr(0, heroString.find(HEROLEVEL_SEPARATOR));
     int level;
     try {
-        level = stoi(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR())+1));
+        level = stoi(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR)+1));
     } catch (const exception & e) {
         throw HERO_PARSE;
     }

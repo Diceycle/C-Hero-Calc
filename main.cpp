@@ -6,7 +6,7 @@
 #include <limits>
 
 #include "inputProcessing.h"
-#include "cosmosDefines.h"
+#include "cosmosData.h"
 #include "battleLogic.h"
 
 using namespace std;
@@ -421,7 +421,7 @@ int main(int argc, char** argv) {
     }
     
     // Initialize global Data
-    initMonsterData();
+    initGameData();
     
     // -------------------------------------------- Program Start --------------------------------------------    
     
