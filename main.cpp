@@ -20,9 +20,9 @@ void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
     size_t armyAmount = armies.size();
     
     for (i = 0; i < armyAmount; i++) {
-        simulateFight(armies[i], instance.target);
-        if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
-            if (armies[i].followerCost < instance.followerUpperBound) {
+        if (armies[i].followerCost < instance.followerUpperBound) {
+            simulateFight(armies[i], instance.target);
+            if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
                 if (!newFound) {
                     iomanager.suspendTimedOutputs(DETAILED_OUTPUT);
                 }
