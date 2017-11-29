@@ -47,7 +47,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     int remainingFollowers;
     size_t availableMonstersSize = availableMonsters.size();
     size_t availableHeroesSize = availableHeroes.size();
-    vector<bool> usedHeroes; usedHeroes.resize(availableHeroesSize, false);
+    vector<bool> usedHeroes; usedHeroes.resize(monsterReference.size(), false);
     size_t i, j, m;
     SkillType currentSkill;
     bool globalAbilityInfluence;
@@ -64,7 +64,10 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 currentSkill = monsterReference[availableHeroes[m]].skill.type;
                 newHeroArmies.push_back(oldPureArmies[i]);
                 newHeroArmies.back().add(availableHeroes[m]);
-                newHeroArmies.back().lastFightData.valid = (currentSkill == P_AOE || currentSkill == FRIENDS || currentSkill == BERSERK || currentSkill == ADAPT); // These skills are self centered
+                newHeroArmies.back().lastFightData.valid = (currentSkill == P_AOE || currentSkill == FRIENDS || 
+                                                            currentSkill == BERSERK || currentSkill == ADAPT ||
+                                                            currentSkill == TRAINING || currentSkill == RAINBOW ||
+                                                            currentSkill == WITHER || currentSkill == REVENGE); // These skills are self centered
             }
         }
     }
@@ -74,14 +77,9 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             globalAbilityInfluence = false;
             remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
             for (j = 0; j < currentArmySize; j++) {
-                for (m = 0; m < availableHeroesSize; m++) {
-                    if (oldHeroArmies[i].monsters[j] == availableHeroes[m]) {
-                        currentSkill = monsterReference[oldHeroArmies[i].monsters[j]].skill.type;
-                        globalAbilityInfluence |= (currentSkill == FRIENDS || currentSkill == RAINBOW);
-                        usedHeroes[m] = true;
-                        break;
-                    }
-                }
+                currentSkill = monsterReference[oldHeroArmies[i].monsters[j]].skill.type;
+                globalAbilityInfluence |= (currentSkill == FRIENDS || currentSkill == RAINBOW);
+                usedHeroes[oldHeroArmies[i].monsters[j]] = true;
             }
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
                 newHeroArmies.push_back(oldHeroArmies[i]);
@@ -89,13 +87,16 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 newHeroArmies.back().lastFightData.valid = !globalAbilityInfluence;
             }
             for (m = 0; m < availableHeroesSize; m++) {
-                if (!usedHeroes[m]) {
+                if (!usedHeroes[availableHeroes[m]]) {
                     currentSkill = monsterReference[availableHeroes[m]].skill.type;
                     newHeroArmies.push_back(oldHeroArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = (currentSkill == P_AOE || currentSkill == FRIENDS || currentSkill == BERSERK || currentSkill == ADAPT); // These skills are self centered
+                    newHeroArmies.back().lastFightData.valid = (currentSkill == P_AOE || currentSkill == FRIENDS || 
+                                                                currentSkill == BERSERK || currentSkill == ADAPT ||
+                                                                currentSkill == TRAINING || currentSkill == RAINBOW ||
+                                                                currentSkill == WITHER || currentSkill == REVENGE); // These skills are self centered
                 }
-                usedHeroes[m] = false;
+                usedHeroes[availableHeroes[m]] = false;
             }
         }
     }
