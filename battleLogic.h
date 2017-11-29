@@ -129,7 +129,7 @@ inline bool ArmyCondition::startNewTurn() {
             } else if (this->skillTypes[i] == AOE) {
                 this->turnData.aoeDamage += (int) this->skillAmounts[i];
             } else if (this->skillTypes[i] == P_AOE && i == this->monstersLost) {
-                this->turnData.paoeDamage += this->lineup[i]->damage;
+                this->turnData.paoeDamage += (int) this->lineup[i]->damage * this->skillAmounts[i];
             }
         }
     }

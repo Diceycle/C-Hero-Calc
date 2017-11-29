@@ -11,10 +11,11 @@ bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
     }
 }
 
-ArmyCondition leftCondition = ArmyCondition();
-ArmyCondition rightCondition = ArmyCondition();
+ArmyCondition leftCondition;
+ArmyCondition rightCondition;
 int turncounter;
-bool leftDied, rightDied;
+bool leftDied;
+bool rightDied;
 
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
