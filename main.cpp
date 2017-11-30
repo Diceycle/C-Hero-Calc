@@ -107,7 +107,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
 // Takes the armies sorts them and compares them with each other. Armies that are strictly worse than other armies or have no chance of winning get dominated
 void calculateDominance(Instance & instance, bool optimizable,
                         vector<Army> & pureMonsterArmies, vector<Army> & heroMonsterArmies,
-                        size_t armySize) {
+                        size_t armySize, size_t firstDominance) {
     size_t i, j, si, sj;
     size_t pureMonsterArmiesSize = pureMonsterArmies.size();
     size_t heroMonsterArmiesSize = heroMonsterArmies.size();
@@ -117,12 +117,12 @@ void calculateDominance(Instance & instance, bool optimizable,
     bool lastExpand = armySize == (instance.maxCombatants - 1);
     
     // Sort the results by follower cost for optimization TODO: Add dominated to sort conditions
-    iomanager.timedOutput("Sorting Lists... ", DETAILED_OUTPUT, 1);
+    iomanager.timedOutput("Sorting Lists... ", DETAILED_OUTPUT, 1, firstDominance == armySize);
     sort(pureMonsterArmies.begin(), pureMonsterArmies.end(), hasFewerFollowers);
     sort(heroMonsterArmies.begin(), heroMonsterArmies.end(), hasFewerFollowers);
     
     // First Check dominance for non-Hero setups
-    iomanager.timedOutput("Calculating Dominance for non-heroes... ", DETAILED_OUTPUT, 1, firstDominance == armySize);
+    iomanager.timedOutput("Calculating Dominance for non-heroes... ", DETAILED_OUTPUT, 1);
     for (i = 0; i < pureMonsterArmiesSize; i++) {
         leftFollowerCost = pureMonsterArmies[i].followerCost;
         currentFightResult = &pureMonsterArmies[i].lastFightData;
@@ -350,7 +350,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                 
             // Calculate which results are strictly better than others (dominance)
             if (firstDominance <= armySize) {
-                calculateDominance(instance, optimizable, pureMonsterArmies, heroMonsterArmies, armySize);
+                calculateDominance(instance, optimizable, pureMonsterArmies, heroMonsterArmies, armySize, firstDominance);
             }
                 
             // now we expand to add the next monster to all non-dominated armies
