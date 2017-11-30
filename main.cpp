@@ -102,13 +102,118 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     }
 }
 
+// Takes the armies sorts them and compares them with each other. Armies that are strictly worse than other armies or have no chance of winning get dominated
+void calculateDominance(Instance & instance, bool optimizable,
+                        vector<Army> & pureMonsterArmies, vector<Army> & heroMonsterArmies,
+                        size_t armySize) {
+    size_t i, j, si, sj;
+    size_t pureMonsterArmiesSize = pureMonsterArmies.size();
+    size_t heroMonsterArmiesSize = heroMonsterArmies.size();
+    
+    int leftFollowerCost;
+    FightResult * currentFightResult;
+    bool lastExpand = armySize == (instance.maxCombatants - 1);
+    
+    // Sort the results by follower cost for optimization TODO: Add dominated to sort conditions
+    iomanager.timedOutput("Sorting Lists... ", DETAILED_OUTPUT, 1);
+    sort(pureMonsterArmies.begin(), pureMonsterArmies.end(), hasFewerFollowers);
+    sort(heroMonsterArmies.begin(), heroMonsterArmies.end(), hasFewerFollowers);
+    
+    // First Check dominance for non-Hero setups
+    iomanager.timedOutput("Calculating Dominance for non-heroes... ", DETAILED_OUTPUT, 1, firstDominance == armySize);
+    for (i = 0; i < pureMonsterArmiesSize; i++) {
+        leftFollowerCost = pureMonsterArmies[i].followerCost;
+        currentFightResult = &pureMonsterArmies[i].lastFightData;
+
+        // Preselection based on the information that no monster can beat 2 monsters alone if optimizable is true
+        // Like the rest of dominance this is unreliable because an aoe hero could easily affect earlier rounds
+        currentFightResult->dominated = lastExpand && // Must be last expansion
+                                        optimizable && // no monster is able to beat the last 2 monsters alone
+                                        !currentFightResult->dominated && // dont check this if already dominated
+                                        currentFightResult->rightAoeDamage == 0 && // make sure there is no interference to the optimized calculation
+                                        currentFightResult->monstersLost < (int) (instance.targetSize - 2); // Army left at least 2 enemies alive
+                                        
+        // A result is dominated If:
+        if (!currentFightResult->dominated) { 
+            // Another pureResults got farther with a less costly lineup
+            for (j = i+1; j < pureMonsterArmiesSize; j++) {
+                if (leftFollowerCost < pureMonsterArmies[j].followerCost) {
+                    break; 
+                } else if (*currentFightResult <= pureMonsterArmies[j].lastFightData) { // currentFightResult has more followers implicitly 
+                    currentFightResult->dominated = true;
+                    break;
+                }
+            }
+            // A lineup without heroes is better than a setup with heroes even if it got just as far
+            for (j = 0; j < heroMonsterArmiesSize; j++) {
+                if (leftFollowerCost > heroMonsterArmies[j].followerCost) {
+                    break; 
+                }
+                heroMonsterArmies[j].lastFightData.dominated |= heroMonsterArmies[j].lastFightData <= *currentFightResult;
+            }
+        }
+    }
+    
+    // Domination for setups with heroes
+    iomanager.timedOutput("Calculating Dominance for heroes... ", DETAILED_OUTPUT, 1);
+    vector<bool> leftMonsterSet; leftMonsterSet.resize(monsterReference.size());
+    size_t leftMonsterSetSize = leftMonsterSet.size();
+    bool usedHeroSubset;
+    for (i = 0; i < leftMonsterSetSize; i++) { // prepare monsterlist
+        leftMonsterSet[i] = monsterReference[i].rarity != NO_HERO; // Normal Monsters are true by default
+    }
+    
+    for (i = 0; i < heroMonsterArmiesSize; i++) {
+        leftFollowerCost = heroMonsterArmies[i].followerCost;
+        currentFightResult = &heroMonsterArmies[i].lastFightData;
+        
+        for (si = 0; si < armySize; si++) {
+            leftMonsterSet[heroMonsterArmies[i].monsters[si]] = true; // Add lefts monsters to set
+        }
+        
+        // Preselection based on the information that no monster can beat 2 monsters alone if optimizable is true
+        // Like the rest of dominance this is unreliable because an aoe hero could easily affect earlier rounds
+        currentFightResult->dominated = lastExpand && // Must be last expansion
+                                        optimizable && // no monster is able to beat the last 2 monsters alone
+                                        !currentFightResult->dominated && // dont check this if already dominated
+                                        currentFightResult->rightAoeDamage == 0 && // make sure there is no interference to the optimized calculation
+                                        currentFightResult->monstersLost < (int) (instance.targetSize - 2); // Army left at least 2 enemies alive
+        
+        // Proper dominance check
+        if (!currentFightResult->dominated) {
+            // if i costs more followers and got less far than j, then i is dominated
+            for (j = i+1; j < heroMonsterArmiesSize; j++) {
+                if (leftFollowerCost < heroMonsterArmies[j].followerCost) {
+                    break;
+                } else if (*currentFightResult <= heroMonsterArmies[j].lastFightData) { // i has more followers implicitly
+                    usedHeroSubset = true; // If j doesn't use a strict subset of the heroes i used, it cannot dominate i
+                    for (sj = 0; sj < armySize; sj++) { // for every hero in j there must be the same hero in i
+                        if (!leftMonsterSet[heroMonsterArmies[j].monsters[sj]]) {
+                            usedHeroSubset = false;
+                            break;
+                        }
+                    }
+                    if (usedHeroSubset) {
+                        currentFightResult->dominated = true;
+                        break;
+                    }                           
+                }
+            }
+        }
+        // Clean up monster set for next iteration
+        for (si = 0; si < armySize; si++) { 
+            leftMonsterSet[heroMonsterArmies[i].monsters[si]] = monsterReference[heroMonsterArmies[i].monsters[si]].rarity == NO_HERO; // Remove only heroes from the set
+        }
+    }
+}
+
 // Use a greedy method to get a first upper bound on follower cost for the solution
 // Greedy approach for 4 or less monsters is obsolete, as bruteforce is still fast enough
 void getQuickSolutions(Instance & instance) {
-    Army tempArmy = Army();
-    vector<int8_t> greedy {};
-    vector<int8_t> greedyHeroes {};
-    vector<int8_t> greedyTemp {};
+    Army tempArmy;
+    vector<int8_t> greedy;
+    vector<int8_t> greedyHeroes;
+    vector<int8_t> greedyTemp;
     bool invalid = false;
     
     iomanager.outputMessage("Trying to find solutions greedily...", DETAILED_OUTPUT);
@@ -161,8 +266,7 @@ void getQuickSolutions(Instance & instance) {
 void solveInstance(Instance & instance, size_t firstDominance) {
     Army tempArmy = Army();
     time_t startTime;
-    
-    size_t i, j, sj, si;
+    size_t i;
 
     // Get first Upper limit on followers
     if (instance.maxCombatants > ARMY_MAX_BRUTEFORCEABLE_SIZE) {
@@ -228,11 +332,6 @@ void solveInstance(Instance & instance, size_t firstDominance) {
         if (instance.bestSolution.monsterAmount > 0 && instance.bestSolution.followerCost == 0) { break; }
         
         if (armySize < instance.maxCombatants) { 
-            // Sort the results by follower cost for some optimization
-            iomanager.timedOutput("Sorting Lists... ", DETAILED_OUTPUT, 1);
-            sort(pureMonsterArmies.begin(), pureMonsterArmies.end(), hasFewerFollowers);
-            sort(heroMonsterArmies.begin(), heroMonsterArmies.end(), hasFewerFollowers);
-                
             if (armySize == firstDominance && iomanager.outputLevel == BASIC_OUTPUT) {
                 iomanager.outputLevel = DETAILED_OUTPUT; // Switch output level after pure brutefore is exhausted
             }
@@ -250,98 +349,11 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                 iomanager.outputMessage("Currently considering " + to_string(pureMonsterArmies.size()) + " normal and " + to_string(heroMonsterArmies.size()) + " hero armies.", BASIC_OUTPUT);
             }
                 
+            // Calculate which results are strictly better than others (dominance)
             if (firstDominance <= armySize) {
-                // Calculate which results are strictly better than others (dominance)
-                iomanager.timedOutput("Calculating Dominance for non-heroes... ", DETAILED_OUTPUT, 1, firstDominance == armySize);
-                
-                int leftFollowerCost;
-                FightResult * currentFightResult;
-                bool lastExpand = armySize == (instance.maxCombatants - 1);
-                // First Check dominance for non-Hero setups
-                for (i = 0; i < pureMonsterArmiesSize; i++) {
-                    leftFollowerCost = pureMonsterArmies[i].followerCost;
-                    currentFightResult = &pureMonsterArmies[i].lastFightData;
-
-                    // Preselection based on the information that no monster can beat 2 monsters alone if optimizable is true
-                    // Like the rest of dominance this is unreliable because an aoe hero could easily affect earlier rounds
-                    currentFightResult->dominated = lastExpand && // Must be last expansion
-                                                    optimizable && // no monster is able to beat the last 2 monsters alone
-                                                    !currentFightResult->dominated && // dont check this if already dominated
-                                                    currentFightResult->rightAoeDamage == 0 && // make sure there is no interference to the optimized calculation
-                                                    currentFightResult->monstersLost < (int) (instance.targetSize - 2); // Army left at least 2 enemies alive
-                                                    
-                    // A result is dominated If:
-                    if (!currentFightResult->dominated) { 
-                        // Another pureResults got farther with a less costly lineup
-                        for (j = i+1; j < pureMonsterArmiesSize; j++) {
-                            if (leftFollowerCost < pureMonsterArmies[j].followerCost) {
-                                break; 
-                            } else if (*currentFightResult <= pureMonsterArmies[j].lastFightData) { // currentFightResult has more followers implicitly 
-                                currentFightResult->dominated = true;
-                                break;
-                            }
-                        }
-                        // A lineup without heroes is better than a setup with heroes even if it got just as far
-                        for (j = 0; j < heroMonsterArmiesSize; j++) {
-                            if (leftFollowerCost > heroMonsterArmies[j].followerCost) {
-                                break; 
-                            }
-                            heroMonsterArmies[j].lastFightData.dominated = heroMonsterArmies[j].lastFightData <= *currentFightResult;
-                        }
-                    }
-                }
-                
-                iomanager.timedOutput("Calculating Dominance for heroes... ", DETAILED_OUTPUT, 1);
-                // Domination for setups with heroes
-                bool leftMonsterSet[monsterReference.size()];
-                size_t leftMonsterSetSize = monsterReference.size();
-                bool usedHeroSubset;
-                for (i = 0; i < leftMonsterSetSize; i++) { // prepare monsterlist
-                    leftMonsterSet[i] = monsterReference[i].rarity != NO_HERO; // Normal Monsters are true by default
-                }
-                
-                for (i = 0; i < heroMonsterArmiesSize; i++) {
-                    leftFollowerCost = heroMonsterArmies[i].followerCost;
-                    currentFightResult = &heroMonsterArmies[i].lastFightData;
-                    for (si = 0; si < armySize; si++) {
-                        leftMonsterSet[heroMonsterArmies[i].monsters[si]] = true; // Add lefts monsters to set
-                    }
-                    
-                    // Preselection based on the information that no monster can beat 2 monsters alone if optimizable is true
-                    // Like the rest of dominance this is unreliable because an aoe hero could easily affect earlier rounds
-                    currentFightResult->dominated = lastExpand && // Must be last expansion
-                                                    optimizable && // no monster is able to beat the last 2 monsters alone
-                                                    !currentFightResult->dominated && // dont check this if already dominated
-                                                    currentFightResult->rightAoeDamage == 0 && // make sure there is no interference to the optimized calculation
-                                                    currentFightResult->monstersLost < (int) (instance.targetSize - 2); // Army left at least 2 enemies alive
-                    
-                    // Proper dominance check
-                    if (!currentFightResult->dominated) {
-                        // if i costs more followers and got less far than j, then i is dominated
-                        for (j = i+1; j < heroMonsterArmiesSize; j++) {
-                            if (leftFollowerCost < heroMonsterArmies[j].followerCost) {
-                                break;
-                            } else if (*currentFightResult <= heroMonsterArmies[j].lastFightData) { // i has more followers implicitly
-                                usedHeroSubset = true; // If j doesn't use a strict subset of the heroes i used, it cannot dominate i
-                                for (sj = 0; sj < armySize; sj++) { // for every hero in j there must be the same hero in i
-                                    if (!leftMonsterSet[heroMonsterArmies[j].monsters[sj]]) {
-                                        usedHeroSubset = false;
-                                        break;
-                                    }
-                                }
-                                if (usedHeroSubset) {
-                                    currentFightResult->dominated = true;
-                                    break;
-                                }                           
-                            }
-                        }
-                    }
-                    // Clean up monster set for next iteration
-                    for (si = 0; si < armySize; si++) { 
-                        leftMonsterSet[heroMonsterArmies[i].monsters[si]] = monsterReference[heroMonsterArmies[i].monsters[si]].rarity == NO_HERO; // Remove only heroes from the set
-                    }
-                }
+                calculateDominance(instance, optimizable, pureMonsterArmies, heroMonsterArmies, armySize);
             }
+                
             // now we expand to add the next monster to all non-dominated armies
             iomanager.timedOutput("Expanding Lineups by one... ", DETAILED_OUTPUT, 1);
             vector<Army> nextPureArmies;
