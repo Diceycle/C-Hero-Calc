@@ -13,14 +13,15 @@ using namespace std;
 
 IOManager iomanager;
 
-// Simulates fights with all armies against the target. Armies will contain Army objects with the results written in.
+// Simulates fights with all armies against the target. The Fightresults are written to the corresponding structs in armies.
+// If a solution is found, armies that are more expensive than that solution are ignored
 void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
     bool newFound = false;
     size_t i = 0;
     size_t armyAmount = armies.size();
     
     for (i = 0; i < armyAmount; i++) {
-        if (armies[i].followerCost < instance.followerUpperBound) {
+        if (armies[i].followerCost < instance.followerUpperBound) { // Ignore if a cheaper solution exists
             simulateFight(armies[i], instance.target);
             if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
                 if (!newFound) {
@@ -40,6 +41,7 @@ void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
 
 // Take the data from oldArmies and write all armies into newArmies with an additional monster at the end.
 // Armies that are dominated are ignored.
+// TODO: Dont expand with heroes if army is too expensive
 void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
             vector<Army> & oldPureArmies, vector<Army> & oldHeroArmies, 
             size_t currentArmySize, Instance & instance) {
@@ -262,25 +264,26 @@ void getQuickSolutions(Instance & instance) {
     }
 }
 
-// Main method for solving an instance. Returns time taken to calculate in seconds
+// Main method for solving an instance.
 void solveInstance(Instance & instance, size_t firstDominance) {
-    Army tempArmy = Army();
+    Army tempArmy;
     time_t startTime;
     size_t i;
 
-    // Get first Upper limit on followers
+    // Get first Upper limit on followers with  agreedy algorithm
     if (instance.maxCombatants > ARMY_MAX_BRUTEFORCEABLE_SIZE) {
         getQuickSolutions(instance);
     }
     
-    vector<Army> pureMonsterArmies {}; // initialize with all monsters
-    vector<Army> heroMonsterArmies {}; // initialize with all heroes
+    // Fill two vectors with armies each containing exactly one unique available hero or monster
+    vector<Army> pureMonsterArmies;
+    vector<Army> heroMonsterArmies;
     for (i = 0; i < availableMonsters.size(); i++) {
         if (monsterReference[availableMonsters[i]].cost <= instance.followerUpperBound) {
             pureMonsterArmies.push_back(Army( {availableMonsters[i]} ));
         }
     }
-    for (i = 0; i < availableHeroes.size(); i++) { // Ignore chacking for Hero Cost
+    for (i = 0; i < availableHeroes.size(); i++) { // Ignore checking for Hero Cost
         heroMonsterArmies.push_back(Army( {availableHeroes[i]} ));
     }
     
@@ -289,7 +292,6 @@ void solveInstance(Instance & instance, size_t firstDominance) {
     if (optimizable) {
         tempArmy = Army({instance.target.monsters[instance.targetSize - 2], instance.target.monsters[instance.targetSize - 1]}); // Make an army from the last two monsters
     }
-    
     if (optimizable) { // Check with normal Mobs
         for (i = 0; i < pureMonsterArmies.size(); i++) {
             simulateFight(pureMonsterArmies[i], tempArmy);
@@ -299,7 +301,6 @@ void solveInstance(Instance & instance, size_t firstDominance) {
             }
         }
     }
-
     if (optimizable) { // Check with Heroes
         for (i = 0; i < heroMonsterArmies.size(); i++) {
             simulateFight(heroMonsterArmies[i], tempArmy);
@@ -312,26 +313,24 @@ void solveInstance(Instance & instance, size_t firstDominance) {
 
     // Run the Bruteforce Loop
     startTime = time(NULL);
-    size_t pureMonsterArmiesSize, heroMonsterArmiesSize;
     for (size_t armySize = 1; armySize <= instance.maxCombatants; armySize++) {
-    
-        pureMonsterArmiesSize = pureMonsterArmies.size();
-        heroMonsterArmiesSize = heroMonsterArmies.size();
         // Output Debug Information
         iomanager.outputMessage("Starting loop for armies of size " + to_string(armySize), BASIC_OUTPUT);
         
         // Run Fights for non-Hero setups
-        iomanager.timedOutput("Simulating " + to_string(pureMonsterArmiesSize) + " non-hero Fights... ", DETAILED_OUTPUT, 1, true);
+        iomanager.timedOutput("Simulating " + to_string(pureMonsterArmies.size()) + " non-hero Fights... ", DETAILED_OUTPUT, 1, true);
         simulateMultipleFights(pureMonsterArmies, instance);
         
         // Run fights for setups with heroes
-        iomanager.timedOutput("Simulating " + to_string(heroMonsterArmiesSize) + " hero Fights... ", DETAILED_OUTPUT, 1);
+        iomanager.timedOutput("Simulating " + to_string(heroMonsterArmies.size()) + " hero Fights... ", DETAILED_OUTPUT, 1);
         simulateMultipleFights(heroMonsterArmies, instance);
         
         // If we have a valid solution with 0 followers there is no need to continue
         if (instance.bestSolution.monsterAmount > 0 && instance.bestSolution.followerCost == 0) { break; }
         
+        // Start Expansion routine if there is still room
         if (armySize < instance.maxCombatants) { 
+            // Manage output format 
             if (armySize == firstDominance && iomanager.outputLevel == BASIC_OUTPUT) {
                 iomanager.outputLevel = DETAILED_OUTPUT; // Switch output level after pure brutefore is exhausted
             }
