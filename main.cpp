@@ -114,10 +114,24 @@ void calculateDominance(Instance & instance, bool optimizable,
     
     int leftFollowerCost;
     FightResult * currentFightResult;
-    bool lastExpand = armySize == (instance.maxCombatants - 1);
     
     // Sort the results by follower cost for optimization TODO: Add dominated to sort conditions
     iomanager.timedOutput("Sorting Lists... ", DETAILED_OUTPUT, 1, firstDominance == armySize);
+    
+    // Preselection based on the information that no monster can beat 2 monsters alone if optimizable is true
+    // Like the rest of dominance this is unreliable because an aoe hero could easily affect earlier rounds
+    if (armySize == (instance.maxCombatants - 1) && optimizable) { // Must be optimizable and the last expansion
+        for (i = 0; i < pureMonsterArmiesSize + heroMonsterArmiesSize; i++) {
+            if (i < pureMonsterArmiesSize) {
+                currentFightResult = &pureMonsterArmies[i].lastFightData;
+            } else {
+                currentFightResult = &heroMonsterArmies[i-pureMonsterArmiesSize].lastFightData;
+            }
+            currentFightResult->dominated = currentFightResult->rightAoeDamage == 0 && // make sure there is no interference to the optimized calculation
+                                            currentFightResult->monstersLost < (int) (instance.targetSize - 2); // Army left at least 2 enemies alive
+        }
+    }
+    
     sort(pureMonsterArmies.begin(), pureMonsterArmies.end(), hasFewerFollowers);
     sort(heroMonsterArmies.begin(), heroMonsterArmies.end(), hasFewerFollowers);
     
@@ -127,14 +141,6 @@ void calculateDominance(Instance & instance, bool optimizable,
         leftFollowerCost = pureMonsterArmies[i].followerCost;
         currentFightResult = &pureMonsterArmies[i].lastFightData;
 
-        // Preselection based on the information that no monster can beat 2 monsters alone if optimizable is true
-        // Like the rest of dominance this is unreliable because an aoe hero could easily affect earlier rounds
-        currentFightResult->dominated = lastExpand && // Must be last expansion
-                                        optimizable && // no monster is able to beat the last 2 monsters alone
-                                        !currentFightResult->dominated && // dont check this if already dominated
-                                        currentFightResult->rightAoeDamage == 0 && // make sure there is no interference to the optimized calculation
-                                        currentFightResult->monstersLost < (int) (instance.targetSize - 2); // Army left at least 2 enemies alive
-                                        
         // A result is dominated If:
         if (!currentFightResult->dominated) { 
             // Another pureResults got farther with a less costly lineup
@@ -172,15 +178,7 @@ void calculateDominance(Instance & instance, bool optimizable,
         for (si = 0; si < armySize; si++) {
             leftMonsterSet[heroMonsterArmies[i].monsters[si]] = true; // Add lefts monsters to set
         }
-        
-        // Preselection based on the information that no monster can beat 2 monsters alone if optimizable is true
-        // Like the rest of dominance this is unreliable because an aoe hero could easily affect earlier rounds
-        currentFightResult->dominated = lastExpand && // Must be last expansion
-                                        optimizable && // no monster is able to beat the last 2 monsters alone
-                                        !currentFightResult->dominated && // dont check this if already dominated
-                                        currentFightResult->rightAoeDamage == 0 && // make sure there is no interference to the optimized calculation
-                                        currentFightResult->monstersLost < (int) (instance.targetSize - 2); // Army left at least 2 enemies alive
-        
+
         // Proper dominance check
         if (!currentFightResult->dominated) {
             // if i costs more followers and got less far than j, then i is dominated
