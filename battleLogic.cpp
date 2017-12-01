@@ -13,6 +13,3 @@ bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
 
 ArmyCondition leftCondition;
 ArmyCondition rightCondition;
-int turncounter;
-bool leftDied;
-bool rightDied;

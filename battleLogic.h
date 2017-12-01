@@ -193,9 +193,6 @@ inline bool ArmyCondition::resolveDamage(TurnData & opposing) {
 
 extern ArmyCondition leftCondition;
 extern ArmyCondition rightCondition;
-extern int turncounter;
-extern bool leftDied;
-extern bool rightDied;
 
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
@@ -210,6 +207,10 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     //  6. AOE of friendly Side         (aoe, paoe)
     //  7. Healing of enemy Side        (healing)
     (*totalFightsSimulated)++;
+    
+    int turncounter;
+    bool leftDied;
+    bool rightDied;
     
     turncounter = 0;
     
