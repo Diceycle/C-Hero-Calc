@@ -1,7 +1,7 @@
 CC = gcc
 CXX = g++
 RM = rm -f
-CPPFLAGS = -Wall -O3 -std=c++11
+CPPFLAGS = -Wall -Ofast -std=c++11
 
 SRCS = main.cpp cosmosData.cpp inputProcessing.cpp battleLogic.cpp base64.cpp
 OBJS = $(subst .cpp,.o,$(SRCS))
