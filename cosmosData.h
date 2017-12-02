@@ -173,7 +173,8 @@ class Army {
 
 // Function for sorting FightResults by followers (ascending)
 inline bool hasFewerFollowers(const Army & a, const Army & b) {
-    return (a.followerCost < b.followerCost);
+    return ((!a.lastFightData.dominated && b.lastFightData.dominated) || 
+            (a.lastFightData.dominated == b.lastFightData.dominated && a.followerCost < b.followerCost));
 }
 
 // Function for sorting Monsters by cost (ascending)
