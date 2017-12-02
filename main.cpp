@@ -55,8 +55,8 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     bool globalAbilityInfluence;
     
     for (i = 0; i < oldPureArmies.size(); i++) {
-        if (!oldPureArmies[i].lastFightData.dominated) {
-            remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
+        remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
+        if (!oldPureArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
                 newPureArmies.push_back(oldPureArmies[i]);
                 newPureArmies.back().add(availableMonsters[m]);
@@ -75,9 +75,9 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     }
     
     for (i = 0; i < oldHeroArmies.size(); i++) {
-        if (!oldHeroArmies[i].lastFightData.dominated) {
+        remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
+        if (!oldHeroArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
             globalAbilityInfluence = false;
-            remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
             for (j = 0; j < currentArmySize; j++) {
                 currentSkill = monsterReference[oldHeroArmies[i].monsters[j]].skill.type;
                 globalAbilityInfluence |= (currentSkill == FRIENDS || currentSkill == RAINBOW);
