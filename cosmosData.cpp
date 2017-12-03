@@ -270,9 +270,13 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 32, 64, "lordkirk",          FIRE,  LEGENDARY, {PROTECT_L,     FIRE, FIRE, 9}));
     baseHeroes.push_back(Monster( 30, 70, "neptunius",         WATER, LEGENDARY, {PROTECT_L,     WATER, WATER, 9}));
     
-    baseHeroes.push_back(Monster( 60, 12, "sigrun",            FIRE,  LEGENDARY, {P_AOE,     FIRE, FIRE, 0.5}));
-    baseHeroes.push_back(Monster( 70, 14, "koldis",            WATER, LEGENDARY, {P_AOE,     WATER, WATER, 0.5}));
-    baseHeroes.push_back(Monster( 75, 16, "alvitr",            EARTH, LEGENDARY, {P_AOE,     EARTH, EARTH, 0.5}));
+    baseHeroes.push_back(Monster( 60, 12, "sigrun",            FIRE,  LEGENDARY, {P_AOE,         FIRE, FIRE, 0.5}));
+    baseHeroes.push_back(Monster( 70, 14, "koldis",            WATER, LEGENDARY, {P_AOE,         WATER, WATER, 0.5}));
+    baseHeroes.push_back(Monster( 75, 16, "alvitr",            EARTH, LEGENDARY, {P_AOE,         EARTH, EARTH, 0.5}));
+    
+    baseHeroes.push_back(Monster( 30, 18, "hama",              WATER, COMMON,    {BUFF,          WATER, WATER, 4}));
+    baseHeroes.push_back(Monster( 34, 34, "hallinskidi",       AIR,   RARE,      {CHAMPION,      AIR, AIR, 2}));
+    baseHeroes.push_back(Monster( 60, 42, "rigr",              EARTH, LEGENDARY, {ADAPT,         EARTH, EARTH, 2}));
 }
 
 void initQuests() {

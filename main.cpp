@@ -126,7 +126,6 @@ void calculateDominance(Instance & instance, bool optimizable,
     }
     
     sort(pureMonsterArmies.begin(), pureMonsterArmies.end(), hasFewerFollowers);
-    
     for (i = 0; i < pureMonsterArmiesSize; i++) {
         leftFollowerCost = pureMonsterArmies[i].followerCost;
         currentFightResult = &pureMonsterArmies[i].lastFightData;
@@ -144,10 +143,8 @@ void calculateDominance(Instance & instance, bool optimizable,
             }
         }
     }
-    
     // Domination for setups with heroes
     iomanager.timedOutput("Calculating Dominance for heroes... ", DETAILED_OUTPUT, 1);
-    
     // Preselection based on the information that no monster can beat 2 monsters alone if optimizable is true
     // Like the rest of dominance this is unreliable because an aoe hero could easily affect earlier rounds
     if (armySize == (instance.maxCombatants - 1) && optimizable) { // Must be optimizable and the last expansion
