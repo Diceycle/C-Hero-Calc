@@ -20,6 +20,7 @@ struct TurnData {
     int protection = 0;
     int healing = 0;
     int revengeDamage = 0;
+    float valkyrieDamage = 0;
 };
 
 // Keep track of an army's condition during a fight and save some convinience data
@@ -35,6 +36,7 @@ class ArmyCondition {
         int pureMonsters; // for friends ability
         
         int monstersLost;
+        int valkyrieDamageTaken; // Half needs to be applied to the next monster if the front dies
         
         int frontDamageTaken;
         int aoeDamageTaken;
@@ -79,11 +81,12 @@ inline void ArmyCondition::init(const Army & army) {
 // Handle death of the front-most monster
 inline void ArmyCondition::afterDeath() {
     if (this->skillTypes[this->monstersLost] == REVENGE) {
-        this->turnData.revengeDamage = (int16_t) round((float) this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
+        this->turnData.revengeDamage = (int) round((float) this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
     }
     this->monstersLost++;
     this->berserkProcs = 0;
-    this->frontDamageTaken = this->aoeDamageTaken;
+    this->valkyrieDamageTaken = (int) ceil(this->valkyrieDamageTaken * 0.5); // Hardcoded value to avoid having to save the multiplier from an enemy skill
+    this->frontDamageTaken = this->aoeDamageTaken + this->valkyrieDamageTaken;
 }
 
 // Resert turndata and fill it again with the hero abilities' values
@@ -171,6 +174,9 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     if (counter[opposingElement] == this->lineup[this->monstersLost]->element) {
         this->turnData.baseDamage *= elementalBoost;
     }
+    if (this->skillTypes[this->monstersLost] == VALKYRIE) { // Valkyrie damage synergizes with all boosts
+        this->turnData.valkyrieDamage = this->turnData.baseDamage;
+    }
 }
 
 // Add damage to the opposing side and check for deaths
@@ -180,6 +186,7 @@ inline bool ArmyCondition::resolveDamage(TurnData & opposing) {
     }
     this->frontDamageTaken += opposing.aoeDamage + opposing.revengeDamage; // Also apply aoeDamage
     this->aoeDamageTaken += opposing.aoeDamage + opposing.paoeDamage + opposing.revengeDamage; // Apply aoe Damage to backline
+    this->valkyrieDamageTaken += (int) ceil(opposing.valkyrieDamage); // Seperately save valkyrie damage. This is relevant for the next monster in line
     opposing.revengeDamage = 0; // Vital to check for additional revenge damage later
     
     // Check if the first Monster died (otherwise it will be revived next turn)
@@ -195,6 +202,7 @@ extern ArmyCondition leftCondition;
 extern ArmyCondition rightCondition;
 
 // TODO: Implement MAX AOE Damage to make sure nothing gets revived
+// TODO: Consider Valkyrie damage for backline deaths
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     // left[0] and right[0] are the first monsters to fight
@@ -221,14 +229,16 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     // Ignore lastFightData if either army-affecting heroes were added or for debugging
     if (left.lastFightData.valid && !verbose) { 
         // Set pre-computed values to pick up where we left off
-        leftCondition.monstersLost      = left.monsterAmount-1; // All monsters of left died last fight only the new one counts
-        leftCondition.frontDamageTaken  = left.lastFightData.leftAoeDamage;
-        leftCondition.aoeDamageTaken    = left.lastFightData.leftAoeDamage;
-        rightCondition.monstersLost     = left.lastFightData.monstersLost;
-        rightCondition.frontDamageTaken = left.lastFightData.damage;
-        rightCondition.aoeDamageTaken   = left.lastFightData.rightAoeDamage;
-        rightCondition.berserkProcs     = left.lastFightData.berserk;
-        turncounter                     = left.lastFightData.turncounter;
+        leftCondition.monstersLost         = left.monsterAmount-1; // All monsters of left died last fight only the new one counts
+        leftCondition.frontDamageTaken     = left.lastFightData.leftAoeDamage;
+        leftCondition.aoeDamageTaken       = left.lastFightData.leftAoeDamage;
+        leftCondition.valkyrieDamageTaken  = left.lastFightData.leftValkyrieDamage;
+        rightCondition.monstersLost        = left.lastFightData.monstersLost;
+        rightCondition.valkyrieDamageTaken = left.lastFightData.rightValkyrieDamage;
+        rightCondition.frontDamageTaken    = left.lastFightData.damage;
+        rightCondition.aoeDamageTaken      = left.lastFightData.rightAoeDamage;
+        rightCondition.berserkProcs        = left.lastFightData.berserk;
+        turncounter                        = left.lastFightData.turncounter;
     }
     
     // Battle Loop. Continues until one side is out of monsters
@@ -281,7 +291,9 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     left.lastFightData.dominated = false;
     left.lastFightData.turncounter = (int8_t) turncounter;
     left.lastFightData.leftAoeDamage = (int16_t) leftCondition.aoeDamageTaken;
+    left.lastFightData.leftValkyrieDamage = (int16_t) leftCondition.valkyrieDamageTaken;
     left.lastFightData.rightAoeDamage = (int16_t) rightCondition.aoeDamageTaken;
+    left.lastFightData.rightValkyrieDamage = (int16_t) rightCondition.valkyrieDamageTaken;
     
     if (leftCondition.monstersLost >= leftCondition.armySize) { //draws count as right wins. 
         left.lastFightData.rightWon = true;

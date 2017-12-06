@@ -69,7 +69,8 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 newHeroArmies.back().lastFightData.valid = (currentSkill == P_AOE || currentSkill == FRIENDS || 
                                                             currentSkill == BERSERK || currentSkill == ADAPT ||
                                                             currentSkill == TRAINING || currentSkill == RAINBOW ||
-                                                            currentSkill == WITHER || currentSkill == REVENGE); // These skills are self centered
+                                                            currentSkill == WITHER || currentSkill == REVENGE ||
+                                                            currentSkill == VALKYRIE); // These skills are self centered
             }
         }
     }
@@ -96,7 +97,8 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                     newHeroArmies.back().lastFightData.valid = (currentSkill == P_AOE || currentSkill == FRIENDS || 
                                                                 currentSkill == BERSERK || currentSkill == ADAPT ||
                                                                 currentSkill == TRAINING || currentSkill == RAINBOW ||
-                                                                currentSkill == WITHER || currentSkill == REVENGE); // These skills are self centered
+                                                                currentSkill == WITHER || currentSkill == REVENGE ||
+                                                                currentSkill == VALKYRIE); // These skills are self centered
                 }
                 usedHeroes[availableHeroes[m]] = false;
             }

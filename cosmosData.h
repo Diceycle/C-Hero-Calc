@@ -36,7 +36,8 @@ enum SkillType {
     RAINBOW,    // This monster receives a damage buff if monsters of every element are behind it
     TRAINING,   // This monster receives a damage buff for every turn that passed
     WITHER,     // This monster's hp decrease after every attack it survives
-    REVENGE     // After this onster dies it damages the entire opposing army
+    REVENGE,    // After this monster dies it damages the entire opposing army
+    VALKYRIE    // This monsters damage is done to all monsters, the value beeing reduced for each monster it hits. Hardcoded to 50%
 };
 
 enum Element {
@@ -118,7 +119,9 @@ void filterMonsterData(int minimumMonsterCost);
 struct FightResult {
     int16_t damage;             // how much damage dealt to the current leading mob of the winning side
     int16_t leftAoeDamage;      // how much aoe damage left took
+    int16_t leftValkyrieDamage;  // how much valkyrie damage is applied to left
     int16_t rightAoeDamage;     // how much aoe damage right took
+    int16_t rightValkyrieDamage; // how much valkyrie damage is applied to right
     int8_t berserk;            // berserk multiplier, if there is a berserker in the front
     int8_t monstersLost;    // how many mobs lost on the winning side (the other side lost all)
     int8_t turncounter;     // how many turns have passed since the battle started
