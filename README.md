@@ -4,7 +4,7 @@
 I took over the developement out of interest and educational purposes. Well, I also needed a good calculator and David's approach was a good place to start.
 My goal is to provide a Calculator that is usable even on difficult problems in respect to memory usage and calculation time.
 
-Game forum and disscusuion thread [here](https://www.kongregate.com/forums/910715-cosmos-quest/topics/948525-version-2-7-6-new-quests-and-heroes-added-to-c-calc).
+Game forum and disscusuion thread [here](https://www.kongregate.com/forums/910715-cosmos-quest/topics/957766-version-2-8-1-the-new-hero-skills-are-finally-valkyready).
 
 Other Repos that might be interesting:
 * [Latas' UI for automatic generation of macro files](https://github.com/Wiedmolol/CQMacroCreator)
@@ -23,8 +23,7 @@ Other Repos that might be interesting:
 * Precompiled exe included (Built on Windows 8.1 (64Bit), no guarantee for other operating systems)
 
 ### What's New?
-
-
+Business as usual. All heroes are fully implemented and there where some speed improvements over the last two weeks
 
 ## Usage
 
@@ -32,7 +31,7 @@ For most people, just downloading the exe and running it will be enough. For tho
 
 ### Compiling
 Personally I get it to compile by running:
-`g++ -std=c++11 -O3 -o CosmosQuest main.cpp cosmosClasses.cpp inputProcessing.cpp cosmosDefines.cpp battleLogic.cpp base64.cpp` from the command line.
+`g++ -std=c++11 -Ofast -o CosmosQuest main.cpp inputProcessing.cpp cosmosData.cpp battleLogic.cpp base64.cpp` from the command line.
 
 **Makefile**: Base Makefile provided by BugsyLansky.
 
@@ -54,7 +53,7 @@ How to use them?
 3. Compile yourself and add your own default macro file name. This will stop you having to start the program via command line.
 
 ### Input via command line
-Input via command line is now mostly unavailable. Compiling yourself or or removing `defalut.cqinput` from the folder will still give you access to it though.
+Input via command line is now mostly unavailable. Compiling yourself or or removing `default.cqinput` from the folder will still give you access to it though.
 
 ### Control Variables
 * `firstDominace` This controls at which army length the calc should start removing suboptimal solutions. Setting this higher _might_ improve the solution. But treat this with extreme caution as it can cause your PC run out of RAM rather quickly.
@@ -85,6 +84,8 @@ Having only 15 or 20 Heroes is totally fine but if you enable all of them, your 
 ### Bugs that I'm aware of
 * It is theoretically possible that healing might revive dead monsters in the backline. 
 But only if the AOE Damage source dies and the heal is strong enough. Should basically never happen (Famous last words)
+
+* Valkyrie damage only comes into effect if the monster in the front dies. This means heroes in the backline will sometimes survive until it's their turn. This might cause some bugs where a hero ability will be in effect longer than it should be.
 
 ### Potential Errors:
 **bad_alloc**: You get this error when the program tries to use more RAM than your computer has available. 
