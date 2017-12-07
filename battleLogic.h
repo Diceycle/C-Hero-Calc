@@ -63,6 +63,7 @@ inline void ArmyCondition::init(const Army & army) {
     this->frontDamageTaken = 0;
     this->aoeDamageTaken = 0;
     this->berserkProcs = 0;
+    this->valkyrieDamageTaken = 0;
     
     for (i = 0; i < this->armySize; i++) {
         this->lineup[i] = &monsterReference[army.monsters[i]];
@@ -100,6 +101,7 @@ inline bool ArmyCondition::startNewTurn() {
     this->turnData.aoeDamage = 0;
     this->turnData.paoeDamage = 0;
     this->turnData.revengeDamage = 0;
+    this->turnData.valkyrieDamage = 0;
     healingTemp = this->turnData.healing;
     this->turnData.healing = 0;
     this->pureMonsters = 0;
@@ -227,8 +229,8 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     rightCondition.init(right);
     
     // Ignore lastFightData if either army-affecting heroes were added or for debugging
+    // Set pre-computed values to pick up where we left off
     if (left.lastFightData.valid && !verbose) { 
-        // Set pre-computed values to pick up where we left off
         leftCondition.monstersLost         = left.monsterAmount-1; // All monsters of left died last fight only the new one counts
         leftCondition.frontDamageTaken     = left.lastFightData.leftAoeDamage;
         leftCondition.aoeDamageTaken       = left.lastFightData.leftAoeDamage;
