@@ -217,7 +217,7 @@ void initBaseHeroes() {
 
     baseHeroes.push_back(Monster( 22, 32, "nicte",             AIR,   RARE,      {BUFF,          AIR, AIR, 4}));
 
-    baseHeroes.push_back(Monster( 50, 12, "james",             EARTH, LEGENDARY, {P_AOE,          ALL, EARTH, 1}));
+    baseHeroes.push_back(Monster( 50, 12, "james",             EARTH, LEGENDARY, {P_AOE,         ALL, EARTH, 1}));
 
     baseHeroes.push_back(Monster( 28, 16, "k41ry",             AIR,   COMMON,    {BUFF,          AIR, AIR, 3}));
     baseHeroes.push_back(Monster( 46, 20, "t4urus",            EARTH, RARE,      {BUFF,          ALL, EARTH, 1}));
@@ -270,7 +270,7 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 32, 64, "lordkirk",          FIRE,  LEGENDARY, {PROTECT_L,     FIRE, FIRE, 9}));
     baseHeroes.push_back(Monster( 30, 70, "neptunius",         WATER, LEGENDARY, {PROTECT_L,     WATER, WATER, 9}));
     
-    baseHeroes.push_back(Monster( 60, 12, "sigrun",            FIRE,  LEGENDARY, {VALKYRIE,      FIRE, FIRE, 0.5}));
+    baseHeroes.push_back(Monster( 65, 12, "sigrun",            FIRE,  LEGENDARY, {VALKYRIE,      FIRE, FIRE, 0.5}));
     baseHeroes.push_back(Monster( 70, 14, "koldis",            WATER, LEGENDARY, {VALKYRIE,      WATER, WATER, 0.5}));
     baseHeroes.push_back(Monster( 75, 16, "alvitr",            EARTH, LEGENDARY, {VALKYRIE,      EARTH, EARTH, 0.5}));
     
