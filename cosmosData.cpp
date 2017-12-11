@@ -31,7 +31,19 @@ Monster::Monster(int someHp, int someDamage, std::string aName, Element anElemen
 
 // Constructor for leveled heroes
 Monster::Monster(const Monster & baseHero, int aLevel) :
-    Monster(baseHero.hp, baseHero.damage, baseHero.cost, baseHero.baseName, baseHero.element, baseHero.rarity, baseHero.skill, aLevel) {}
+    Monster(baseHero.hp, baseHero.damage, baseHero.cost, baseHero.baseName, baseHero.element, baseHero.rarity, baseHero.skill, aLevel) 
+{
+    if (baseHero.skill.type == BUFF_L) {
+        this->skill.type = BUFF;
+        this->skill.amount = aLevel / (int) baseHero.skill.amount;
+    } else if (baseHero.skill.type == PROTECT_L) {
+        this->skill.type = PROTECT;
+        this->skill.amount = aLevel / (int) baseHero.skill.amount;
+    } else if (baseHero.skill.type == CHAMPION_L) {
+        this->skill.type = CHAMPION;
+        this->skill.amount = aLevel / (int) baseHero.skill.amount;
+    }
+}
 
 Monster::Monster() {}
 
