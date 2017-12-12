@@ -119,9 +119,7 @@ void filterMonsterData(int minimumMonsterCost);
 struct FightResult {
     int16_t damage;             // how much damage dealt to the current leading mob of the winning side
     int16_t leftAoeDamage;      // how much aoe damage left took
-    int16_t leftValkyrieDamage;  // how much valkyrie damage is applied to left
     int16_t rightAoeDamage;     // how much aoe damage right took
-    int16_t rightValkyrieDamage; // how much valkyrie damage is applied to right
     int8_t berserk;            // berserk multiplier, if there is a berserker in the front
     int8_t monstersLost;    // how many mobs lost on the winning side (the other side lost all)
     int8_t turncounter;     // how many turns have passed since the battle started

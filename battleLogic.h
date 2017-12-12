@@ -15,12 +15,13 @@ const int VALID_RAINBOW_CONDITION = 15; // Binary 00001111 -> means all elements
 struct TurnData {
     float baseDamage = 0;
     int buffDamage = 0;
+    int protection = 0;
     int aoeDamage = 0;
     int paoeDamage = 0;
-    int protection = 0;
     int healing = 0;
-    int revengeDamage = 0;
-    float valkyrieDamage = 0;
+    float valkyrieMult = 0;
+    int valkyrieDamage = 0;
+    int witherer = -1;
 };
 
 // Keep track of an army's condition during a fight and save some convinience data
@@ -28,6 +29,7 @@ class ArmyCondition {
     public: 
         int armySize;
         Monster * lineup[ARMY_MAX_SIZE];
+        int remainingHealths[ARMY_MAX_SIZE];
         SkillType skillTypes[ARMY_MAX_SIZE];
         Element skillTargets[ARMY_MAX_SIZE];
         float skillAmounts[ARMY_MAX_SIZE];
@@ -36,17 +38,13 @@ class ArmyCondition {
         int pureMonsters; // for friends ability
         
         int monstersLost;
-        int valkyrieDamageTaken; // Half needs to be applied to the next monster if the front dies
-        
-        int frontDamageTaken;
-        int aoeDamageTaken;
         int berserkProcs;
         
         TurnData turnData;
         
         inline void init(const Army & army);
         inline void afterDeath();
-        inline bool startNewTurn();
+        inline void startNewTurn();
         inline void getDamage(const int turncounter, const Element opposingElement);
         inline bool resolveDamage(TurnData & opposing);
     
@@ -59,11 +57,7 @@ inline void ArmyCondition::init(const Army & army) {
     
     this->armySize = army.monsterAmount;
     this->monstersLost = 0;
-    
-    this->frontDamageTaken = 0;
-    this->aoeDamageTaken = 0;
     this->berserkProcs = 0;
-    this->valkyrieDamageTaken = 0;
     
     for (i = 0; i < this->armySize; i++) {
         this->lineup[i] = &monsterReference[army.monsters[i]];
@@ -72,85 +66,61 @@ inline void ArmyCondition::init(const Army & army) {
         skill = &(this->lineup[i]->skill);
         this->skillTypes[i] = skill->type;
         if (skill->type == RAINBOW) {
-            this->rainbowCondition = 0;
+            this->rainbowCondition = 0; // More than 1 Rainbow Hero per lineup will not work properly
         }
         this->skillTargets[i] = skill->target;
         this->skillAmounts[i] = skill->amount;
+        this->remainingHealths[i] = this->lineup[i]->hp;
     }
 }
 
 // Handle death of the front-most monster
 inline void ArmyCondition::afterDeath() {
-    if (this->skillTypes[this->monstersLost] == REVENGE) {
-        this->turnData.revengeDamage = (int) round((float) this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
-    }
+//    if (this->skillTypes[this->monstersLost] == REVENGE) {
+//        this->turnData.revengeDamage = (int) round((float) this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
+//    }
     this->monstersLost++;
     this->berserkProcs = 0;
-    this->valkyrieDamageTaken = (int) ceil(this->valkyrieDamageTaken * 0.5); // Hardcoded value to avoid having to save the multiplier from an enemy skill
-    this->frontDamageTaken = this->aoeDamageTaken + this->valkyrieDamageTaken;
 }
 
 // Resert turndata and fill it again with the hero abilities' values
 // Also handles healing afterwards to avoid accidental ressurects
-inline bool ArmyCondition::startNewTurn() {
-    int healingTemp;
+inline void ArmyCondition::startNewTurn() {
     int i;
     
     this->turnData.buffDamage = 0;
     this->turnData.protection = 0;
     this->turnData.aoeDamage = 0;
-    this->turnData.paoeDamage = 0;
-    this->turnData.revengeDamage = 0;
-    this->turnData.valkyrieDamage = 0;
-    healingTemp = this->turnData.healing;
     this->turnData.healing = 0;
     this->pureMonsters = 0;
     
-    // Gather hero abilities' effects
+    // Gather all skills that trigger globally
     for (i = this->monstersLost; i < this->armySize; i++) {
-        if (this->aoeDamageTaken >= this->lineup[i]->hp) { // Check for Backline Deaths
-            if (i == this->monstersLost) {
-                this->afterDeath();
-            }
-        } else {
-            if (this->skillTypes[i] == NOTHING) {
-                pureMonsters++; // count for friends ability
-            } else if (this->skillTypes[i] == PROTECT && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
-                this->turnData.protection += (int) this->skillAmounts[i];
-            } else if (this->skillTypes[i] == BUFF && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
-                this->turnData.buffDamage += (int) this->skillAmounts[i];
-            } else if (this->skillTypes[i] == CHAMPION && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
-                this->turnData.buffDamage += (int) this->skillAmounts[i];
-                this->turnData.protection += (int) this->skillAmounts[i];
-            } else if (this->skillTypes[i] == HEAL) {
-                this->turnData.healing += (int) this->skillAmounts[i];
-            } else if (this->skillTypes[i] == AOE) {
-                this->turnData.aoeDamage += (int) this->skillAmounts[i];
-            } else if (this->skillTypes[i] == P_AOE && i == this->monstersLost) {
-                this->turnData.paoeDamage += (int) ((float) this->lineup[i]->damage * this->skillAmounts[i]);
-            }
+        if (this->skillTypes[i] == NOTHING) {
+            pureMonsters++; // count for friends ability
+        } else if (this->skillTypes[i] == PROTECT && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
+            this->turnData.protection += (int) this->skillAmounts[i];
+        } else if (this->skillTypes[i] == BUFF && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
+            this->turnData.buffDamage += (int) this->skillAmounts[i];
+        } else if (this->skillTypes[i] == CHAMPION && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
+            this->turnData.buffDamage += (int) this->skillAmounts[i];
+            this->turnData.protection += (int) this->skillAmounts[i];
+        } else if (this->skillTypes[i] == HEAL) {
+            this->turnData.healing += (int) this->skillAmounts[i];
+        } else if (this->skillTypes[i] == AOE) {
+            this->turnData.aoeDamage += (int) this->skillAmounts[i];
         }
     }
-    
-    // heal monsters
-    this->frontDamageTaken -= healingTemp;
-    this->aoeDamageTaken -= healingTemp;
-    if (this->frontDamageTaken < 0) {
-        this->frontDamageTaken = 0;
-    } 
-    if (this->aoeDamageTaken < 0) {
-        this->aoeDamageTaken = 0;
-    }
-    
-    // Return if loss condition is fulfilled
-    return (this->monstersLost >= this->armySize);
 }
 
 // Handle all self-centered abilites and other multipliers on damage
 inline void ArmyCondition::getDamage(const int turncounter, const Element opposingElement) {
     this->turnData.baseDamage = (float) this->lineup[this->monstersLost]->damage; // Get Base damage
     
-    // Handle Monsters with skills berserk or friends or training etc.
+    // Handle Monsters with skills that only activate on attack.
+    this->turnData.paoeDamage = 0;
+    this->turnData.valkyrieMult = 0;
+    this->turnData.witherer = -1;
     if (this->skillTypes[this->monstersLost] == FRIENDS) {
         this->turnData.baseDamage *= (float) pow(this->skillAmounts[this->monstersLost], this->pureMonsters);
     } else if (this->skillTypes[this->monstersLost] == TRAINING) {
@@ -162,6 +132,12 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     } else if (this->skillTypes[this->monstersLost] == BERSERK) {
         this->turnData.baseDamage *= (float) pow(this->skillAmounts[this->monstersLost], this->berserkProcs);
         this->berserkProcs++;
+    } else if (this->skillTypes[this->monstersLost] == P_AOE) {
+        this->turnData.paoeDamage = (int) ((float) this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
+    } else if (this->skillTypes[this->monstersLost] == VALKYRIE) {
+        this->turnData.valkyrieMult = this->skillAmounts[this->monstersLost]; // save valkyrie mult for later
+    } else if (this->skillTypes[this->monstersLost] == WITHER) {
+        this->turnData.witherer = this->monstersLost; // Witherer did an attack
     }
     
     this->turnData.baseDamage += (float) this->turnData.buffDamage; // Add Buff Damage
@@ -169,35 +145,44 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     if (counter[opposingElement] == this->lineup[this->monstersLost]->element) {
         this->turnData.baseDamage *= elementalBoost;
     }
-    if (this->skillTypes[this->monstersLost] == VALKYRIE) { // Valkyrie damage synergizes with all boosts
-        this->turnData.valkyrieDamage = this->turnData.baseDamage;
-    }
+    this->turnData.baseDamage = (float) ceil(this->turnData.baseDamage);
+    this->turnData.valkyrieDamage = (int) this->turnData.baseDamage;
 }
 
 // Add damage to the opposing side and check for deaths
 inline bool ArmyCondition::resolveDamage(TurnData & opposing) {
-    if (opposing.baseDamage > this->turnData.protection) {
-        this->frontDamageTaken += (int) ceil(opposing.baseDamage) - this->turnData.protection; // Handle Protection
-    }
-    this->frontDamageTaken += opposing.aoeDamage + opposing.revengeDamage; // Also apply aoeDamage
-    this->aoeDamageTaken += opposing.aoeDamage + opposing.paoeDamage + opposing.revengeDamage; // Apply aoe Damage to backline
-    this->valkyrieDamageTaken += (int) ceil(opposing.valkyrieDamage); // Seperately save valkyrie damage. This is relevant for the next monster in line
-    opposing.revengeDamage = 0; // Vital to check for additional revenge damage later
+    int i;
+    int frontliner = this->monstersLost; // save original frontliner
     
-    // Check if the first Monster died (otherwise it will be revived next turn)
-    if (this->lineup[this->monstersLost]->hp <= this->frontDamageTaken) {
-        this->afterDeath();
-        return true;
-    } else {
-        return false;
+    // Apply normal attack damage to the frontliner
+    if (opposing.baseDamage > this->turnData.protection) {
+        this->remainingHealths[this->monstersLost] -= (int) opposing.baseDamage - this->turnData.protection; // Handle Protection
     }
+    
+    // Handle aoe Damage for all combatants
+    for (i = frontliner; i < this->armySize; i++) {
+        remainingHealths[i] -= opposing.aoeDamage;
+        if (i > frontliner) { // Aoe that doesnt affect the frontliner
+            remainingHealths[i] -= opposing.paoeDamage + opposing.valkyrieDamage;
+        }
+        if (remainingHealths[i] <= 0) { // TODO: maybe add ability negation here?
+            if (i == this->monstersLost) {
+                afterDeath();
+            }
+        } else {
+            remainingHealths[i] += this->turnData.healing;
+            if (remainingHealths[i] > this->lineup[i]->hp) { // Avoid overhealing
+                remainingHealths[i] = this->lineup[i]->hp;
+            }
+        }
+        opposing.valkyrieDamage = (int) ceil((float) opposing.valkyrieDamage * opposing.valkyrieMult);
+    }
+    return (this->monstersLost >= this->armySize);
 }
 
 extern ArmyCondition leftCondition;
 extern ArmyCondition rightCondition;
 
-// TODO: Implement MAX AOE Damage to make sure nothing gets revived
-// TODO: Consider Valkyrie damage for backline deaths
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     // left[0] and right[0] are the first monsters to fight
@@ -211,94 +196,102 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     //  7. Healing of enemy Side        (healing)
     (*totalFightsSimulated)++;
     
-    int turncounter;
-    bool leftDied;
-    bool rightDied;
-    
-    turncounter = 0;
+    int turncounter = 0;
+//    bool leftDied;
+//    bool rightDied;
     
     // Load Army data into conditions
     leftCondition.init(left);
     rightCondition.init(right);
     
-    // Ignore lastFightData if either army-affecting heroes were added or for debugging
-    // Set pre-computed values to pick up where we left off
-    if (left.lastFightData.valid && !verbose) { 
-        leftCondition.monstersLost         = left.monsterAmount-1; // All monsters of left died last fight only the new one counts
-        leftCondition.frontDamageTaken     = left.lastFightData.leftAoeDamage;
-        leftCondition.aoeDamageTaken       = left.lastFightData.leftAoeDamage;
-        leftCondition.valkyrieDamageTaken  = left.lastFightData.leftValkyrieDamage;
-        rightCondition.monstersLost        = left.lastFightData.monstersLost;
-        rightCondition.valkyrieDamageTaken = left.lastFightData.rightValkyrieDamage;
-        rightCondition.frontDamageTaken    = left.lastFightData.damage;
-        rightCondition.aoeDamageTaken      = left.lastFightData.rightAoeDamage;
-        rightCondition.berserkProcs        = left.lastFightData.berserk;
-        turncounter                        = left.lastFightData.turncounter;
-    }
+    // Reset Potential values in fightresults
+    left.lastFightData.leftAoeDamage = 0;
+    left.lastFightData.rightAoeDamage = 0;
+//    // Ignore lastFightData if either army-affecting heroes were added or for debugging
+//    // Set pre-computed values to pick up where we left off
+//    if (left.lastFightData.valid && !verbose) { 
+//        leftCondition.monstersLost         = left.monsterAmount-1; // All monsters of left died last fight only the new one counts
+//        leftCondition.frontDamageTaken     = left.lastFightData.leftAoeDamage;
+//        leftCondition.aoeDamageTaken       = left.lastFightData.leftAoeDamage;
+//        leftCondition.valkyrieDamageTaken  = left.lastFightData.leftValkyrieDamage;
+//        rightCondition.monstersLost        = left.lastFightData.monstersLost;
+//        rightCondition.valkyrieDamageTaken = left.lastFightData.rightValkyrieDamage;
+//        rightCondition.frontDamageTaken    = left.lastFightData.damage;
+//        rightCondition.aoeDamageTaken      = left.lastFightData.rightAoeDamage;
+//        rightCondition.berserkProcs        = left.lastFightData.berserk;
+//        turncounter                        = left.lastFightData.turncounter;
+//    }
     
     // Battle Loop. Continues until one side is out of monsters
     while (true) {
-        if (leftCondition.startNewTurn() | rightCondition.startNewTurn()) {
-            break; // startNewTurn returns if an army ran out of monsters
-        }
+        leftCondition.startNewTurn();
+        rightCondition.startNewTurn();
         
         // Get damage with all relevant multipliers
         leftCondition.getDamage(turncounter, rightCondition.lineup[rightCondition.monstersLost]->element);
         rightCondition.getDamage(turncounter, leftCondition.lineup[leftCondition.monstersLost]->element);
         
-        // Check if anything died as a result
-        leftDied = leftCondition.resolveDamage(rightCondition.turnData);
-        rightDied = rightCondition.resolveDamage(leftCondition.turnData); // This already takes potential revenge damage into account
-        
-        // Handle revenge ability. Easily the messiest thing to do if you dont rely on a function based approach. The things you do for performance
-        if (rightCondition.turnData.revengeDamage != 0) { // Means the right frontline had revenge
-            leftCondition.aoeDamageTaken += rightCondition.turnData.revengeDamage;
-            leftCondition.frontDamageTaken += rightCondition.turnData.revengeDamage;
-            
-            // Only do this if left died as a result of added revenge damage of right
-            if (!leftDied && leftCondition.lineup[leftCondition.monstersLost]->hp <= leftCondition.frontDamageTaken) { 
-                // Any additional damage can be handled next turn 
-                // TODO: Check if there can really be no faulty interactions if there are revenge monsters in the backline that die as a result
-                leftCondition.afterDeath();
-                rightCondition.aoeDamageTaken += leftCondition.turnData.revengeDamage;
-                rightCondition.frontDamageTaken += leftCondition.turnData.revengeDamage;
-                leftDied = true; 
-            } 
+        // Handle Revenge Damage before anything else. Revenge Damage caused through aoe seems to be ignored
+        if (leftCondition.skillTypes[leftCondition.monstersLost] == REVENGE && 
+            leftCondition.remainingHealths[leftCondition.monstersLost] < (int) rightCondition.turnData.baseDamage - leftCondition.turnData.protection) {
+            leftCondition.turnData.aoeDamage += (int) round((float) leftCondition.lineup[leftCondition.monstersLost]->damage * leftCondition.skillAmounts[leftCondition.monstersLost]);
         }
+        if (rightCondition.skillTypes[rightCondition.monstersLost] == REVENGE && 
+            rightCondition.remainingHealths[rightCondition.monstersLost] < (int) leftCondition.turnData.baseDamage - rightCondition.turnData.protection) {
+            rightCondition.turnData.aoeDamage += (int) round((float) rightCondition.lineup[rightCondition.monstersLost]->damage * rightCondition.skillAmounts[rightCondition.monstersLost]);
+        }
+        
+        // Check if anything died as a result
+        if (leftCondition.resolveDamage(rightCondition.turnData) | rightCondition.resolveDamage(leftCondition.turnData)) {
+            break; // True is returned if monstersLost reaches armySize
+        }
+        
+//        // Handle revenge ability. Easily the messiest thing to do if you dont rely on a function based approach. The things you do for performance
+//        if (rightCondition.turnData.revengeDamage != 0) { // Means the right frontline had revenge
+//            leftCondition.aoeDamageTaken += rightCondition.turnData.revengeDamage;
+//            leftCondition.frontDamageTaken += rightCondition.turnData.revengeDamage;
+//            
+//            // Only do this if left died as a result of added revenge damage of right
+//            if (!leftDied && leftCondition.lineup[leftCondition.monstersLost]->hp <= leftCondition.frontDamageTaken) { 
+//                // Any additional damage can be handled next turn 
+//                // TODO: Check if there can really be no faulty interactions if there are revenge monsters in the backline that die as a result
+//                leftCondition.afterDeath();
+//                rightCondition.aoeDamageTaken += leftCondition.turnData.revengeDamage;
+//                rightCondition.frontDamageTaken += leftCondition.turnData.revengeDamage;
+//                leftDied = true; 
+//            } 
+//        }
         
         // Handle wither ability
-        if (!leftDied && leftCondition.skillTypes[leftCondition.monstersLost] == WITHER) {
-            leftCondition.frontDamageTaken += (int) ((float) (leftCondition.lineup[leftCondition.monstersLost]->hp - leftCondition.frontDamageTaken) * leftCondition.skillAmounts[leftCondition.monstersLost]);
+        if (leftCondition.turnData.witherer == leftCondition.monstersLost) {
+            leftCondition.remainingHealths[leftCondition.monstersLost] = (int) ceil((float) leftCondition.remainingHealths[leftCondition.monstersLost] * leftCondition.skillAmounts[leftCondition.monstersLost]);
         }
-        if (!rightDied && rightCondition.skillTypes[rightCondition.monstersLost] == WITHER) {
-            rightCondition.frontDamageTaken += (int) ((float) (rightCondition.lineup[rightCondition.monstersLost]->hp - rightCondition.frontDamageTaken) * rightCondition.skillAmounts[rightCondition.monstersLost]);
-        }
-        
-        // Output detailed fight Data for debugging
-        if (verbose) {
-            std::cout << std::setw(3) << leftCondition.monstersLost << " " << std::setw(3) << leftCondition.frontDamageTaken<< " " << std::setw(3) << leftCondition.aoeDamageTaken << " ";
-            std::cout << std::setw(3) << rightCondition.monstersLost << " " << std::setw(3) << rightCondition.frontDamageTaken << " " << std::setw(3) << rightCondition.aoeDamageTaken << std::endl;
+        if (rightCondition.turnData.witherer == rightCondition.monstersLost) {
+            rightCondition.remainingHealths[rightCondition.monstersLost] = (int) ceil((float) rightCondition.remainingHealths[rightCondition.monstersLost] * rightCondition.skillAmounts[rightCondition.monstersLost]);
         }
         turncounter++;
+        
+        left.lastFightData.leftAoeDamage += leftCondition.turnData.aoeDamage + leftCondition.turnData.paoeDamage;
+        left.lastFightData.rightAoeDamage += rightCondition.turnData.aoeDamage + rightCondition.turnData.paoeDamage;
     }
     
     // write all the results into a FightResult
     left.lastFightData.dominated = false;
     left.lastFightData.turncounter = (int8_t) turncounter;
-    left.lastFightData.leftAoeDamage = (int16_t) leftCondition.aoeDamageTaken;
-    left.lastFightData.leftValkyrieDamage = (int16_t) leftCondition.valkyrieDamageTaken;
-    left.lastFightData.rightAoeDamage = (int16_t) rightCondition.aoeDamageTaken;
-    left.lastFightData.rightValkyrieDamage = (int16_t) rightCondition.valkyrieDamageTaken;
     
     if (leftCondition.monstersLost >= leftCondition.armySize) { //draws count as right wins. 
         left.lastFightData.rightWon = true;
         left.lastFightData.monstersLost = (int8_t) rightCondition.monstersLost; 
-        left.lastFightData.damage = (int16_t) rightCondition.frontDamageTaken;
         left.lastFightData.berserk = (int8_t) rightCondition.berserkProcs;
+        if (rightCondition.monstersLost < rightCondition.armySize) {
+            left.lastFightData.damage = (int16_t) (rightCondition.lineup[rightCondition.monstersLost]->hp - rightCondition.remainingHealths[rightCondition.monstersLost]);
+        } else {
+            left.lastFightData.damage = (int16_t) (rightCondition.lineup[rightCondition.armySize-1]->hp - rightCondition.remainingHealths[rightCondition.armySize-1]);
+        }
     } else {
         left.lastFightData.rightWon = false;
         left.lastFightData.monstersLost = (int8_t) leftCondition.monstersLost; 
-        left.lastFightData.damage = (int16_t) leftCondition.frontDamageTaken;
+        left.lastFightData.damage = (int16_t) (leftCondition.lineup[leftCondition.monstersLost]->hp - leftCondition.remainingHealths[leftCondition.monstersLost]);
         left.lastFightData.berserk = (int8_t) leftCondition.berserkProcs;
     }
 }
