@@ -35,13 +35,13 @@ Monster::Monster(const Monster & baseHero, int aLevel) :
 {
     if (baseHero.skill.type == BUFF_L) {
         this->skill.type = BUFF;
-        this->skill.amount = aLevel / (int) baseHero.skill.amount;
+        this->skill.amount = (float) (aLevel / (int) baseHero.skill.amount);
     } else if (baseHero.skill.type == PROTECT_L) {
         this->skill.type = PROTECT;
-        this->skill.amount = aLevel / (int) baseHero.skill.amount;
+        this->skill.amount = (float) (aLevel / (int) baseHero.skill.amount);
     } else if (baseHero.skill.type == CHAMPION_L) {
         this->skill.type = CHAMPION;
-        this->skill.amount = aLevel / (int) baseHero.skill.amount;
+        this->skill.amount = (float) (aLevel / (int) baseHero.skill.amount);
     }
 }
 
