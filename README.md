@@ -4,16 +4,16 @@
 I took over the developement out of interest and educational purposes. Well, I also needed a good calculator and David's approach was a good place to start.
 My goal is to provide a Calculator that is usable even on difficult problems in respect to memory usage and calculation time.
 
-Game forum and disscusuion thread [here](https://www.kongregate.com/forums/910715-cosmos-quest/topics/957766-version-2-8-1-the-new-hero-skills-are-finally-valkyready).
+Game forum and disscusuion thread [here](https://www.kongregate.com/forums/910715-cosmos-quest/topics/961925-version-2-8-2-this-time-for-sure?page=1#posts-11779297).
 
 Other Repos that might be interesting:
 * [Latas' UI for automatic generation of macro files](https://github.com/Wiedmolol/CQMacroCreator)
 * [Malizia's version of the calc](https://github.com/Maliziacat/C-Hero-Calc)
+* [Battle Specification and Hero Skill Explanations](https://www.kongregate.com/forums/910715-cosmos-quest/topics/959359-detailed-explanations-of-the-hero-abilities)
 
 ### Features
 * C++ based Calcultor for solving PvE instances
 * Heroes are implemented, levelable and abilities are fully functional
-* Hero Levels will be saved between executions
 * Completely controllable via Command Line
 * All quests predefined and accessable
 * Don't know how to input heroes, monster or just generally confused how to use this calculator? Type `help` when asked for input to get... well, help
@@ -23,7 +23,15 @@ Other Repos that might be interesting:
 * Precompiled exe included (Built on Windows 8.1 (64Bit), no guarantee for other operating systems)
 
 ### What's New?
-Business as usual. All heroes are fully implemented and there where some speed improvements over the last two weeks
+I have reworked the way battles are simulated. This means that a lot of bugs could be in the system but I'm semi-confident that those are only skill interactions, not the skills themselves. 
+
+However, since I disabled the optimizations in order to ensure easier bug fixing should something come up and i suspect the new method is slower in general there will be increased calculation times where battles are concerned (by about a factor 4). 
+
+Also I wrote a [Specification](https://www.kongregate.com/forums/910715-cosmos-quest/topics/959359-detailed-explanations-of-the-hero-abilities) on all I know about the different Hero Abilities and how battles work. You can look up the details of certain abilities and how they interact with each other.
+
+Here are some notable Facts and differences between Calc and Reality:
+* Koth, Zeth and Gurth's ability will now only trigger if they are killed by an attacking unit. If any kind of Aoe kills them they will do no damage. I suspect this is the wrong behaviour but without an accurate battle simulator it's impossible to tell. I hope that between all the DQs being calculated we'll find out. 
+* More than one Hero with Aoyuki's Ability per lineup will not function properly. This doesn't matter unless another similar hero is released.
 
 ## Usage
 
@@ -82,10 +90,7 @@ If you calculate a DQ20 you probably wont need those Lv.1 Commons or anything ch
 Having only 15 or 20 Heroes is totally fine but if you enable all of them, your machine will probably run out of RAM.
 
 ### Bugs that I'm aware of
-* It is theoretically possible that healing might revive dead monsters in the backline. 
-But only if the AOE Damage source dies and the heal is strong enough. Should basically never happen (Famous last words)
-
-* Valkyrie damage only comes into effect if the monster in the front dies. This means heroes in the backline will sometimes survive until it's their turn. This might cause some bugs where a hero ability will be in effect longer than it should be.
+No currently known unintended behaviours. Let me know if you find anything.
 
 ### Potential Errors:
 **bad_alloc**: You get this error when the program tries to use more RAM than your computer has available. 
