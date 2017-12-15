@@ -247,6 +247,21 @@ string IOManager::getJSONError(InputException e) {
     return s.str();
 }
 
+
+void Instance::setTarget(Army aTarget) {
+    this->target = aTarget;
+    this->targetSize = aTarget.monsterAmount;
+    
+    HeroSkill currentSkill;
+    this->hasAoe = false;
+    this->hasAsymmetricAoe = false;
+    for (int i = 0; i < this->targetSize; i++) {
+        currentSkill = monsterReference[this->target.monsters[i]].skill;
+        this->hasAoe |= currentSkill.hasAoe;
+        this->hasAsymmetricAoe |= currentSkill.hasAsymmetricAoe;
+    }
+}
+
 // Convert a lineup string into an actual instance to solve
 Instance makeInstanceFromString(string instanceString) {
     Instance instance;
@@ -255,17 +270,16 @@ Instance makeInstanceFromString(string instanceString) {
     if (instanceString.compare(0, QUEST_PREFIX.length(), QUEST_PREFIX) == 0) {
         try {
             int questNumber = stoi(instanceString.substr(QUEST_PREFIX.length(), dashPosition-QUEST_PREFIX.length()));
-            instance.target = makeArmyFromStrings(quests[questNumber]);
+            instance.setTarget(makeArmyFromStrings(quests[questNumber]));
             instance.maxCombatants = ARMY_MAX_SIZE - (stoi(instanceString.substr(dashPosition+1, 1)) - 1);
         } catch (const exception & e) {
             throw QUEST_PARSE;
         }
     } else {
         vector<string> stringLineup = split(instanceString, ELEMENT_SEPARATOR);
-        instance.target = makeArmyFromStrings(stringLineup);
+        instance.setTarget(makeArmyFromStrings(stringLineup));
         instance.maxCombatants = ARMY_MAX_SIZE;
     }
-    instance.targetSize = instance.target.monsterAmount;
     return instance;
 }
 

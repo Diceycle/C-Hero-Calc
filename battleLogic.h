@@ -48,7 +48,7 @@ class ArmyCondition {
         inline void afterDeath();
         inline void startNewTurn();
         inline void getDamage(const int turncounter, const Element opposingElement);
-        inline bool resolveDamage(TurnData & opposing);
+        inline void resolveDamage(TurnData & opposing);
     
 };
 
@@ -149,7 +149,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
 }
 
 // Add damage to the opposing side and check for deaths
-inline bool ArmyCondition::resolveDamage(TurnData & opposing) {
+inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     int i;
     int frontliner = this->monstersLost; // save original frontliner
     
@@ -176,7 +176,6 @@ inline bool ArmyCondition::resolveDamage(TurnData & opposing) {
         }
         opposing.valkyrieDamage = (int) ceil((float) opposing.valkyrieDamage * opposing.valkyrieMult);
     }
-    return (this->monstersLost >= this->armySize);
 }
 
 extern ArmyCondition leftCondition;
@@ -195,32 +194,29 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     //  7. Healing of enemy Side        (healing)
     (*totalFightsSimulated)++;
     
-    int turncounter = 0;
+    int turncounter;
     
     // Load Army data into conditions
     leftCondition.init(left);
     rightCondition.init(right);
     
-    // Reset Potential values in fightresults
-    left.lastFightData.leftAoeDamage = 0;
-    left.lastFightData.rightAoeDamage = 0;
-//    // Ignore lastFightData if either army-affecting heroes were added or for debugging
-//    // Set pre-computed values to pick up where we left off
-//    if (left.lastFightData.valid && !verbose) { 
-//        leftCondition.monstersLost         = left.monsterAmount-1; // All monsters of left died last fight only the new one counts
-//        leftCondition.frontDamageTaken     = left.lastFightData.leftAoeDamage;
-//        leftCondition.aoeDamageTaken       = left.lastFightData.leftAoeDamage;
-//        leftCondition.valkyrieDamageTaken  = left.lastFightData.leftValkyrieDamage;
-//        rightCondition.monstersLost        = left.lastFightData.monstersLost;
-//        rightCondition.valkyrieDamageTaken = left.lastFightData.rightValkyrieDamage;
-//        rightCondition.frontDamageTaken    = left.lastFightData.damage;
-//        rightCondition.aoeDamageTaken      = left.lastFightData.rightAoeDamage;
-//        rightCondition.berserkProcs        = left.lastFightData.berserk;
-//        turncounter                        = left.lastFightData.turncounter;
-//    }
+    // Ignore lastFightData if either army-affecting heroes were added or for debugging
+    // Set pre-computed values to pick up where we left off
+    if (left.lastFightData.valid && !verbose) { 
+        leftCondition.monstersLost         = left.monsterAmount-1; // All monsters of left died last fight only the new one counts
+        rightCondition.monstersLost        = left.lastFightData.monstersLost;
+        rightCondition.remainingHealths[rightCondition.monstersLost] = left.lastFightData.frontHealth;
+        rightCondition.berserkProcs        = left.lastFightData.berserk;
+        turncounter                        = left.lastFightData.turncounter;
+    } else {
+        // Reset Potential values in fightresults
+        left.lastFightData.leftAoeDamage = 0;
+        left.lastFightData.rightAoeDamage = 0;
+        turncounter = 0;
+    }
     
     // Battle Loop. Continues until one side is out of monsters
-    while (true) {
+    while (leftCondition.monstersLost < leftCondition.armySize && rightCondition.monstersLost < rightCondition.armySize) {
         leftCondition.startNewTurn();
         rightCondition.startNewTurn();
         
@@ -242,9 +238,8 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         left.lastFightData.rightAoeDamage += rightCondition.turnData.aoeDamage + rightCondition.turnData.paoeDamage;
         
         // Check if anything died as a result
-        if (leftCondition.resolveDamage(rightCondition.turnData) | rightCondition.resolveDamage(leftCondition.turnData)) {
-            break; // True is returned if monstersLost reaches armySize
-        }
+        leftCondition.resolveDamage(rightCondition.turnData);
+        rightCondition.resolveDamage(leftCondition.turnData);
         
         // Handle wither ability
         if (leftCondition.turnData.witherer == leftCondition.monstersLost) {
@@ -265,14 +260,14 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         left.lastFightData.monstersLost = (int8_t) rightCondition.monstersLost; 
         left.lastFightData.berserk = (int8_t) rightCondition.berserkProcs;
         if (rightCondition.monstersLost < rightCondition.armySize) {
-            left.lastFightData.damage = (int16_t) (rightCondition.lineup[rightCondition.monstersLost]->hp - rightCondition.remainingHealths[rightCondition.monstersLost]);
+            left.lastFightData.frontHealth = (int16_t) (rightCondition.remainingHealths[rightCondition.monstersLost]);
         } else {
-            left.lastFightData.damage = (int16_t) (rightCondition.lineup[rightCondition.armySize-1]->hp - rightCondition.remainingHealths[rightCondition.armySize-1]);
+            left.lastFightData.frontHealth = 0;
         }
     } else {
         left.lastFightData.rightWon = false;
         left.lastFightData.monstersLost = (int8_t) leftCondition.monstersLost; 
-        left.lastFightData.damage = (int16_t) (leftCondition.lineup[leftCondition.monstersLost]->hp - leftCondition.remainingHealths[leftCondition.monstersLost]);
+        left.lastFightData.frontHealth = (int16_t) (leftCondition.remainingHealths[leftCondition.monstersLost]);
         left.lastFightData.berserk = (int8_t) leftCondition.berserkProcs;
     }
 }

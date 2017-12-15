@@ -51,10 +51,12 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float an
     sourceElement(aSource), 
     amount(anAmount) 
 {
-        this->violatesFightResults = (aType == BUFF || aType == BUFF_L || 
-                                      aType == PROTECT || aType == PROTECT_L ||
-                                      aType == CHAMPION || aType == CHAMPION_L ||
-                                      aType == AOE || aType == HEAL);
+    this->hasAsymmetricAoe = (aType == VALKYRIE);
+    this->hasAoe = (aType == AOE || aType == HEAL || aType == P_AOE || aType == REVENGE || aType == VALKYRIE);
+    this->violatesFightResults = (aType == BUFF || aType == BUFF_L || 
+                                  aType == PROTECT || aType == PROTECT_L ||
+                                  aType == CHAMPION || aType == CHAMPION_L ||
+                                  aType == AOE || aType == HEAL);
 }
 
 std::string Monster::toJSON() {

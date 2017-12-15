@@ -51,6 +51,10 @@ struct Instance {
     time_t calculationTime;
     int totalFightsSimulated = 0;
     
+    bool hasAoe;
+    bool hasAsymmetricAoe;
+    
+    void setTarget(Army aTarget);
     std::string toString(bool valid, bool showReplayString = true);
     std::string toJSON(bool valid);
 };

@@ -64,6 +64,8 @@ struct HeroSkill {
     Element sourceElement;
     float amount;
     bool violatesFightResults;
+    bool hasAoe;
+    bool hasAsymmetricAoe;
     
     HeroSkill(SkillType aType, Element aTarget, Element aSource, float anAmount);
     HeroSkill() {};
@@ -121,7 +123,7 @@ void filterMonsterData(int minimumMonsterCost);
 
 // Defines the results of a fight between two armies; monstersLost and damage desribe the condition of the winning side
 struct FightResult {
-    int16_t damage;             // how much damage dealt to the current leading mob of the winning side
+    int16_t frontHealth;        // how much health remaining to the current leading mob of the winning side
     int16_t leftAoeDamage;      // how much aoe damage left took
     int16_t rightAoeDamage;     // how much aoe damage right took
     int8_t berserk;            // berserk multiplier, if there is a berserker in the front
@@ -138,7 +140,7 @@ struct FightResult {
             return false; // left is not certainly worse than right
         }
         if (this->monstersLost == toCompare.monstersLost) {
-            return this->damage <= toCompare.damage; // less damage dealt to the enemy -> left is worse
+            return this->frontHealth > toCompare.frontHealth; // less damage dealt to the enemy -> left is worse
         } else {
             return this->monstersLost < toCompare.monstersLost; // less monsters destroyed on the enemy side -> left is worse
         }
