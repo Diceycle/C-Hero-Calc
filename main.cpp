@@ -48,11 +48,11 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     int remainingFollowers;
     size_t availableMonstersSize = availableMonsters.size();
     size_t availableHeroesSize = availableHeroes.size();
-    size_t oldPureArmieSize = oldHeroArmies.size();
+    size_t oldPureArmiesSize = oldPureArmies.size();
     size_t oldHeroArmiesSize = oldHeroArmies.size();
-    size_t i, j, m;
+    size_t i, m;
     
-    for (i = 0; i < oldPureArmieSize; i++) {
+    for (i = 0; i < oldPureArmiesSize; i++) {
         remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
         if (!oldPureArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
@@ -77,11 +77,11 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
         if (!oldHeroArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
             friendsInfluence = false;
             rainbowInfluence = false;
-            for (j = 0; j < currentArmySize; j++) {
-                currentSkill = monsterReference[oldHeroArmies[i].monsters[j]].skill.skillType;
+            for (m = 0; m < currentArmySize; m++) {
+                currentSkill = monsterReference[oldHeroArmies[i].monsters[m]].skill.skillType;
                 friendsInfluence |= currentSkill == FRIENDS;
-                rainbowInfluence |= currentSkill == RAINBOW && currentArmySize > j + 4; // Hardcoded number of elements required to activate rainbow
-                usedHeroes[oldHeroArmies[i].monsters[j]] = true;
+                rainbowInfluence |= currentSkill == RAINBOW && currentArmySize > m + 4; // Hardcoded number of elements required to activate rainbow
+                usedHeroes[oldHeroArmies[i].monsters[m]] = true;
             }
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
                 newHeroArmies.push_back(oldHeroArmies[i]);
