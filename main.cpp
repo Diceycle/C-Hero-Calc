@@ -17,10 +17,9 @@ IOManager iomanager;
 // If a solution is found, armies that are more expensive than that solution are ignored
 void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
     bool newFound = false;
-    size_t i = 0;
     size_t armyAmount = armies.size();
     
-    for (i = 0; i < armyAmount; i++) {
+    for (size_t i = 0; i < armyAmount; i++) {
         if (armies[i].followerCost < instance.followerUpperBound) { // Ignore if a cheaper solution exists
             simulateFight(armies[i], instance.target);
             if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
@@ -43,18 +42,17 @@ void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
 // Armies that are dominated are ignored.
 // TODO: Dont expand with heroes if army is too expensive
 void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
-            vector<Army> & oldPureArmies, vector<Army> & oldHeroArmies, 
-            size_t currentArmySize, Instance & instance) {
+            const vector<Army> & oldPureArmies, const vector<Army> & oldHeroArmies, 
+            const size_t currentArmySize, const Instance & instance) {
 
     int remainingFollowers;
     size_t availableMonstersSize = availableMonsters.size();
     size_t availableHeroesSize = availableHeroes.size();
-    vector<bool> usedHeroes; usedHeroes.resize(monsterReference.size(), false);
+    size_t oldPureArmieSize = oldHeroArmies.size();
+    size_t oldHeroArmiesSize = oldHeroArmies.size();
     size_t i, j, m;
-    SkillType currentSkill;
-    bool globalAbilityInfluence;
     
-    for (i = 0; i < oldPureArmies.size(); i++) {
+    for (i = 0; i < oldPureArmieSize; i++) {
         remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
         if (!oldPureArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
@@ -70,25 +68,31 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
         }
     }
     
-    for (i = 0; i < oldHeroArmies.size(); i++) {
+    vector<bool> usedHeroes; usedHeroes.resize(monsterReference.size(), false);
+    SkillType currentSkill;
+    bool friendsInfluence;
+    bool rainbowInfluence;
+    for (i = 0; i < oldHeroArmiesSize; i++) {
         remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
         if (!oldHeroArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
-            globalAbilityInfluence = false;
+            friendsInfluence = false;
+            rainbowInfluence = false;
             for (j = 0; j < currentArmySize; j++) {
                 currentSkill = monsterReference[oldHeroArmies[i].monsters[j]].skill.skillType;
-                globalAbilityInfluence |= (currentSkill == FRIENDS || currentSkill == RAINBOW);
+                friendsInfluence |= currentSkill == FRIENDS;
+                rainbowInfluence |= currentSkill == RAINBOW && currentArmySize > j + 4; // Hardcoded number of elements required to activate rainbow
                 usedHeroes[oldHeroArmies[i].monsters[j]] = true;
             }
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
                 newHeroArmies.push_back(oldHeroArmies[i]);
                 newHeroArmies.back().add(availableMonsters[m]);
-                newHeroArmies.back().lastFightData.valid = !globalAbilityInfluence;
+                newHeroArmies.back().lastFightData.valid = !friendsInfluence && !rainbowInfluence;
             }
             for (m = 0; m < availableHeroesSize; m++) {
                 if (!usedHeroes[availableHeroes[m]]) {
                     newHeroArmies.push_back(oldHeroArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = !monsterReference[availableHeroes[m]].skill.violatesFightResults;
+                    newHeroArmies.back().lastFightData.valid = !monsterReference[availableHeroes[m]].skill.violatesFightResults && !rainbowInfluence;
                 }
                 usedHeroes[availableHeroes[m]] = false;
             }
