@@ -123,8 +123,8 @@ struct FightResult {
     int8_t berserk;            // berserk multiplier, if there is a berserker in the front
     int8_t monstersLost;    // how many mobs lost on the winning side (the other side lost all)
     int8_t turncounter;     // how many turns have passed since the battle started
-    bool valid;             // If the result is valid
     bool rightWon;          // false -> left win, true -> right win.
+    bool valid;             // If the result is valid
     bool dominated;         // If the result is worse than another
                 
     FightResult() : valid(false) {}

@@ -14,13 +14,15 @@ const int VALID_RAINBOW_CONDITION = 15; // Binary 00001111 -> means all elements
 // Struct keeping track of everything that is only valid for one turn
 struct TurnData {
     float baseDamage = 0;
+    
     int buffDamage = 0;
     int protection = 0;
     int aoeDamage = 0;
-    int paoeDamage = 0;
     int healing = 0;
+    
     float valkyrieMult = 0;
     int valkyrieDamage = 0;
+    int paoeDamage = 0;
     int witherer = -1;
 };
 
@@ -76,9 +78,6 @@ inline void ArmyCondition::init(const Army & army) {
 
 // Handle death of the front-most monster
 inline void ArmyCondition::afterDeath() {
-//    if (this->skillTypes[this->monstersLost] == REVENGE) {
-//        this->turnData.revengeDamage = (int) round((float) this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
-//    }
     this->monstersLost++;
     this->berserkProcs = 0;
 }
@@ -197,8 +196,6 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     (*totalFightsSimulated)++;
     
     int turncounter = 0;
-//    bool leftDied;
-//    bool rightDied;
     
     // Load Army data into conditions
     leftCondition.init(left);
@@ -241,26 +238,13 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
             rightCondition.turnData.aoeDamage += (int) round((float) rightCondition.lineup[rightCondition.monstersLost]->damage * rightCondition.skillAmounts[rightCondition.monstersLost]);
         }
         
+        left.lastFightData.leftAoeDamage += leftCondition.turnData.aoeDamage + leftCondition.turnData.paoeDamage;
+        left.lastFightData.rightAoeDamage += rightCondition.turnData.aoeDamage + rightCondition.turnData.paoeDamage;
+        
         // Check if anything died as a result
         if (leftCondition.resolveDamage(rightCondition.turnData) | rightCondition.resolveDamage(leftCondition.turnData)) {
             break; // True is returned if monstersLost reaches armySize
         }
-        
-//        // Handle revenge ability. Easily the messiest thing to do if you dont rely on a function based approach. The things you do for performance
-//        if (rightCondition.turnData.revengeDamage != 0) { // Means the right frontline had revenge
-//            leftCondition.aoeDamageTaken += rightCondition.turnData.revengeDamage;
-//            leftCondition.frontDamageTaken += rightCondition.turnData.revengeDamage;
-//            
-//            // Only do this if left died as a result of added revenge damage of right
-//            if (!leftDied && leftCondition.lineup[leftCondition.monstersLost]->hp <= leftCondition.frontDamageTaken) { 
-//                // Any additional damage can be handled next turn 
-//                // TODO: Check if there can really be no faulty interactions if there are revenge monsters in the backline that die as a result
-//                leftCondition.afterDeath();
-//                rightCondition.aoeDamageTaken += leftCondition.turnData.revengeDamage;
-//                rightCondition.frontDamageTaken += leftCondition.turnData.revengeDamage;
-//                leftDied = true; 
-//            } 
-//        }
         
         // Handle wither ability
         if (leftCondition.turnData.witherer == leftCondition.monstersLost) {
@@ -270,9 +254,6 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
             rightCondition.remainingHealths[rightCondition.monstersLost] = (int) ceil((float) rightCondition.remainingHealths[rightCondition.monstersLost] * rightCondition.skillAmounts[rightCondition.monstersLost]);
         }
         turncounter++;
-        
-        left.lastFightData.leftAoeDamage += leftCondition.turnData.aoeDamage + leftCondition.turnData.paoeDamage;
-        left.lastFightData.rightAoeDamage += rightCondition.turnData.aoeDamage + rightCondition.turnData.paoeDamage;
     }
     
     // write all the results into a FightResult
