@@ -66,8 +66,8 @@ inline void ArmyCondition::init(const Army & army) {
         this->rainbowCondition |= 1 << this->lineup[i]->element;
         
         skill = &(this->lineup[i]->skill);
-        this->skillTypes[i] = skill->type;
-        if (skill->type == RAINBOW) {
+        this->skillTypes[i] = skill->skillType;
+        if (skill->skillType == RAINBOW) {
             this->rainbowCondition = 0; // More than 1 Rainbow Hero per lineup will not work properly
         }
         this->skillTargets[i] = skill->target;

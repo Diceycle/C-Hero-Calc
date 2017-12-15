@@ -33,19 +33,29 @@ Monster::Monster(int someHp, int someDamage, std::string aName, Element anElemen
 Monster::Monster(const Monster & baseHero, int aLevel) :
     Monster(baseHero.hp, baseHero.damage, baseHero.cost, baseHero.baseName, baseHero.element, baseHero.rarity, baseHero.skill, aLevel) 
 {
-    if (baseHero.skill.type == BUFF_L) {
-        this->skill.type = BUFF;
+    if (baseHero.skill.skillType == BUFF_L) {
+        this->skill.skillType = BUFF;
         this->skill.amount = (float) (aLevel / (int) baseHero.skill.amount);
-    } else if (baseHero.skill.type == PROTECT_L) {
-        this->skill.type = PROTECT;
+    } else if (baseHero.skill.skillType == PROTECT_L) {
+        this->skill.skillType = PROTECT;
         this->skill.amount = (float) (aLevel / (int) baseHero.skill.amount);
-    } else if (baseHero.skill.type == CHAMPION_L) {
-        this->skill.type = CHAMPION;
+    } else if (baseHero.skill.skillType == CHAMPION_L) {
+        this->skill.skillType = CHAMPION;
         this->skill.amount = (float) (aLevel / (int) baseHero.skill.amount);
     }
 }
 
-Monster::Monster() {}
+HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float anAmount) :
+    skillType(aType), 
+    target(aTarget), 
+    sourceElement(aSource), 
+    amount(anAmount) 
+{
+        this->violatesFightResults = (aType == BUFF || aType == BUFF_L || 
+                                      aType == PROTECT || aType == PROTECT_L ||
+                                      aType == CHAMPION || aType == CHAMPION_L ||
+                                      aType == AOE || aType == HEAL);
+}
 
 std::string Monster::toJSON() {
     std::stringstream s;

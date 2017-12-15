@@ -59,10 +59,14 @@ enum HeroRarity {
 
 // Defines Skills of Heros
 struct HeroSkill {
-    SkillType type;
+    SkillType skillType;
     Element target;
     Element sourceElement;
     float amount;
+    bool violatesFightResults;
+    
+    HeroSkill(SkillType aType, Element aTarget, Element aSource, float anAmount);
+    HeroSkill() {};
 };
 const HeroSkill NO_SKILL = HeroSkill({NOTHING, AIR, AIR, 1}); // base skill used for normal monsters
 
@@ -88,7 +92,7 @@ class Monster {
         Monster(int hp, int damage, int cost, std::string name, Element element);
         Monster(int hp, int damage, std::string name, Element element, HeroRarity rarity, HeroSkill skill);
         Monster(const Monster & baseHero, int level);
-        Monster();
+        Monster() {};
         
         std::string toJSON();
 };

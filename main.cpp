@@ -63,14 +63,9 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 newPureArmies.back().lastFightData.valid = true;
             }
             for (m = 0; m < availableHeroesSize; m++) {
-                currentSkill = monsterReference[availableHeroes[m]].skill.type;
                 newHeroArmies.push_back(oldPureArmies[i]);
                 newHeroArmies.back().add(availableHeroes[m]);
-                newHeroArmies.back().lastFightData.valid = (currentSkill == P_AOE || currentSkill == FRIENDS || 
-                                                            currentSkill == BERSERK || currentSkill == ADAPT ||
-                                                            currentSkill == TRAINING || currentSkill == RAINBOW ||
-                                                            currentSkill == WITHER || currentSkill == REVENGE ||
-                                                            currentSkill == VALKYRIE); // These skills are self centered
+                newHeroArmies.back().lastFightData.valid = !monsterReference[availableHeroes[m]].skill.violatesFightResults;
             }
         }
     }
@@ -80,7 +75,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
         if (!oldHeroArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
             globalAbilityInfluence = false;
             for (j = 0; j < currentArmySize; j++) {
-                currentSkill = monsterReference[oldHeroArmies[i].monsters[j]].skill.type;
+                currentSkill = monsterReference[oldHeroArmies[i].monsters[j]].skill.skillType;
                 globalAbilityInfluence |= (currentSkill == FRIENDS || currentSkill == RAINBOW);
                 usedHeroes[oldHeroArmies[i].monsters[j]] = true;
             }
@@ -91,14 +86,9 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             }
             for (m = 0; m < availableHeroesSize; m++) {
                 if (!usedHeroes[availableHeroes[m]]) {
-                    currentSkill = monsterReference[availableHeroes[m]].skill.type;
                     newHeroArmies.push_back(oldHeroArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = (currentSkill == P_AOE || currentSkill == FRIENDS || 
-                                                                currentSkill == BERSERK || currentSkill == ADAPT ||
-                                                                currentSkill == TRAINING || currentSkill == RAINBOW ||
-                                                                currentSkill == WITHER || currentSkill == REVENGE ||
-                                                                currentSkill == VALKYRIE); // These skills are self centered
+                    newHeroArmies.back().lastFightData.valid = !monsterReference[availableHeroes[m]].skill.violatesFightResults;
                 }
                 usedHeroes[availableHeroes[m]] = false;
             }
