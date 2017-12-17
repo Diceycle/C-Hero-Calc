@@ -227,11 +227,11 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         
         // Handle Revenge Damage before anything else. Revenge Damage caused through aoe seems to be ignored
         if (leftCondition.skillTypes[leftCondition.monstersLost] == REVENGE && 
-            leftCondition.remainingHealths[leftCondition.monstersLost] < (int) rightCondition.turnData.baseDamage - leftCondition.turnData.protection) {
+            leftCondition.remainingHealths[leftCondition.monstersLost] <= (int) rightCondition.turnData.baseDamage - leftCondition.turnData.protection) {
             leftCondition.turnData.aoeDamage += (int) round((float) leftCondition.lineup[leftCondition.monstersLost]->damage * leftCondition.skillAmounts[leftCondition.monstersLost]);
         }
         if (rightCondition.skillTypes[rightCondition.monstersLost] == REVENGE && 
-            rightCondition.remainingHealths[rightCondition.monstersLost] < (int) leftCondition.turnData.baseDamage - rightCondition.turnData.protection) {
+            rightCondition.remainingHealths[rightCondition.monstersLost] <= (int) leftCondition.turnData.baseDamage - rightCondition.turnData.protection) {
             rightCondition.turnData.aoeDamage += (int) round((float) rightCondition.lineup[rightCondition.monstersLost]->damage * rightCondition.skillAmounts[rightCondition.monstersLost]);
         }
         
