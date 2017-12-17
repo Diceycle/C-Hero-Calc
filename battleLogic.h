@@ -250,6 +250,19 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
             rightCondition.remainingHealths[rightCondition.monstersLost] = (int) ceil((float) rightCondition.remainingHealths[rightCondition.monstersLost] * rightCondition.skillAmounts[rightCondition.monstersLost]);
         }
         turncounter++;
+        
+        if (verbose) {
+            std::cout << "After Turn " << turncounter << ":" << std::endl;
+            int i;
+            std::cout << "  Left: ";
+            for (i = 0; i < leftCondition.armySize; i++) {
+                std::cout << leftCondition.remainingHealths[i] << " ";
+            } std::cout << std::endl;
+            std::cout << "  Right: ";
+            for (i = 0; i < rightCondition.armySize; i++) {
+                std::cout << rightCondition.remainingHealths[i] << " ";
+            } std::cout << std::endl;
+        }
     }
     
     // write all the results into a FightResult
