@@ -413,7 +413,8 @@ string Instance::toString(bool valid, bool showReplayString) {
         s << endl << "Could not find a solution that beats this lineup." << endl;
     }
     s << "  " << this->totalFightsSimulated << " Fights simulated." << endl;
-    s << "  Total Calculation Time: " << this->calculationTime << endl << endl;
+    s << "  Total Calculation Time: " << this->calculationTime << endl;
+    s << "  Calc Version: " << VERSION << endl << endl;
     if (!this->bestSolution.isEmpty() && showReplayString) {
         s << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(this->bestSolution, this->target) << endl << endl;
     }
