@@ -8,6 +8,7 @@
 
 const float elementalBoost = 1.5; // Damage Boost if element has advantage over another
 extern int * totalFightsSimulated;
+extern int fightsSimulatedDefault; 
 
 const int VALID_RAINBOW_CONDITION = 15; // Binary 00001111 -> means all elements were added
 

@@ -1,6 +1,7 @@
 #include "battleLogic.h"
 
-int * totalFightsSimulated;
+int fightsSimulatedDefault;
+int * totalFightsSimulated = &fightsSimulatedDefault;
 
 // Prototype function! Currently not used. Function determining if a monster is strictly better than another
 bool isBetter(Monster * a, Monster * b, bool considerAbilities) {
