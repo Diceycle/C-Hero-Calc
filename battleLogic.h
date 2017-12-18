@@ -68,6 +68,9 @@ inline void ArmyCondition::init(const Army & army) {
         
         skill = &(this->lineup[i]->skill);
         this->skillTypes[i] = skill->skillType;
+        if (skill->skillType == NOTHING) {
+            this->pureMonsters++;
+        }
         if (skill->skillType == RAINBOW) {
             this->rainbowCondition = 0; // More than 1 Rainbow Hero per lineup will not work properly
         }
@@ -92,12 +95,10 @@ inline void ArmyCondition::startNewTurn() {
     this->turnData.protection = 0;
     this->turnData.aoeDamage = 0;
     this->turnData.healing = 0;
-    this->pureMonsters = 0;
     
     // Gather all skills that trigger globally
     for (i = this->monstersLost; i < this->armySize; i++) {
-        if (this->skillTypes[i] == NOTHING) {
-            pureMonsters++; // count for friends ability
+        if (this->skillTypes[i] == NOTHING) { // Careful when doing anything here, as dead heroes get their ability set to NOTHING
         } else if (this->skillTypes[i] == PROTECT && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
             this->turnData.protection += (int) this->skillAmounts[i];
         } else if (this->skillTypes[i] == BUFF && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
@@ -165,10 +166,11 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
         if (i > frontliner) { // Aoe that doesnt affect the frontliner
             remainingHealths[i] -= opposing.paoeDamage + opposing.valkyrieDamage;
         }
-        if (remainingHealths[i] <= 0) { // TODO: maybe add ability negation here?
+        if (remainingHealths[i] <= 0) {
             if (i == this->monstersLost) {
                 afterDeath();
             }
+            this->skillTypes[i] = NOTHING; // set dead hero's ability to NOTHING
         } else {
             remainingHealths[i] += this->turnData.healing;
             if (remainingHealths[i] > this->lineup[i]->hp) { // Avoid overhealing
