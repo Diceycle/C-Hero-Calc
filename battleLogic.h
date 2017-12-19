@@ -74,6 +74,9 @@ inline void ArmyCondition::init(const Army & army) {
         if (skill->skillType == RAINBOW) {
             this->rainbowCondition = 0; // More than 1 Rainbow Hero per lineup will not work properly
         }
+        if (skill->skillType == FRIENDS) {
+            this->pureMonsters = 0; // More than 1 Friends Hero per lineup will not work properly
+        }
         this->skillTargets[i] = skill->target;
         this->skillAmounts[i] = skill->amount;
         this->remainingHealths[i] = this->lineup[i]->hp;
