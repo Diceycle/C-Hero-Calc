@@ -251,14 +251,17 @@ string IOManager::getJSONError(InputException e) {
 void Instance::setTarget(Army aTarget) {
     this->target = aTarget;
     this->targetSize = aTarget.monsterAmount;
+    this->lowestBossHealth = -1;
     
     HeroSkill currentSkill;
     this->hasAoe = false;
     this->hasAsymmetricAoe = false;
+    this->hasWorldBoss = false;
     for (int i = 0; i < this->targetSize; i++) {
         currentSkill = monsterReference[this->target.monsters[i]].skill;
         this->hasAoe |= currentSkill.hasAoe;
         this->hasAsymmetricAoe |= currentSkill.hasAsymmetricAoe;
+        this->hasWorldBoss |= monsterReference[this->target.monsters[i]].rarity == WORLDBOSS;
     }
 }
 
@@ -412,10 +415,13 @@ string Instance::toString(bool valid, bool showReplayString) {
     } else {
         s << endl << "Could not find a solution that beats this lineup." << endl;
     }
+    if (this->hasWorldBoss) {
+        s << "  Remaining Boss Health: " << this->lowestBossHealth << endl;
+    }
     s << "  " << this->totalFightsSimulated << " Fights simulated." << endl;
     s << "  Total Calculation Time: " << this->calculationTime << endl;
     s << "  Calc Version: " << VERSION << endl << endl;
-    if (!this->bestSolution.isEmpty() && showReplayString) {
+    if (!this->bestSolution.isEmpty() && showReplayString && !this->hasWorldBoss) {
         s << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(this->bestSolution, this->target) << endl << endl;
     }
     if (!valid) {

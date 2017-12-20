@@ -19,22 +19,32 @@ void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
     bool newFound = false;
     size_t armyAmount = armies.size();
     
-    for (size_t i = 0; i < armyAmount; i++) {
-        if (armies[i].followerCost < instance.followerUpperBound) { // Ignore if a cheaper solution exists
-            simulateFight(armies[i], instance.target);
-            if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
-                if (!newFound) {
-                    iomanager.suspendTimedOutputs(DETAILED_OUTPUT);
+    if (!instance.hasWorldBoss) {
+        for (size_t i = 0; i < armyAmount; i++) {
+            if (armies[i].followerCost < instance.followerUpperBound) { // Ignore if a cheaper solution exists
+                simulateFight(armies[i], instance.target);
+                if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
+                    if (!newFound) {
+                        iomanager.suspendTimedOutputs(DETAILED_OUTPUT);
+                    }
+                    newFound = true;
+                    instance.followerUpperBound = armies[i].followerCost;
+                    instance.bestSolution = armies[i];
+                    iomanager.outputMessage(instance.bestSolution.toString(), DETAILED_OUTPUT, 2);
                 }
-                newFound = true;
-                instance.followerUpperBound = armies[i].followerCost;
-                instance.bestSolution = armies[i];
-                iomanager.outputMessage(instance.bestSolution.toString(), DETAILED_OUTPUT, 2);
             }
         }
-    }
-    if (newFound) {
-        iomanager.resumeTimedOutputs(DETAILED_OUTPUT);
+        if (newFound) {
+            iomanager.resumeTimedOutputs(DETAILED_OUTPUT);
+        }
+    } else {
+        for (size_t i = 0; i < armyAmount; i++) {
+            simulateFight(armies[i], instance.target);
+            if (instance.lowestBossHealth == -1 || armies[i].lastFightData.frontHealth < instance.lowestBossHealth) {
+                instance.bestSolution = armies[i];
+                instance.lowestBossHealth = armies[i].lastFightData.frontHealth;
+            }
+        }
     }
 }
 
@@ -320,7 +330,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
         simulateMultipleFights(heroMonsterArmies, instance);
         
         // If we have a valid solution with 0 followers there is no need to continue
-        if (instance.bestSolution.monsterAmount > 0 && instance.bestSolution.followerCost == 0) { break; }
+        if (!instance.hasWorldBoss && instance.bestSolution.monsterAmount > 0 && instance.bestSolution.followerCost == 0) { break; }
         
         // Start Expansion routine if there is still room
         if (armySize < instance.maxCombatants) { 
@@ -364,8 +374,10 @@ void solveInstance(Instance & instance, size_t firstDominance) {
 
 void outputSolution(Instance instance, bool replayStrings) {
     instance.bestSolution.lastFightData.valid = false;
-    simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
-    bool sane = !instance.bestSolution.lastFightData.rightWon || instance.bestSolution.isEmpty();
+    simulateFight(instance.bestSolution, instance.target, true); // Sanity check on the solution
+    bool sane;
+    sane = !instance.hasWorldBoss && (!instance.bestSolution.lastFightData.rightWon || instance.bestSolution.isEmpty());
+    sane |= instance.hasWorldBoss && instance.bestSolution.lastFightData.frontHealth == instance.lowestBossHealth;
     
     if (iomanager.outputLevel == SERVER_OUTPUT) {
         iomanager.outputMessage(instance.toJSON(sane), SERVER_OUTPUT);
@@ -476,7 +488,7 @@ int main(int argc, char** argv) {
         }
         iomanager.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", CMD_OUTPUT);
         
-        if (iomanager.outputLevel == CMD_OUTPUT) {
+        if (iomanager.outputLevel == CMD_OUTPUT) { // TODO: Reset Output Level if userwantscontinue
             if (instances.size() > 1) {
                 iomanager.outputLevel = SOLUTION_OUTPUT;
             } else {

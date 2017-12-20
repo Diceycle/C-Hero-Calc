@@ -12,7 +12,7 @@
 #include "cosmosData.h"
 #include "base64.h"
 
-const std::string VERSION = "2.8.2.3";
+const std::string VERSION = "2.8.2.3a";
 
 const size_t STANDARD_CMD_WIDTH = 80;
 const int INDENT_WIDTH = 2;
@@ -55,6 +55,8 @@ struct Instance {
     
     bool hasAoe;
     bool hasAsymmetricAoe;
+    bool hasWorldBoss;
+    int lowestBossHealth;
     
     void setTarget(Army aTarget);
     std::string toString(bool valid, bool showReplayString = true);

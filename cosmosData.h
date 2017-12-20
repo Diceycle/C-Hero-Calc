@@ -54,7 +54,8 @@ enum HeroRarity {
     NO_HERO = 0,
     COMMON = 1, 
     RARE = 2, 
-    LEGENDARY = 6 // Values define how many stat points per level a hero of this rarity gets
+    LEGENDARY = 6, // Values define how many stat points per level a hero of this rarity gets
+    WORLDBOSS
 };
 
 // Defines Skills of Heros
