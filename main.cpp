@@ -374,7 +374,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
 
 void outputSolution(Instance instance, bool replayStrings) {
     instance.bestSolution.lastFightData.valid = false;
-    simulateFight(instance.bestSolution, instance.target, true); // Sanity check on the solution
+    simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
     bool sane;
     sane = !instance.hasWorldBoss && (!instance.bestSolution.lastFightData.rightWon || instance.bestSolution.isEmpty());
     sane |= instance.hasWorldBoss && instance.bestSolution.lastFightData.frontHealth == instance.lowestBossHealth;
