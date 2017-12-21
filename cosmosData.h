@@ -26,8 +26,10 @@ enum SkillType {
     PROTECT,    // Reduces incoming damage vs the own army
     PROTECT_L,  // Protect ability that scales with level
     AOE,        // Damages the entire opposing army every turn
+    AOE_L,      // AOE ability that scales with level
     P_AOE,      // If this monster attacks it also damages every monster behind the attacked
     HEAL,       // Heals the entire own army every turn
+    HEAL_L,     // Heal ability that scales with level
     BERSERK,    // Every attack this monster makes multiplies its own damage 
     FRIENDS,    // This monster receives a damage multiplicator for every NORMAL monster behind it
     CHAMPION,   // This monster has the buff and protect ability at the same time
@@ -55,6 +57,7 @@ enum HeroRarity {
     COMMON = 1, 
     RARE = 2, 
     LEGENDARY = 6, // Values define how many stat points per level a hero of this rarity gets
+    ASCENDED = 12,
     WORLDBOSS
 };
 
