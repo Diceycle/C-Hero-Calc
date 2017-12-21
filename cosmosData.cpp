@@ -58,7 +58,7 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float an
     amount(anAmount) 
 {
     this->hasAsymmetricAoe = (aType == VALKYRIE);
-    this->hasAoe = (aType == AOE || aType == AOE_L || aType == HEAL || aType == HEAL_L || aType == P_AOE || aType == REVENGE || aType == VALKYRIE);
+    this->hasAoe = (aType == AOE || aType == AOE_L || aType == HEAL || aType == HEAL_L || aType == PIERCE || aType == REVENGE || aType == VALKYRIE);
     this->violatesFightResults = (aType == BUFF || aType == BUFF_L || 
                                   aType == PROTECT || aType == PROTECT_L ||
                                   aType == CHAMPION || aType == CHAMPION_L ||
@@ -248,7 +248,7 @@ void initBaseHeroes() {
 
     baseHeroes.push_back(Monster( 22, 32, "nicte",             AIR,   RARE,      {BUFF,          AIR, AIR, 4}));
 
-    baseHeroes.push_back(Monster( 50, 12, "james",             EARTH, LEGENDARY, {P_AOE,         ALL, EARTH, 1}));
+    baseHeroes.push_back(Monster( 50, 12, "james",             EARTH, LEGENDARY, {PIERCE,        ALL, EARTH, 1}));
 
     baseHeroes.push_back(Monster( 28, 16, "k41ry",             AIR,   COMMON,    {BUFF,          AIR, AIR, 3}));
     baseHeroes.push_back(Monster( 46, 20, "t4urus",            EARTH, RARE,      {BUFF,          ALL, EARTH, 1}));

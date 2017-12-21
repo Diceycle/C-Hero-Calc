@@ -136,7 +136,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     } else if (this->skillTypes[this->monstersLost] == BERSERK) {
         this->turnData.baseDamage *= (float) pow(this->skillAmounts[this->monstersLost], this->berserkProcs);
         this->berserkProcs++;
-    } else if (this->skillTypes[this->monstersLost] == P_AOE) {
+    } else if (this->skillTypes[this->monstersLost] == PIERCE) {
         this->turnData.paoeDamage = (int) ((float) this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
     } else if (this->skillTypes[this->monstersLost] == VALKYRIE) {
         this->turnData.valkyrieMult = this->skillAmounts[this->monstersLost]; // save valkyrie mult for later
