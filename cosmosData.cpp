@@ -13,11 +13,15 @@ Monster::Monster(int someHp, int someDamage, int aCost, std::string aName, Eleme
     name(aName)
 {
     if (this->rarity != NO_HERO) {
-        int points = this->rarity * (this->level-1);
-        int value = this->hp + this->damage;
         this->name = this->baseName + HEROLEVEL_SEPARATOR + std::to_string(this->level);
-        this->hp = this->hp + (int) round((float) points * (float) this->hp / (float) value);
-        this->damage = this->damage + (int) round((float) points * (float) this->damage / (float) value);
+        if (this->rarity == WORLDBOSS) {
+            this->damage += this->level-1;
+        } else {
+            int points = this->rarity * (this->level-1);
+            int value = this->hp + this->damage;
+            this->hp = this->hp + (int) round((float) points * (float) this->hp / (float) value);
+            this->damage = this->damage + (int) round((float) points * (float) this->damage / (float) value);
+        }
     }
 }
 
