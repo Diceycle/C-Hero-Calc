@@ -30,6 +30,7 @@ enum SkillType {
     
     AOE,        // Damages the entire opposing army every turn
     HEAL,       // Heals the entire own army every turn
+    LIFESTEAL,  // Combines the Aoe and Heal ability into one
     
     BERSERK,    // Every attack this monster makes multiplies its own damage 
     FRIENDS,    // This monster receives a damage multiplicator for every NORMAL monster behind it
@@ -48,6 +49,7 @@ enum SkillType {
     CHAMPION_L, // Champion ability that scales with level
     AOE_L,      // AOE ability that scales with level
     HEAL_L,     // Heal ability that scales with level
+    LIFESTEAL_L,// Lifesteal ability that scales with level
 };
 
 enum Element {

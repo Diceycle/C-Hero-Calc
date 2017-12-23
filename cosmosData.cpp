@@ -52,6 +52,9 @@ Monster::Monster(const Monster & baseHero, int aLevel) :
     } else if (baseHero.skill.skillType == AOE_L) {
         this->skill.skillType = AOE;
         this->skill.amount = floor((float) aLevel * baseHero.skill.amount);
+    } else if (baseHero.skill.skillType == LIFESTEAL_L) {
+        this->skill.skillType = LIFESTEAL;
+        this->skill.amount = floor((float) aLevel * baseHero.skill.amount);
     }
 }
 
@@ -62,12 +65,16 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float an
     amount(anAmount) 
 {
     this->hasAsymmetricAoe = (aType == VALKYRIE);
-    this->hasAoe = (aType == AOE || aType == AOE_L || aType == HEAL || aType == HEAL_L || aType == PIERCE || aType == REVENGE || aType == VALKYRIE);
+    this->hasAoe = (aType == AOE || aType == AOE_L || 
+                    aType == HEAL || aType == HEAL_L || 
+                    aType == LIFESTEAL || aType == LIFESTEAL_L || 
+                    aType == PIERCE || aType == REVENGE || aType == VALKYRIE);
     this->violatesFightResults = (aType == BUFF || aType == BUFF_L || 
                                   aType == PROTECT || aType == PROTECT_L ||
                                   aType == CHAMPION || aType == CHAMPION_L ||
                                   aType == AOE || aType == AOE_L || 
-                                  aType == HEAL || aType == HEAL_L);
+                                  aType == HEAL || aType == HEAL_L ||
+                                  aType == LIFESTEAL || aType == LIFESTEAL_L);
 }
 
 std::string Monster::toJSON() {
@@ -322,6 +329,11 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster(116,116, "ageror",            AIR,   ASCENDED,  {FRIENDS,       SELF, AIR, 1.3}));
     
     baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 50, "lordofchaos",     FIRE,  WORLDBOSS, {AOE,           ALL, FIRE, 20}));
+    
+    baseHeroes.push_back(Monster( 38, 24, "christmaself",      WATER, COMMON,    {HEAL_L,        ALL, WATER, 0.112}));
+    baseHeroes.push_back(Monster( 54, 36, "reindeer",          AIR,   RARE,      {AOE_L,         ALL, AIR, 0.112}));
+    baseHeroes.push_back(Monster( 72, 48, "santaclaus",        FIRE,  LEGENDARY, {LIFESTEAL_L,   ALL, FIRE, 0.112}));
+    baseHeroes.push_back(Monster( 44, 44, "marychristmas",     EARTH, RARE,      {VALKYRIE,      ALL, EARTH, 0.66}));
 }
 
 void initQuests() {

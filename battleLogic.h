@@ -101,7 +101,8 @@ inline void ArmyCondition::startNewTurn() {
     
     // Gather all skills that trigger globally
     for (i = this->monstersLost; i < this->armySize; i++) {
-        if (this->skillTypes[i] == NOTHING) { // Careful when doing anything here, as dead heroes get their ability set to NOTHING
+        if (this->skillTypes[i] == NOTHING) { 
+            // Careful when doing anything here, as dead heroes get their ability set to NOTHING
         } else if (this->skillTypes[i] == PROTECT && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
             this->turnData.protection += (int) this->skillAmounts[i];
         } else if (this->skillTypes[i] == BUFF && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
@@ -113,6 +114,9 @@ inline void ArmyCondition::startNewTurn() {
             this->turnData.healing += (int) this->skillAmounts[i];
         } else if (this->skillTypes[i] == AOE) {
             this->turnData.aoeDamage += (int) this->skillAmounts[i];
+        } else if (this->skillTypes[i] == LIFESTEAL) {
+            this->turnData.aoeDamage += (int) this->skillAmounts[i];
+            this->turnData.healing += (int) this->skillAmounts[i];
         }
     }
 }
