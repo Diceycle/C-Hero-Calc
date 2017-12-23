@@ -320,6 +320,8 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster(190, 38, "atr0n1x",           FIRE,  ASCENDED,  {VALKYRIE,      ALL, FIRE, 0.75}));
     baseHeroes.push_back(Monster(222,  8, "ageum",             EARTH, ASCENDED,  {BERSERK,       SELF, EARTH, 2}));
     baseHeroes.push_back(Monster(116,116, "ageror",            AIR,   ASCENDED,  {FRIENDS,       SELF, AIR, 1.3}));
+    
+    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 50, "lordofchaos",     FIRE,  WORLDBOSS, {AOE,           ALL, FIRE, 20}));
 }
 
 void initQuests() {

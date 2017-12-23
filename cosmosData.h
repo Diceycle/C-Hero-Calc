@@ -18,6 +18,8 @@ const size_t ARMY_MAX_BRUTEFORCEABLE_SIZE = 4;
 const std::string HEROLEVEL_SEPARATOR = ":";
 const int INDEX_NO_MONSTER = -1;
 
+const int16_t WORLDBOSS_HEALTH = 32000;
+
 // Define types of HeroSkills, Elements and Rarities
 enum SkillType {
     NOTHING,    // Base Skill used by normal monsters
