@@ -389,12 +389,16 @@ string getReplayHeroes(Army setup) {
 string Instance::toJSON(bool valid) {
     stringstream s;
     s << "{\"validSolution\" : {";
-            s << "\"target\""  << ":" << this->target.toJSON() << ",";
-            s << "\"solution\""  << ":" << this->bestSolution.toJSON() << ",";
-            s << "\"time\""  << ":" << this->calculationTime << ",";
-            s << "\"fights\"" << ":" << this->totalFightsSimulated << ",";
-            s << "\"replay\"" << ":" << "\"" << makeBattleReplay(this->bestSolution, this->target) << "\"";
-        s << "}";
+    if (this->hasWorldBoss) {
+        s << "\"bossdamage\"" << ":" << WORLDBOSS_HEALTH - this->lowestBossHealth << ",";
+    }
+        s << "\"target\""  << ":" << this->target.toJSON() << ",";
+        s << "\"solution\""  << ":" << this->bestSolution.toJSON() << ",";
+        s << "\"time\""  << ":" << this->calculationTime << ",";
+        s << "\"fights\"" << ":" << this->totalFightsSimulated << ",";
+        s << "\"replay\"" << ":" << "\"" << makeBattleReplay(this->bestSolution, this->target) << "\"";
+    
+    s << "}";
     if (!valid) {
         s << ",\"error\" : {";
             s << "\"message\"" << ":" << "\"Fatal Internal Error: Solution not valid!!!\"" << ",";
@@ -416,12 +420,12 @@ string Instance::toString(bool valid, bool showReplayString) {
         s << endl << "Could not find a solution that beats this lineup." << endl;
     }
     if (this->hasWorldBoss) {
-        s << "  Remaining Boss Health: " << this->lowestBossHealth << endl;
+        s << "  Boss Damage Done: " << WORLDBOSS_HEALTH - this->lowestBossHealth << endl;
     }
     s << "  " << this->totalFightsSimulated << " Fights simulated." << endl;
     s << "  Total Calculation Time: " << this->calculationTime << endl;
     s << "  Calc Version: " << VERSION << endl << endl;
-    if (!this->bestSolution.isEmpty() && showReplayString && !this->hasWorldBoss) {
+    if (!this->bestSolution.isEmpty() && showReplayString) {
         s << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(this->bestSolution, this->target) << endl << endl;
     }
     if (!valid) {
