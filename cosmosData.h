@@ -211,4 +211,14 @@ int isQuest(Army & army);
 
 // Get the index of a monster corresponding to the unique id it is given ingame
 int getRealIndex(Monster & monster);
+
+// Custom ceil function to avoid excessive casting 
+// Works only for positive values which is fine for this program
+inline int castCeil(float f) {
+    int n = (int) f;
+    if (f > (float) n) {
+        return n + 1;
+    }
+    return n;
+}
 #endif

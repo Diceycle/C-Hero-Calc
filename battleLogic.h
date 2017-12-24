@@ -152,7 +152,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     if (counter[opposingElement] == this->lineup[this->monstersLost]->element) {
         this->turnData.baseDamage *= elementalBoost;
     }
-    this->turnData.baseDamage = (float) ceil(this->turnData.baseDamage);
+    this->turnData.baseDamage = (float) castCeil(this->turnData.baseDamage);
     this->turnData.valkyrieDamage = (int) this->turnData.baseDamage;
 }
 
@@ -183,7 +183,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
                 remainingHealths[i] = this->lineup[i]->hp;
             }
         }
-        opposing.valkyrieDamage = (int) ceil((float) opposing.valkyrieDamage * opposing.valkyrieMult);
+        opposing.valkyrieDamage = castCeil((float) opposing.valkyrieDamage * opposing.valkyrieMult);
     }
 }
 
@@ -244,10 +244,10 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         
         // Handle wither ability
         if (leftCondition.turnData.witherer == leftCondition.monstersLost) {
-            leftCondition.remainingHealths[leftCondition.monstersLost] = (int) ceil((float) leftCondition.remainingHealths[leftCondition.monstersLost] * leftCondition.skillAmounts[leftCondition.monstersLost]);
+            leftCondition.remainingHealths[leftCondition.monstersLost] = castCeil((float) leftCondition.remainingHealths[leftCondition.monstersLost] * leftCondition.skillAmounts[leftCondition.monstersLost]);
         }
         if (rightCondition.turnData.witherer == rightCondition.monstersLost) {
-            rightCondition.remainingHealths[rightCondition.monstersLost] = (int) ceil((float) rightCondition.remainingHealths[rightCondition.monstersLost] * rightCondition.skillAmounts[rightCondition.monstersLost]);
+            rightCondition.remainingHealths[rightCondition.monstersLost] = castCeil((float) rightCondition.remainingHealths[rightCondition.monstersLost] * rightCondition.skillAmounts[rightCondition.monstersLost]);
         }
         turncounter++;
         
