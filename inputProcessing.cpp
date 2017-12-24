@@ -90,7 +90,7 @@ void IOManager::haltExecution() {
 }
 
 // Method for handling ALL input. Gives access to help, error resistance and macro file for input.
-string IOManager::getResistantInput(string query, string help, QueryType queryType) {
+string IOManager::getResistantInput(string query, QueryType queryType) {
     string inputString;
     string firstToken;
     while (true) {
@@ -117,37 +117,33 @@ string IOManager::getResistantInput(string query, string help, QueryType queryTy
         if (this->useMacroFile && this->showQueries) {
             cout << inputString << endl; // Show input if a macro file is used
         }
-        if (firstToken == "help") {
-            cout << help;
-        } else {
-            if (queryType == question && (firstToken == POSITIVE_ANSWER || firstToken == NEGATIVE_ANSWER)) {
+        if (queryType == question && (firstToken == POSITIVE_ANSWER || firstToken == NEGATIVE_ANSWER)) {
+            return firstToken;
+        }
+        if (queryType == integer) {
+            try {
+                stoi(firstToken);
                 return firstToken;
+            } catch (const exception & e) {
+                this->handleInputException(NUMBER_PARSE);
             }
-            if (queryType == integer) {
-                try {
-                    stoi(firstToken);
-                    return firstToken;
-                } catch (const exception & e) {
-                    this->handleInputException(NUMBER_PARSE);
-                }
-            }
-            if (queryType == raw) {
-                return inputString;
-            }
-            if (queryType == rawFirst) {
-                return firstToken;
-            }
+        }
+        if (queryType == raw) {
+            return inputString;
+        }
+        if (queryType == rawFirst) {
+            return firstToken;
         }
     }
 }
 
 // Ask the user a question that they can answer via command line
-bool IOManager::askYesNoQuestion(string questionMessage, string help, OutputLevel urgency, string defaultAnswer) {
+bool IOManager::askYesNoQuestion(string questionMessage, OutputLevel urgency, string defaultAnswer) {
     string inputString;
     if (!this->shouldOutput(urgency)) {
         inputString = defaultAnswer;
     } else {
-        inputString = this->getResistantInput(questionMessage + " (" + POSITIVE_ANSWER + "/" + NEGATIVE_ANSWER + "): ", help, question);
+        inputString = this->getResistantInput(questionMessage + " (" + POSITIVE_ANSWER + "/" + NEGATIVE_ANSWER + "): ", question);
     }
     
     if (inputString == NEGATIVE_ANSWER) {
@@ -171,7 +167,7 @@ vector<int8_t> IOManager::takeHerolevelInput() {
     }
     int cancelCounter = 0;
     do {
-        input = this->getResistantInput("Enter Hero " + to_string(heroes.size()+1) + ": ", heroInputHelp, rawFirst);
+        input = this->getResistantInput("Enter Hero " + to_string(heroes.size()+1) + ": ", rawFirst);
         if (input == "") {
             cancelCounter++;
         } else {
@@ -196,7 +192,7 @@ vector<Instance> IOManager::takeInstanceInput(string prompt) {
     string input;
     
     while (true) {
-        input = this->getResistantInput(prompt, lineupInputHelp, raw);
+        input = this->getResistantInput(prompt, raw);
         instances.clear();
         instanceStrings = split(input, TOKEN_SEPARATOR);
         try {

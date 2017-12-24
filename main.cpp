@@ -346,7 +346,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                 } else {
                     iomanager.outputMessage("Could not find a solution yet!", DETAILED_OUTPUT);
                 }
-                if (!iomanager.askYesNoQuestion("Continue calculation?", "  Continuing will most likely result in a cheaper solution but could consume a lot of RAM.\n", DETAILED_OUTPUT, POSITIVE_ANSWER)) {return;}
+                if (!iomanager.askYesNoQuestion("Continue calculation?", DETAILED_OUTPUT, POSITIVE_ANSWER)) {return;}
                 startTime = time(NULL);
                 iomanager.outputMessage("\nPreparing to work on loop for armies of size " + to_string(armySize+1), BASIC_OUTPUT);
                 iomanager.outputMessage("Currently considering " + to_string(pureMonsterArmies.size()) + " normal and " + to_string(heroMonsterArmies.size()) + " hero armies.", BASIC_OUTPUT);
@@ -447,7 +447,7 @@ int main(int argc, char** argv) {
             simulateFight(left, right, true);
             iomanager.outputMessage(to_string(left.lastFightData.rightWon) + " " + to_string(left.followerCost) + " " + to_string(right.followerCost), CMD_OUTPUT);
             
-            if (!iomanager.askYesNoQuestion("Simulate another Fight?", "", CMD_OUTPUT, NEGATIVE_ANSWER)) {
+            if (!iomanager.askYesNoQuestion("Simulate another Fight?", CMD_OUTPUT, NEGATIVE_ANSWER)) {
                 break;
             }
         }
@@ -457,8 +457,8 @@ int main(int argc, char** argv) {
     // Collect the Data via Command Line
     try {
         availableHeroes = iomanager.takeHerolevelInput();
-        minimumMonsterCost = stoi(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", minimumMonsterCostHelp, integer));
-        userFollowerUpperBound = stoi(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", maxFollowerHelp, integer));
+        minimumMonsterCost = stoi(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", integer));
+        userFollowerUpperBound = stoi(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", integer));
     } catch (InputException e) {
         if (e == MACROFILE_USED_UP) {
             if (iomanager.outputLevel == SERVER_OUTPUT) {
@@ -508,7 +508,7 @@ int main(int argc, char** argv) {
             solveInstance(instances[i], firstDominance);
             outputSolution(instances[i], showReplayStrings);
         }
-        userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", "", CMD_OUTPUT, NEGATIVE_ANSWER);
+        userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", CMD_OUTPUT, NEGATIVE_ANSWER);
     } while (userWantsContinue);
     
     iomanager.outputMessage("", CMD_OUTPUT);
