@@ -38,8 +38,9 @@ class ArmyCondition {
         Element skillTargets[ARMY_MAX_SIZE];
         float skillAmounts[ARMY_MAX_SIZE];
         
-        int rainbowCondition; // for rainbow ability
-        int pureMonsters; // for friends ability
+        int rainbowConditions[ARMY_MAX_SIZE]; // for rainbow ability
+        int pureMonsters[ARMY_MAX_SIZE]; // for friends ability
+        
         int berserkProcs; // for berserk ability
         
         int monstersLost;
@@ -59,28 +60,28 @@ inline void ArmyCondition::init(const Army & army) {
     int i;
     HeroSkill * skill;
     
+    int tempRainbowCondition = 0;
+    int tempPureMonsters = 0;
+    
     armySize = army.monsterAmount;
     monstersLost = 0;
     berserkProcs = 0;
     
-    for (i = 0; i < armySize; i++) {
+    for (i = armySize -1; i >= 0; i--) {
         lineup[i] = &monsterReference[army.monsters[i]];
-        rainbowCondition |= 1 << lineup[i]->element;
+        tempRainbowCondition |= 1 << lineup[i]->element;
         
         skill = &(lineup[i]->skill);
         skillTypes[i] = skill->skillType;
         if (skill->skillType == NOTHING) {
-            pureMonsters++;
-        }
-        if (skill->skillType == RAINBOW) {
-            rainbowCondition = 0; // More than 1 Rainbow Hero per lineup will not work properly
-        }
-        if (skill->skillType == FRIENDS) {
-            pureMonsters = 0; // More than 1 Friends Hero per lineup will not work properly
+            tempPureMonsters++;
         }
         skillTargets[i] = skill->target;
         skillAmounts[i] = skill->amount;
         remainingHealths[i] = lineup[i]->hp;
+        
+        rainbowConditions[i] = tempRainbowCondition;
+        pureMonsters[i] = tempPureMonsters;
     }
 }
 
@@ -131,10 +132,10 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     turnData.witherer = -1;
     turnData.multiplier = 1;
     if (skillTypes[monstersLost] == FRIENDS) {
-        turnData.multiplier *= (float) pow(skillAmounts[monstersLost], pureMonsters);
+        turnData.multiplier *= (float) pow(skillAmounts[monstersLost], pureMonsters[monstersLost]);
     } else if (skillTypes[monstersLost] == TRAINING) {
         turnData.buffDamage += (int) (skillAmounts[monstersLost] * (float) turncounter);
-    } else if (skillTypes[monstersLost] == RAINBOW && rainbowCondition == VALID_RAINBOW_CONDITION) {
+    } else if (skillTypes[monstersLost] == RAINBOW && rainbowConditions[monstersLost] == VALID_RAINBOW_CONDITION) {
         turnData.buffDamage += (int) skillAmounts[monstersLost];
     } else if (skillTypes[monstersLost] == ADAPT && opposingElement == skillTargets[monstersLost]) {
         turnData.multiplier *= skillAmounts[monstersLost];
