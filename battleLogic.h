@@ -39,9 +39,9 @@ class ArmyCondition {
         
         int rainbowCondition; // for rainbow ability
         int pureMonsters; // for friends ability
+        int berserkProcs; // for berserk ability
         
         int monstersLost;
-        int berserkProcs;
         
         TurnData turnData;
         
@@ -89,8 +89,7 @@ inline void ArmyCondition::afterDeath() {
     this->berserkProcs = 0;
 }
 
-// Resert turndata and fill it again with the hero abilities' values
-// Also handles healing afterwards to avoid accidental ressurects
+// Reset turndata and fill it again with the hero abilities' values
 inline void ArmyCondition::startNewTurn() {
     int i;
     
@@ -194,14 +193,6 @@ extern ArmyCondition rightCondition;
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     // left[0] and right[0] are the first monsters to fight
-    // Damage Application Order: TODO: Find out exactly where wither ability triggers. probably after 6.
-    //  1. Base Damage of creature
-    //  2. Multiplicators of self       (friends, berserk, etc.)
-    //  3. Buffs from heroes            (buff, champion)
-    //  4. Elemental Advantage          (f.e. Fire vs. Earth)
-    //  5. Protection of enemy Side     (protect, champion)
-    //  6. AOE of friendly Side         (aoe, paoe)
-    //  7. Healing of enemy Side        (healing)
     (*totalFightsSimulated)++;
     
     int turncounter;
@@ -234,7 +225,7 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         leftCondition.getDamage(turncounter, rightCondition.lineup[rightCondition.monstersLost]->element);
         rightCondition.getDamage(turncounter, leftCondition.lineup[leftCondition.monstersLost]->element);
         
-        // Handle Revenge Damage before anything else. Revenge Damage caused through aoe seems to be ignored
+        // Handle Revenge Damage before anything else. Revenge Damage caused through aoe is ignored
         if (leftCondition.skillTypes[leftCondition.monstersLost] == REVENGE && 
             leftCondition.remainingHealths[leftCondition.monstersLost] <= (int) rightCondition.turnData.baseDamage - leftCondition.turnData.protection) {
             leftCondition.turnData.aoeDamage += (int) round((float) leftCondition.lineup[leftCondition.monstersLost]->damage * leftCondition.skillAmounts[leftCondition.monstersLost]);
@@ -244,8 +235,8 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
             rightCondition.turnData.aoeDamage += (int) round((float) rightCondition.lineup[rightCondition.monstersLost]->damage * rightCondition.skillAmounts[rightCondition.monstersLost]);
         }
         
-        left.lastFightData.leftAoeDamage += leftCondition.turnData.aoeDamage + leftCondition.turnData.paoeDamage;
-        left.lastFightData.rightAoeDamage += rightCondition.turnData.aoeDamage + rightCondition.turnData.paoeDamage;
+        left.lastFightData.leftAoeDamage += (int16_t) (leftCondition.turnData.aoeDamage + leftCondition.turnData.paoeDamage);
+        left.lastFightData.rightAoeDamage += (int16_t) (rightCondition.turnData.aoeDamage + rightCondition.turnData.paoeDamage);
         
         // Check if anything died as a result
         leftCondition.resolveDamage(rightCondition.turnData);

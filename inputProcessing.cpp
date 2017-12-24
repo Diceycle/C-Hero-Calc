@@ -253,7 +253,7 @@ void Instance::setTarget(Army aTarget) {
     this->hasAoe = false;
     this->hasAsymmetricAoe = false;
     this->hasWorldBoss = false;
-    for (int i = 0; i < this->targetSize; i++) {
+    for (size_t i = 0; i < this->targetSize; i++) {
         currentSkill = monsterReference[this->target.monsters[i]].skill;
         this->hasAoe |= currentSkill.hasAoe;
         this->hasAsymmetricAoe |= currentSkill.hasAsymmetricAoe;
