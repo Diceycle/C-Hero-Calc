@@ -14,7 +14,8 @@ const int VALID_RAINBOW_CONDITION = 15; // Binary 00001111 -> means all elements
 
 // Struct keeping track of everything that is only valid for one turn
 struct TurnData {
-    float baseDamage = 0;
+    int baseDamage = 0;
+    float multiplier = 1;
     
     int buffDamage = 0;
     int protection = 0;
@@ -122,22 +123,23 @@ inline void ArmyCondition::startNewTurn() {
 
 // Handle all self-centered abilites and other multipliers on damage
 inline void ArmyCondition::getDamage(const int turncounter, const Element opposingElement) {
-    this->turnData.baseDamage = (float) this->lineup[this->monstersLost]->damage; // Get Base damage
+    this->turnData.baseDamage = this->lineup[this->monstersLost]->damage; // Get Base damage
     
     // Handle Monsters with skills that only activate on attack.
     this->turnData.paoeDamage = 0;
     this->turnData.valkyrieMult = 0;
     this->turnData.witherer = -1;
+    this->turnData.multiplier = 1;
     if (this->skillTypes[this->monstersLost] == FRIENDS) {
-        this->turnData.baseDamage *= (float) pow(this->skillAmounts[this->monstersLost], this->pureMonsters);
+        this->turnData.multiplier *= (float) pow(this->skillAmounts[this->monstersLost], this->pureMonsters);
     } else if (this->skillTypes[this->monstersLost] == TRAINING) {
-        this->turnData.baseDamage += this->skillAmounts[this->monstersLost] * (float) turncounter;
+        this->turnData.buffDamage += (int) (this->skillAmounts[this->monstersLost] * (float) turncounter);
     } else if (this->skillTypes[this->monstersLost] == RAINBOW && this->rainbowCondition == VALID_RAINBOW_CONDITION) {
-        this->turnData.baseDamage += this->skillAmounts[this->monstersLost];
+        this->turnData.buffDamage += (int) this->skillAmounts[this->monstersLost];
     } else if (this->skillTypes[this->monstersLost] == ADAPT && opposingElement == this->skillTargets[this->monstersLost]) {
-        this->turnData.baseDamage *= this->skillAmounts[this->monstersLost];
+        this->turnData.multiplier *= this->skillAmounts[this->monstersLost];
     } else if (this->skillTypes[this->monstersLost] == BERSERK) {
-        this->turnData.baseDamage *= (float) pow(this->skillAmounts[this->monstersLost], this->berserkProcs);
+        this->turnData.multiplier *= (float) pow(this->skillAmounts[this->monstersLost], this->berserkProcs);
         this->berserkProcs++;
     } else if (this->skillTypes[this->monstersLost] == PIERCE) {
         this->turnData.paoeDamage = (int) ((float) this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
@@ -147,13 +149,12 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
         this->turnData.witherer = this->monstersLost; // Witherer did an attack
     }
     
-    this->turnData.baseDamage += (float) this->turnData.buffDamage; // Add Buff Damage
-    
     if (counter[opposingElement] == this->lineup[this->monstersLost]->element) {
-        this->turnData.baseDamage *= elementalBoost;
+        this->turnData.baseDamage = castCeil(((float) this->turnData.baseDamage * this->turnData.multiplier + (float) this->turnData.buffDamage) * elementalBoost);
+    } else { 
+        this->turnData.baseDamage = castCeil((float) this->turnData.baseDamage * this->turnData.multiplier) + this->turnData.buffDamage;
     }
-    this->turnData.baseDamage = (float) castCeil(this->turnData.baseDamage);
-    this->turnData.valkyrieDamage = (int) this->turnData.baseDamage;
+    this->turnData.valkyrieDamage = this->turnData.baseDamage;
 }
 
 // Add damage to the opposing side and check for deaths
@@ -163,7 +164,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     
     // Apply normal attack damage to the frontliner
     if (opposing.baseDamage > this->turnData.protection) {
-        this->remainingHealths[this->monstersLost] -= (int) opposing.baseDamage - this->turnData.protection; // Handle Protection
+        this->remainingHealths[this->monstersLost] -= opposing.baseDamage - this->turnData.protection; // Handle Protection
     }
     
     // Handle aoe Damage for all combatants
@@ -227,11 +228,11 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         
         // Handle Revenge Damage before anything else. Revenge Damage caused through aoe is ignored
         if (leftCondition.skillTypes[leftCondition.monstersLost] == REVENGE && 
-            leftCondition.remainingHealths[leftCondition.monstersLost] <= (int) rightCondition.turnData.baseDamage - leftCondition.turnData.protection) {
+            leftCondition.remainingHealths[leftCondition.monstersLost] <= rightCondition.turnData.baseDamage - leftCondition.turnData.protection) {
             leftCondition.turnData.aoeDamage += (int) round((float) leftCondition.lineup[leftCondition.monstersLost]->damage * leftCondition.skillAmounts[leftCondition.monstersLost]);
         }
         if (rightCondition.skillTypes[rightCondition.monstersLost] == REVENGE && 
-            rightCondition.remainingHealths[rightCondition.monstersLost] <= (int) leftCondition.turnData.baseDamage - rightCondition.turnData.protection) {
+            rightCondition.remainingHealths[rightCondition.monstersLost] <= leftCondition.turnData.baseDamage - rightCondition.turnData.protection) {
             rightCondition.turnData.aoeDamage += (int) round((float) rightCondition.lineup[rightCondition.monstersLost]->damage * rightCondition.skillAmounts[rightCondition.monstersLost]);
         }
         
