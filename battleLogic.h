@@ -145,8 +145,6 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
         this->turnData.paoeDamage = (int) ((float) this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
     } else if (this->skillTypes[this->monstersLost] == VALKYRIE) {
         this->turnData.valkyrieMult = this->skillAmounts[this->monstersLost]; // save valkyrie mult for later
-    } else if (this->skillTypes[this->monstersLost] == WITHER) {
-        this->turnData.witherer = this->monstersLost; // Witherer did an attack
     }
     
     if (counter[opposingElement] == this->lineup[this->monstersLost]->element) {
@@ -185,6 +183,10 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
             }
         }
         opposing.valkyrieDamage = castCeil((float) opposing.valkyrieDamage * opposing.valkyrieMult);
+    }
+    // Handle wither ability
+    if (this->monstersLost == frontliner && this->skillTypes[this->monstersLost] == WITHER) {
+        this->remainingHealths[this->monstersLost] = castCeil((float) this->remainingHealths[this->monstersLost] * this->skillAmounts[this->monstersLost]);
     }
 }
 
@@ -243,13 +245,6 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         leftCondition.resolveDamage(rightCondition.turnData);
         rightCondition.resolveDamage(leftCondition.turnData);
         
-        // Handle wither ability
-        if (leftCondition.turnData.witherer == leftCondition.monstersLost) {
-            leftCondition.remainingHealths[leftCondition.monstersLost] = castCeil((float) leftCondition.remainingHealths[leftCondition.monstersLost] * leftCondition.skillAmounts[leftCondition.monstersLost]);
-        }
-        if (rightCondition.turnData.witherer == rightCondition.monstersLost) {
-            rightCondition.remainingHealths[rightCondition.monstersLost] = castCeil((float) rightCondition.remainingHealths[rightCondition.monstersLost] * rightCondition.skillAmounts[rightCondition.monstersLost]);
-        }
         turncounter++;
         
         if (verbose) {
