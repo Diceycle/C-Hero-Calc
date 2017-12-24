@@ -59,134 +59,134 @@ inline void ArmyCondition::init(const Army & army) {
     int i;
     HeroSkill * skill;
     
-    this->armySize = army.monsterAmount;
-    this->monstersLost = 0;
-    this->berserkProcs = 0;
+    armySize = army.monsterAmount;
+    monstersLost = 0;
+    berserkProcs = 0;
     
-    for (i = 0; i < this->armySize; i++) {
-        this->lineup[i] = &monsterReference[army.monsters[i]];
-        this->rainbowCondition |= 1 << this->lineup[i]->element;
+    for (i = 0; i < armySize; i++) {
+        lineup[i] = &monsterReference[army.monsters[i]];
+        rainbowCondition |= 1 << lineup[i]->element;
         
-        skill = &(this->lineup[i]->skill);
-        this->skillTypes[i] = skill->skillType;
+        skill = &(lineup[i]->skill);
+        skillTypes[i] = skill->skillType;
         if (skill->skillType == NOTHING) {
-            this->pureMonsters++;
+            pureMonsters++;
         }
         if (skill->skillType == RAINBOW) {
-            this->rainbowCondition = 0; // More than 1 Rainbow Hero per lineup will not work properly
+            rainbowCondition = 0; // More than 1 Rainbow Hero per lineup will not work properly
         }
         if (skill->skillType == FRIENDS) {
-            this->pureMonsters = 0; // More than 1 Friends Hero per lineup will not work properly
+            pureMonsters = 0; // More than 1 Friends Hero per lineup will not work properly
         }
-        this->skillTargets[i] = skill->target;
-        this->skillAmounts[i] = skill->amount;
-        this->remainingHealths[i] = this->lineup[i]->hp;
+        skillTargets[i] = skill->target;
+        skillAmounts[i] = skill->amount;
+        remainingHealths[i] = lineup[i]->hp;
     }
 }
 
 // Handle death of the front-most monster
 inline void ArmyCondition::afterDeath() {
-    this->monstersLost++;
-    this->berserkProcs = 0;
+    monstersLost++;
+    berserkProcs = 0;
 }
 
 // Reset turndata and fill it again with the hero abilities' values
 inline void ArmyCondition::startNewTurn() {
     int i;
     
-    this->turnData.buffDamage = 0;
-    this->turnData.protection = 0;
-    this->turnData.aoeDamage = 0;
-    this->turnData.healing = 0;
+    turnData.buffDamage = 0;
+    turnData.protection = 0;
+    turnData.aoeDamage = 0;
+    turnData.healing = 0;
     
     // Gather all skills that trigger globally
-    for (i = this->monstersLost; i < this->armySize; i++) {
-        if (this->skillTypes[i] == NOTHING) { 
+    for (i = monstersLost; i < armySize; i++) {
+        if (skillTypes[i] == NOTHING) { 
             // Careful when doing anything here, as dead heroes get their ability set to NOTHING
-        } else if (this->skillTypes[i] == PROTECT && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
-            this->turnData.protection += (int) this->skillAmounts[i];
-        } else if (this->skillTypes[i] == BUFF && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
-            this->turnData.buffDamage += (int) this->skillAmounts[i];
-        } else if (this->skillTypes[i] == CHAMPION && (this->skillTargets[i] == ALL || this->skillTargets[i] == this->lineup[this->monstersLost]->element)) {
-            this->turnData.buffDamage += (int) this->skillAmounts[i];
-            this->turnData.protection += (int) this->skillAmounts[i];
-        } else if (this->skillTypes[i] == HEAL) {
-            this->turnData.healing += (int) this->skillAmounts[i];
-        } else if (this->skillTypes[i] == AOE) {
-            this->turnData.aoeDamage += (int) this->skillAmounts[i];
-        } else if (this->skillTypes[i] == LIFESTEAL) {
-            this->turnData.aoeDamage += (int) this->skillAmounts[i];
-            this->turnData.healing += (int) this->skillAmounts[i];
+        } else if (skillTypes[i] == PROTECT && (skillTargets[i] == ALL || skillTargets[i] == lineup[monstersLost]->element)) {
+            turnData.protection += (int) skillAmounts[i];
+        } else if (skillTypes[i] == BUFF && (skillTargets[i] == ALL || skillTargets[i] == lineup[monstersLost]->element)) {
+            turnData.buffDamage += (int) skillAmounts[i];
+        } else if (skillTypes[i] == CHAMPION && (skillTargets[i] == ALL || skillTargets[i] == lineup[monstersLost]->element)) {
+            turnData.buffDamage += (int) skillAmounts[i];
+            turnData.protection += (int) skillAmounts[i];
+        } else if (skillTypes[i] == HEAL) {
+            turnData.healing += (int) skillAmounts[i];
+        } else if (skillTypes[i] == AOE) {
+            turnData.aoeDamage += (int) skillAmounts[i];
+        } else if (skillTypes[i] == LIFESTEAL) {
+            turnData.aoeDamage += (int) skillAmounts[i];
+            turnData.healing += (int) skillAmounts[i];
         }
     }
 }
 
 // Handle all self-centered abilites and other multipliers on damage
 inline void ArmyCondition::getDamage(const int turncounter, const Element opposingElement) {
-    this->turnData.baseDamage = this->lineup[this->monstersLost]->damage; // Get Base damage
+    turnData.baseDamage = lineup[monstersLost]->damage; // Get Base damage
     
     // Handle Monsters with skills that only activate on attack.
-    this->turnData.paoeDamage = 0;
-    this->turnData.valkyrieMult = 0;
-    this->turnData.witherer = -1;
-    this->turnData.multiplier = 1;
-    if (this->skillTypes[this->monstersLost] == FRIENDS) {
-        this->turnData.multiplier *= (float) pow(this->skillAmounts[this->monstersLost], this->pureMonsters);
-    } else if (this->skillTypes[this->monstersLost] == TRAINING) {
-        this->turnData.buffDamage += (int) (this->skillAmounts[this->monstersLost] * (float) turncounter);
-    } else if (this->skillTypes[this->monstersLost] == RAINBOW && this->rainbowCondition == VALID_RAINBOW_CONDITION) {
-        this->turnData.buffDamage += (int) this->skillAmounts[this->monstersLost];
-    } else if (this->skillTypes[this->monstersLost] == ADAPT && opposingElement == this->skillTargets[this->monstersLost]) {
-        this->turnData.multiplier *= this->skillAmounts[this->monstersLost];
-    } else if (this->skillTypes[this->monstersLost] == BERSERK) {
-        this->turnData.multiplier *= (float) pow(this->skillAmounts[this->monstersLost], this->berserkProcs);
-        this->berserkProcs++;
-    } else if (this->skillTypes[this->monstersLost] == PIERCE) {
-        this->turnData.paoeDamage = (int) ((float) this->lineup[this->monstersLost]->damage * this->skillAmounts[this->monstersLost]);
-    } else if (this->skillTypes[this->monstersLost] == VALKYRIE) {
-        this->turnData.valkyrieMult = this->skillAmounts[this->monstersLost]; // save valkyrie mult for later
+    turnData.paoeDamage = 0;
+    turnData.valkyrieMult = 0;
+    turnData.witherer = -1;
+    turnData.multiplier = 1;
+    if (skillTypes[monstersLost] == FRIENDS) {
+        turnData.multiplier *= (float) pow(skillAmounts[monstersLost], pureMonsters);
+    } else if (skillTypes[monstersLost] == TRAINING) {
+        turnData.buffDamage += (int) (skillAmounts[monstersLost] * (float) turncounter);
+    } else if (skillTypes[monstersLost] == RAINBOW && rainbowCondition == VALID_RAINBOW_CONDITION) {
+        turnData.buffDamage += (int) skillAmounts[monstersLost];
+    } else if (skillTypes[monstersLost] == ADAPT && opposingElement == skillTargets[monstersLost]) {
+        turnData.multiplier *= skillAmounts[monstersLost];
+    } else if (skillTypes[monstersLost] == BERSERK) {
+        turnData.multiplier *= (float) pow(skillAmounts[monstersLost], berserkProcs);
+        berserkProcs++;
+    } else if (skillTypes[monstersLost] == PIERCE) {
+        turnData.paoeDamage = (int) ((float) lineup[monstersLost]->damage * skillAmounts[monstersLost]);
+    } else if (skillTypes[monstersLost] == VALKYRIE) {
+        turnData.valkyrieMult = skillAmounts[monstersLost]; // save valkyrie mult for later
     }
     
-    if (counter[opposingElement] == this->lineup[this->monstersLost]->element) {
-        this->turnData.baseDamage = castCeil(((float) this->turnData.baseDamage * this->turnData.multiplier + (float) this->turnData.buffDamage) * elementalBoost);
+    if (counter[opposingElement] == lineup[monstersLost]->element) {
+        turnData.baseDamage = castCeil(((float) turnData.baseDamage * turnData.multiplier + (float) turnData.buffDamage) * elementalBoost);
     } else { 
-        this->turnData.baseDamage = castCeil((float) this->turnData.baseDamage * this->turnData.multiplier) + this->turnData.buffDamage;
+        turnData.baseDamage = castCeil((float) turnData.baseDamage * turnData.multiplier) + turnData.buffDamage;
     }
-    this->turnData.valkyrieDamage = this->turnData.baseDamage;
+    turnData.valkyrieDamage = turnData.baseDamage;
 }
 
 // Add damage to the opposing side and check for deaths
 inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     int i;
-    int frontliner = this->monstersLost; // save original frontliner
+    int frontliner = monstersLost; // save original frontliner
     
     // Apply normal attack damage to the frontliner
-    if (opposing.baseDamage > this->turnData.protection) {
-        this->remainingHealths[this->monstersLost] -= opposing.baseDamage - this->turnData.protection; // Handle Protection
+    if (opposing.baseDamage > turnData.protection) {
+        remainingHealths[monstersLost] -= opposing.baseDamage - turnData.protection; // Handle Protection
     }
     
     // Handle aoe Damage for all combatants
-    for (i = frontliner; i < this->armySize; i++) {
+    for (i = frontliner; i < armySize; i++) {
         remainingHealths[i] -= opposing.aoeDamage;
         if (i > frontliner) { // Aoe that doesnt affect the frontliner
             remainingHealths[i] -= opposing.paoeDamage + opposing.valkyrieDamage;
         }
         if (remainingHealths[i] <= 0) {
-            if (i == this->monstersLost) {
+            if (i == monstersLost) {
                 afterDeath();
             }
-            this->skillTypes[i] = NOTHING; // set dead hero's ability to NOTHING
+            skillTypes[i] = NOTHING; // set dead hero's ability to NOTHING
         } else {
-            remainingHealths[i] += this->turnData.healing;
-            if (remainingHealths[i] > this->lineup[i]->hp) { // Avoid overhealing
-                remainingHealths[i] = this->lineup[i]->hp;
+            remainingHealths[i] += turnData.healing;
+            if (remainingHealths[i] > lineup[i]->hp) { // Avoid overhealing
+                remainingHealths[i] = lineup[i]->hp;
             }
         }
         opposing.valkyrieDamage = castCeil((float) opposing.valkyrieDamage * opposing.valkyrieMult);
     }
     // Handle wither ability
-    if (this->monstersLost == frontliner && this->skillTypes[this->monstersLost] == WITHER) {
-        this->remainingHealths[this->monstersLost] = castCeil((float) this->remainingHealths[this->monstersLost] * this->skillAmounts[this->monstersLost]);
+    if (monstersLost == frontliner && skillTypes[monstersLost] == WITHER) {
+        remainingHealths[monstersLost] = castCeil((float) remainingHealths[monstersLost] * skillAmounts[monstersLost]);
     }
 }
 
