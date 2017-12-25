@@ -333,7 +333,7 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 38, 24, "christmaself",      WATER, COMMON,    {HEAL_L,        ALL, WATER, 0.112f}));
     baseHeroes.push_back(Monster( 54, 36, "reindeer",          AIR,   RARE,      {AOE_L,         ALL, AIR, 0.112f}));
     baseHeroes.push_back(Monster( 72, 48, "santaclaus",        FIRE,  LEGENDARY, {LIFESTEAL_L,   ALL, FIRE, 0.112f}));
-    baseHeroes.push_back(Monster( 44, 44, "marychristmas",     EARTH, RARE,      {VALKYRIE,      ALL, EARTH, 0.66f}));
+    baseHeroes.push_back(Monster( 44, 44, "sexysanta",         EARTH, RARE,      {VALKYRIE,      ALL, EARTH, 0.66f}));
 }
 
 void initQuests() {
