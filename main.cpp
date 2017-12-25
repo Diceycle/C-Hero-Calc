@@ -343,6 +343,9 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                 if (!instance.bestSolution.isEmpty()) {
                     iomanager.outputMessage("Best Solution so far:", DETAILED_OUTPUT);
                     iomanager.outputMessage(instance.bestSolution.toString(), DETAILED_OUTPUT, 1);
+                    if (instance.hasWorldBoss) {
+                        iomanager.outputMessage("Damage Done: " + to_string(WORLDBOSS_HEALTH - instance.lowestBossHealth), DETAILED_OUTPUT, 1);
+                    }
                 } else {
                     iomanager.outputMessage("Could not find a solution yet!", DETAILED_OUTPUT);
                 }
