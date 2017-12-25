@@ -102,22 +102,25 @@ inline void ArmyCondition::startNewTurn() {
     
     // Gather all skills that trigger globally
     for (i = monstersLost; i < armySize; i++) {
-        if (skillTypes[i] == NOTHING) { 
-            // Careful when doing anything here, as dead heroes get their ability set to NOTHING
-        } else if (skillTypes[i] == PROTECT && (skillTargets[i] == ALL || skillTargets[i] == lineup[monstersLost]->element)) {
-            turnData.protection += (int) skillAmounts[i];
-        } else if (skillTypes[i] == BUFF && (skillTargets[i] == ALL || skillTargets[i] == lineup[monstersLost]->element)) {
-            turnData.buffDamage += (int) skillAmounts[i];
-        } else if (skillTypes[i] == CHAMPION && (skillTargets[i] == ALL || skillTargets[i] == lineup[monstersLost]->element)) {
-            turnData.buffDamage += (int) skillAmounts[i];
-            turnData.protection += (int) skillAmounts[i];
-        } else if (skillTypes[i] == HEAL) {
-            turnData.healing += (int) skillAmounts[i];
-        } else if (skillTypes[i] == AOE) {
-            turnData.aoeDamage += (int) skillAmounts[i];
-        } else if (skillTypes[i] == LIFESTEAL) {
-            turnData.aoeDamage += (int) skillAmounts[i];
-            turnData.healing += (int) skillAmounts[i];
+        switch (skillTypes[i]) {
+            default:        break;
+            case PROTECT:   if (skillTargets[i] == ALL || skillTargets[i] == lineup[monstersLost]->element) {
+                                turnData.protection += (int) skillAmounts[i];
+                            } break;
+            case BUFF:      if (skillTargets[i] == ALL || skillTargets[i] == lineup[monstersLost]->element) {
+                                turnData.buffDamage += (int) skillAmounts[i];
+                            } break;
+            case CHAMPION:  if (skillTargets[i] == ALL || skillTargets[i] == lineup[monstersLost]->element) {
+                                turnData.buffDamage += (int) skillAmounts[i];
+                                turnData.protection += (int) skillAmounts[i];
+                            } break;
+            case HEAL:      turnData.healing += (int) skillAmounts[i];
+                            break;
+            case AOE:       turnData.aoeDamage += (int) skillAmounts[i];
+                            break;
+            case LIFESTEAL: turnData.aoeDamage += (int) skillAmounts[i];
+                            turnData.healing += (int) skillAmounts[i];
+                            break;
         }
     }
 }
@@ -131,21 +134,24 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     turnData.valkyrieMult = 0;
     turnData.witherer = -1;
     turnData.multiplier = 1;
-    if (skillTypes[monstersLost] == FRIENDS) {
-        turnData.multiplier *= (float) pow(skillAmounts[monstersLost], pureMonsters[monstersLost]);
-    } else if (skillTypes[monstersLost] == TRAINING) {
-        turnData.buffDamage += (int) (skillAmounts[monstersLost] * (float) turncounter);
-    } else if (skillTypes[monstersLost] == RAINBOW && rainbowConditions[monstersLost] == VALID_RAINBOW_CONDITION) {
-        turnData.buffDamage += (int) skillAmounts[monstersLost];
-    } else if (skillTypes[monstersLost] == ADAPT && opposingElement == skillTargets[monstersLost]) {
-        turnData.multiplier *= skillAmounts[monstersLost];
-    } else if (skillTypes[monstersLost] == BERSERK) {
-        turnData.multiplier *= (float) pow(skillAmounts[monstersLost], berserkProcs);
-        berserkProcs++;
-    } else if (skillTypes[monstersLost] == PIERCE) {
-        turnData.paoeDamage = (int) ((float) lineup[monstersLost]->damage * skillAmounts[monstersLost]);
-    } else if (skillTypes[monstersLost] == VALKYRIE) {
-        turnData.valkyrieMult = skillAmounts[monstersLost]; // save valkyrie mult for later
+    switch (skillTypes[monstersLost]) {
+        default:        break;
+        case FRIENDS:   turnData.multiplier *= (float) pow(skillAmounts[monstersLost], pureMonsters[monstersLost]); 
+                        break;
+        case TRAINING:  turnData.buffDamage += (int) (skillAmounts[monstersLost] * (float) turncounter); 
+                        break;
+        case RAINBOW:   if (rainbowConditions[monstersLost] == VALID_RAINBOW_CONDITION) {
+                            turnData.buffDamage += (int) skillAmounts[monstersLost];
+                        } break;
+        case ADAPT:     if (opposingElement == skillTargets[monstersLost]) {
+                            turnData.multiplier *= skillAmounts[monstersLost];
+                        } break;
+        case BERSERK:   turnData.multiplier *= (float) pow(skillAmounts[monstersLost], berserkProcs); berserkProcs++; 
+                        break;
+        case PIERCE:    turnData.paoeDamage = (int) ((float) lineup[monstersLost]->damage * skillAmounts[monstersLost]); 
+                        break;
+        case VALKYRIE:  turnData.valkyrieMult = skillAmounts[monstersLost]; 
+                        break;
     }
     
     if (counter[opposingElement] == lineup[monstersLost]->element) {
@@ -176,7 +182,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
             if (i == monstersLost) {
                 afterDeath();
             }
-            skillTypes[i] = NOTHING; // set dead hero's ability to NOTHING
+            skillTypes[i] = NOTHING; // disable dead hero's ability
         } else {
             remainingHealths[i] += turnData.healing;
             if (remainingHealths[i] > lineup[i]->hp) { // Avoid overhealing
