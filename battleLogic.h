@@ -69,19 +69,19 @@ inline void ArmyCondition::init(const Army & army) {
     
     for (i = armySize -1; i >= 0; i--) {
         lineup[i] = &monsterReference[army.monsters[i]];
-        tempRainbowCondition |= 1 << lineup[i]->element;
         
         skill = &(lineup[i]->skill);
         skillTypes[i] = skill->skillType;
-        if (skill->skillType == NOTHING) {
-            tempPureMonsters++;
-        }
         skillTargets[i] = skill->target;
         skillAmounts[i] = skill->amount;
         remainingHealths[i] = lineup[i]->hp;
         
         rainbowConditions[i] = tempRainbowCondition;
         pureMonsters[i] = tempPureMonsters;
+        tempRainbowCondition |= 1 << lineup[i]->element;
+        if (skill->skillType == NOTHING) {
+            tempPureMonsters++;
+        }
     }
 }
 
