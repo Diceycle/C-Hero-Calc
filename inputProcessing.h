@@ -12,7 +12,7 @@
 #include "cosmosData.h"
 #include "base64.h"
 
-const std::string VERSION = "2.9.1.4";
+const std::string VERSION = "2.9.1.5";
 
 const size_t STANDARD_CMD_WIDTH = 80;
 const int INDENT_WIDTH = 2;
