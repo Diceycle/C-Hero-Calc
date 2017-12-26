@@ -23,7 +23,7 @@ struct TurnData {
     int healing = 0;
     
     float valkyrieMult = 0;
-    int valkyrieDamage = 0;
+    float valkyrieDamage = 0;
     int paoeDamage = 0;
     int witherer = -1;
 };
@@ -176,7 +176,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     for (i = frontliner; i < armySize; i++) {
         remainingHealths[i] -= opposing.aoeDamage;
         if (i > frontliner) { // Aoe that doesnt affect the frontliner
-            remainingHealths[i] -= opposing.paoeDamage + opposing.valkyrieDamage;
+            remainingHealths[i] -= opposing.paoeDamage + castCeil(opposing.valkyrieDamage);
         }
         if (remainingHealths[i] <= 0) {
             if (i == monstersLost) {
@@ -189,7 +189,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
                 remainingHealths[i] = lineup[i]->hp;
             }
         }
-        opposing.valkyrieDamage = castCeil((float) opposing.valkyrieDamage * opposing.valkyrieMult);
+        opposing.valkyrieDamage *= opposing.valkyrieMult;
     }
     // Handle wither ability
     if (monstersLost == frontliner && skillTypes[monstersLost] == WITHER) {
