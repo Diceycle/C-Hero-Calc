@@ -85,12 +85,6 @@ inline void ArmyCondition::init(const Army & army) {
     }
 }
 
-// Handle death of the front-most monster
-inline void ArmyCondition::afterDeath() {
-    monstersLost++;
-    berserkProcs = 0;
-}
-
 // Reset turndata and fill it again with the hero abilities' values
 inline void ArmyCondition::startNewTurn() {
     int i;
@@ -180,7 +174,8 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
         }
         if (remainingHealths[i] <= 0) {
             if (i == monstersLost) {
-                afterDeath();
+                monstersLost++;
+                berserkProcs = 0;
             }
             skillTypes[i] = NOTHING; // disable dead hero's ability
         } else {
