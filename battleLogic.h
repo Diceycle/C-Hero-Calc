@@ -147,13 +147,12 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
         case VALKYRIE:  turnData.valkyrieMult = skillAmounts[monstersLost]; 
                         break;
     }
+    turnData.valkyrieDamage = (float) turnData.baseDamage * turnData.multiplier + (float) turnData.buffDamage;
     
     if (counter[opposingElement] == lineup[monstersLost]->element) {
-        turnData.baseDamage = castCeil(((float) turnData.baseDamage * turnData.multiplier + (float) turnData.buffDamage) * elementalBoost);
-    } else { 
-        turnData.baseDamage = castCeil((float) turnData.baseDamage * turnData.multiplier) + turnData.buffDamage;
+        turnData.valkyrieDamage *= elementalBoost;
     }
-    turnData.valkyrieDamage = turnData.baseDamage;
+    turnData.baseDamage = castCeil(turnData.valkyrieDamage);
 }
 
 // Add damage to the opposing side and check for deaths
