@@ -64,11 +64,11 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float an
     sourceElement(aSource), 
     amount(anAmount) 
 {
-    this->hasAsymmetricAoe = (aType == VALKYRIE);
+    this->hasAsymmetricAoe = (aType == VALKYRIE || aType == PIERCE);
     this->hasAoe = (aType == AOE || aType == AOE_L || 
                     aType == HEAL || aType == HEAL_L || 
                     aType == LIFESTEAL || aType == LIFESTEAL_L || 
-                    aType == PIERCE || aType == REVENGE || aType == VALKYRIE);
+                    aType == REVENGE || this->hasAsymmetricAoe);
     this->violatesFightResults = (aType == BUFF || aType == BUFF_L || 
                                   aType == PROTECT || aType == PROTECT_L ||
                                   aType == CHAMPION || aType == CHAMPION_L ||

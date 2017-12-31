@@ -83,15 +83,17 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     bool invalidSkill;
     bool friendsInfluence;
     bool rainbowInfluence;
+    bool instanceInvalid;
     for (i = 0; i < oldHeroArmiesSize; i++) {
         remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
         if (!oldHeroArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
             friendsInfluence = false;
             rainbowInfluence = false;
             invalidSkill = false;
+            instanceInvalid = instance.hasAoe;
             for (m = 0; m < currentArmySize; m++) {
                 currentSkill = monsterReference[oldHeroArmies[i].monsters[m]].skill;
-                invalidSkill |= currentSkill.hasAoe || currentSkill.hasAsymmetricAoe;
+                invalidSkill |= currentSkill.hasAoe;
                 friendsInfluence |= currentSkill.skillType == FRIENDS;
                 rainbowInfluence |= currentSkill.skillType == RAINBOW && currentArmySize > m + 4; // Hardcoded number of elements required to activate rainbow
                 usedHeroes[oldHeroArmies[i].monsters[m]] = true;
@@ -99,13 +101,13 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
                 newHeroArmies.push_back(oldHeroArmies[i]);
                 newHeroArmies.back().add(availableMonsters[m]);
-                newHeroArmies.back().lastFightData.valid = !friendsInfluence && !rainbowInfluence && !invalidSkill && !instance.hasAoe && !instance.hasAsymmetricAoe;
+                newHeroArmies.back().lastFightData.valid = !instanceInvalid && !friendsInfluence && !rainbowInfluence && !invalidSkill;
             }
             for (m = 0; m < availableHeroesSize; m++) {
                 if (!usedHeroes[availableHeroes[m]]) {
                     newHeroArmies.push_back(oldHeroArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = !monsterReference[availableHeroes[m]].skill.violatesFightResults && !rainbowInfluence && !invalidSkill && !instance.hasAoe && !instance.hasAsymmetricAoe;
+                    newHeroArmies.back().lastFightData.valid = !instanceInvalid && !monsterReference[availableHeroes[m]].skill.violatesFightResults && !rainbowInfluence && !invalidSkill;
                 }
                 usedHeroes[availableHeroes[m]] = false;
             }
