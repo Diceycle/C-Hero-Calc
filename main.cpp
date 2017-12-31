@@ -358,7 +358,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
             }
                 
             // Calculate which results are strictly better than others (dominance)
-            if (firstDominance <= armySize) {
+            if (firstDominance <= armySize && availableMonsters.size() > 0) {
                 calculateDominance(instance, optimizable, pureMonsterArmies, heroMonsterArmies, armySize, firstDominance);
             }
                 
