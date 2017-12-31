@@ -38,7 +38,7 @@ class ArmyCondition {
         Element skillTargets[ARMY_MAX_SIZE];
         float skillAmounts[ARMY_MAX_SIZE];
         
-        int rainbowConditions[ARMY_MAX_SIZE]; // for rainbow ability
+        bool rainbowConditions[ARMY_MAX_SIZE]; // for rainbow ability
         int pureMonsters[ARMY_MAX_SIZE]; // for friends ability
         
         int berserkProcs; // for berserk ability
@@ -76,8 +76,9 @@ inline void ArmyCondition::init(const Army & army) {
         skillAmounts[i] = skill->amount;
         remainingHealths[i] = lineup[i]->hp;
         
-        rainbowConditions[i] = tempRainbowCondition;
+        rainbowConditions[i] = tempRainbowCondition == VALID_RAINBOW_CONDITION;
         pureMonsters[i] = tempPureMonsters;
+        
         tempRainbowCondition |= 1 << lineup[i]->element;
         if (skill->skillType == NOTHING) {
             tempPureMonsters++;
@@ -134,7 +135,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
                         break;
         case TRAINING:  turnData.buffDamage += (int) (skillAmounts[monstersLost] * (float) turncounter); 
                         break;
-        case RAINBOW:   if (rainbowConditions[monstersLost] == VALID_RAINBOW_CONDITION) {
+        case RAINBOW:   if (rainbowConditions[monstersLost]) {
                             turnData.buffDamage += (int) skillAmounts[monstersLost];
                         } break;
         case ADAPT:     if (opposingElement == skillTargets[monstersLost]) {
