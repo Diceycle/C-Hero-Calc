@@ -413,17 +413,23 @@ string Instance::toString(bool valid, bool showReplayString) {
     if (!this->bestSolution.isEmpty()) {
         s << "  " << this->bestSolution.toString() << endl;
     } else {
-        s << endl << "Could not find a solution that beats this lineup." << endl;
-    }
+        s << "  Could not find a solution that beats this lineup." << endl;
+    } cout << endl;
+    
+    // Aditional Statistics
     if (this->hasWorldBoss) {
         s << "  Boss Damage Done: " << WORLDBOSS_HEALTH - this->lowestBossHealth << endl;
     }
     s << "  " << this->totalFightsSimulated << " Fights simulated." << endl;
     s << "  Total Calculation Time: " << this->calculationTime << endl;
     s << "  Calc Version: " << VERSION << endl << endl;
+    
+    // Replay for debugging and confirming interactions
     if (!this->bestSolution.isEmpty() && showReplayString) {
         s << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(this->bestSolution, this->target) << endl << endl;
     }
+    
+    // Sanity Check
     if (!valid) {
         s << "This does not beat the lineup!!!" << endl;
         s << "FATAL ERROR!!! Please comment this output in the Forums!" << endl;
