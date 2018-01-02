@@ -50,7 +50,7 @@ class ArmyCondition {
         inline void init(const Army & army);
         inline void afterDeath();
         inline void startNewTurn();
-        inline void getDamage(const int turncounter, const Element opposingElement);
+        inline void getDamage(const int turncounter, const Element opposingElement, const int opposingProtection);
         inline void resolveDamage(TurnData & opposing);
     
 };
@@ -121,7 +121,8 @@ inline void ArmyCondition::startNewTurn() {
 }
 
 // Handle all self-centered abilites and other multipliers on damage
-inline void ArmyCondition::getDamage(const int turncounter, const Element opposingElement) {
+// Protection needs to be calculated at this point. 
+inline void ArmyCondition::getDamage(const int turncounter, const Element opposingElement, const int opposingProtection) {
     turnData.baseDamage = lineup[monstersLost]->damage; // Get Base damage
     
     // Handle Monsters with skills that only activate on attack.
@@ -153,6 +154,12 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     if (counter[opposingElement] == lineup[monstersLost]->element) {
         turnData.valkyrieDamage *= elementalBoost;
     }
+    if (turnData.valkyrieDamage > opposingProtection) { // Handle Protection
+        turnData.valkyrieDamage -= (float) opposingProtection;
+    } else {
+        turnData.valkyrieDamage = 0;
+    }
+    
     turnData.baseDamage = castCeil(turnData.valkyrieDamage);
 }
 
@@ -162,9 +169,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     int frontliner = monstersLost; // save original frontliner
     
     // Apply normal attack damage to the frontliner
-    if (opposing.baseDamage > turnData.protection) {
-        remainingHealths[monstersLost] -= opposing.baseDamage - turnData.protection; // Handle Protection
-    }
+    remainingHealths[monstersLost] -= opposing.baseDamage;
     
     // Handle aoe Damage for all combatants
     for (i = frontliner; i < armySize; i++) {
@@ -227,16 +232,16 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         rightCondition.startNewTurn();
         
         // Get damage with all relevant multipliers
-        leftCondition.getDamage(turncounter, rightCondition.lineup[rightCondition.monstersLost]->element);
-        rightCondition.getDamage(turncounter, leftCondition.lineup[leftCondition.monstersLost]->element);
+        leftCondition.getDamage(turncounter, rightCondition.lineup[rightCondition.monstersLost]->element, rightCondition.turnData.protection);
+        rightCondition.getDamage(turncounter, leftCondition.lineup[leftCondition.monstersLost]->element, leftCondition.turnData.protection);
         
         // Handle Revenge Damage before anything else. Revenge Damage caused through aoe is ignored
         if (leftCondition.skillTypes[leftCondition.monstersLost] == REVENGE && 
-            leftCondition.remainingHealths[leftCondition.monstersLost] <= rightCondition.turnData.baseDamage - leftCondition.turnData.protection) {
+            leftCondition.remainingHealths[leftCondition.monstersLost] <= rightCondition.turnData.baseDamage) {
             leftCondition.turnData.aoeDamage += (int) round((float) leftCondition.lineup[leftCondition.monstersLost]->damage * leftCondition.skillAmounts[leftCondition.monstersLost]);
         }
         if (rightCondition.skillTypes[rightCondition.monstersLost] == REVENGE && 
-            rightCondition.remainingHealths[rightCondition.monstersLost] <= leftCondition.turnData.baseDamage - rightCondition.turnData.protection) {
+            rightCondition.remainingHealths[rightCondition.monstersLost] <= leftCondition.turnData.baseDamage) {
             rightCondition.turnData.aoeDamage += (int) round((float) rightCondition.lineup[rightCondition.monstersLost]->damage * rightCondition.skillAmounts[rightCondition.monstersLost]);
         }
         
