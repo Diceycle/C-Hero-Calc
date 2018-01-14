@@ -123,6 +123,28 @@ std::string Army::toJSON() {
     return s.str();
 }
 
+void Instance::setTarget(Army aTarget) {
+    this->target = aTarget;
+    this->targetSize = aTarget.monsterAmount;
+    this->lowestBossHealth = -1;
+    
+    HeroSkill currentSkill;
+    this->hasAoe = false;
+    this->hasAsymmetricAoe = false;
+    this->hasWorldBoss = false;
+    for (size_t i = 0; i < this->targetSize; i++) {
+        currentSkill = monsterReference[this->target.monsters[i]].skill;
+        this->hasAoe |= currentSkill.hasAoe;
+        this->hasAsymmetricAoe |= currentSkill.hasAsymmetricAoe;
+        this->hasWorldBoss |= monsterReference[this->target.monsters[i]].rarity == WORLDBOSS;
+    }
+    
+    int lastAttack = monsterReference[this->target.monsters[this->targetSize - 1]].damage;
+    for (size_t i = 0; i < monsterReference.size(); i++) {
+        this->monsterUsefulLast.push_back(monsterReference[i].hp > lastAttack || monsterReference[i].skill.violatesFightResults);
+    }
+}
+
 // Returns the index of a quest if the lineup is the same. Returns -1 if not a quest
 int isQuest(Army & army) {
     bool match;

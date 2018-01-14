@@ -50,7 +50,6 @@ void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
 
 // Take the data from oldArmies and write all armies into newArmies with an additional monster at the end.
 // Armies that are dominated are ignored.
-// TODO: Dont expand with heroes if army is too expensive
 void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies, 
             const vector<Army> & oldPureArmies, const vector<Army> & oldHeroArmies, 
             const size_t currentArmySize, const Instance & instance) {
@@ -385,9 +384,9 @@ void outputSolution(Instance instance, bool replayStrings) {
     sane |= instance.hasWorldBoss && instance.bestSolution.lastFightData.frontHealth == instance.lowestBossHealth;
     
     if (iomanager.outputLevel == SERVER_OUTPUT) {
-        iomanager.outputMessage(instance.toJSON(sane), SERVER_OUTPUT);
+        iomanager.outputMessage(makeJSONFromInstance(instance, sane), SERVER_OUTPUT);
     } else {
-        iomanager.outputMessage(instance.toString(sane, replayStrings), CMD_OUTPUT);
+        iomanager.outputMessage(makeStringFromInstance(instance, sane, replayStrings), CMD_OUTPUT);
     }
 }
 

@@ -243,24 +243,6 @@ string IOManager::getJSONError(InputException e) {
     return s.str();
 }
 
-
-void Instance::setTarget(Army aTarget) {
-    this->target = aTarget;
-    this->targetSize = aTarget.monsterAmount;
-    this->lowestBossHealth = -1;
-    
-    HeroSkill currentSkill;
-    this->hasAoe = false;
-    this->hasAsymmetricAoe = false;
-    this->hasWorldBoss = false;
-    for (size_t i = 0; i < this->targetSize; i++) {
-        currentSkill = monsterReference[this->target.monsters[i]].skill;
-        this->hasAoe |= currentSkill.hasAoe;
-        this->hasAsymmetricAoe |= currentSkill.hasAsymmetricAoe;
-        this->hasWorldBoss |= monsterReference[this->target.monsters[i]].rarity == WORLDBOSS;
-    }
-}
-
 // Convert a lineup string into an actual instance to solve
 Instance makeInstanceFromString(string instanceString) {
     Instance instance;
@@ -382,17 +364,17 @@ string getReplayHeroes(Army setup) {
     return heroes.str();
 }
 
-string Instance::toJSON(bool valid) {
+string makeJSONFromInstance(Instance instance, bool valid) {
     stringstream s;
     s << "{\"validSolution\" : {";
-    if (this->hasWorldBoss) {
-        s << "\"bossdamage\"" << ":" << WORLDBOSS_HEALTH - this->lowestBossHealth << ",";
+    if (instance.hasWorldBoss) {
+        s << "\"bossdamage\"" << ":" << WORLDBOSS_HEALTH - instance.lowestBossHealth << ",";
     }
-        s << "\"target\""  << ":" << this->target.toJSON() << ",";
-        s << "\"solution\""  << ":" << this->bestSolution.toJSON() << ",";
-        s << "\"time\""  << ":" << this->calculationTime << ",";
-        s << "\"fights\"" << ":" << this->totalFightsSimulated << ",";
-        s << "\"replay\"" << ":" << "\"" << makeBattleReplay(this->bestSolution, this->target) << "\"";
+        s << "\"target\""  << ":" << instance.target.toJSON() << ",";
+        s << "\"solution\""  << ":" << instance.bestSolution.toJSON() << ",";
+        s << "\"time\""  << ":" << instance.calculationTime << ",";
+        s << "\"fights\"" << ":" << instance.totalFightsSimulated << ",";
+        s << "\"replay\"" << ":" << "\"" << makeBattleReplay(instance.bestSolution, instance.target) << "\"";
     
     s << "}";
     if (!valid) {
@@ -405,28 +387,28 @@ string Instance::toJSON(bool valid) {
     return s.str();
 }
 
-string Instance::toString(bool valid, bool showReplayString) {
+string makeStringFromInstance(Instance instance, bool valid, bool showReplayString) {
     stringstream s;
         
-    s << endl << "Solution for " << this->target.toString() << ":" << endl;
+    s << endl << "Solution for " << instance.target.toString() << ":" << endl;
     // Announce the result
-    if (!this->bestSolution.isEmpty()) {
-        s << "  " << this->bestSolution.toString() << endl;
+    if (!instance.bestSolution.isEmpty()) {
+        s << "  " << instance.bestSolution.toString() << endl;
     } else {
         s << "  Could not find a solution that beats this lineup." << endl;
-    } cout << endl;
+    } s << endl;
     
     // Aditional Statistics
-    if (this->hasWorldBoss) {
-        s << "  Boss Damage Done: " << WORLDBOSS_HEALTH - this->lowestBossHealth << endl;
+    if (instance.hasWorldBoss) {
+        s << "  Boss Damage Done: " << WORLDBOSS_HEALTH - instance.lowestBossHealth << endl;
     }
-    s << "  " << this->totalFightsSimulated << " Fights simulated." << endl;
-    s << "  Total Calculation Time: " << this->calculationTime << endl;
+    s << "  " << instance.totalFightsSimulated << " Fights simulated." << endl;
+    s << "  Total Calculation Time: " << instance.calculationTime << endl;
     s << "  Calc Version: " << VERSION << endl << endl;
     
     // Replay for debugging and confirming interactions
-    if (!this->bestSolution.isEmpty() && showReplayString) {
-        s << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(this->bestSolution, this->target) << endl << endl;
+    if (!instance.bestSolution.isEmpty() && showReplayString) {
+        s << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(instance.bestSolution, instance.target) << endl << endl;
     }
     
     // Sanity Check

@@ -192,6 +192,28 @@ class Army {
         std::string toJSON();
 };
 
+// An instance to be solved by the program
+struct Instance {
+    Army target;
+    size_t targetSize;
+    size_t maxCombatants;
+    
+    int followerUpperBound;
+    Army bestSolution;
+    
+    time_t calculationTime;
+    int totalFightsSimulated = 0;
+    
+    bool hasAoe;
+    bool hasAsymmetricAoe;
+    bool hasWorldBoss;
+    int lowestBossHealth;
+    
+    std::vector<bool> monsterUsefulLast;
+    
+    void setTarget(Army aTarget);
+};
+
 // Function for sorting FightResults by followers (ascending)
 inline bool hasFewerFollowers(const Army & a, const Army & b) {
     return ((!a.lastFightData.dominated && b.lastFightData.dominated) || 

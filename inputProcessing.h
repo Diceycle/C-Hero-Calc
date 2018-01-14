@@ -41,28 +41,6 @@ enum OutputLevel {
     DETAILED_OUTPUT = 5
 };
 
-// An instance to be solved by the program
-struct Instance {
-    Army target;
-    size_t targetSize;
-    size_t maxCombatants;
-    
-    int followerUpperBound;
-    Army bestSolution;
-    
-    time_t calculationTime;
-    int totalFightsSimulated = 0;
-    
-    bool hasAoe;
-    bool hasAsymmetricAoe;
-    bool hasWorldBoss;
-    int lowestBossHealth;
-    
-    void setTarget(Army aTarget);
-    std::string toString(bool valid, bool showReplayString = true);
-    std::string toJSON(bool valid);
-};
-
 // TODO: Detect double hero inputs
 enum InputException {
     MONSTER_PARSE,
@@ -111,6 +89,9 @@ class IOManager {
 
 // Convert a lineup string into an actual instance to solve
 Instance makeInstanceFromString(std::string instanceString);
+
+std::string makeStringFromInstance(Instance instance, bool valid, bool showReplayString = true);
+std::string makeJSONFromInstance(Instance instance, bool valid);
 
 // Parse string linup input into actual monsters. If there are heroes in the input, a leveled hero is added to the database
 Army makeArmyFromStrings(std::vector<std::string> stringMonsters);
