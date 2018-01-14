@@ -334,6 +334,10 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 54, 36, "reindeer",          AIR,   RARE,      {AOE_L,         ALL, AIR, 0.112f}));
     baseHeroes.push_back(Monster( 72, 48, "santaclaus",        FIRE,  LEGENDARY, {LIFESTEAL_L,   ALL, FIRE, 0.112f}));
     baseHeroes.push_back(Monster( 44, 44, "sexysanta",         EARTH, RARE,      {VALKYRIE,      ALL, EARTH, 0.66f}));
+
+    baseHeroes.push_back(Monster( 24, 24, "toth",              FIRE,  COMMON,    {BUFF,          FIRE, FIRE, 4}));
+    baseHeroes.push_back(Monster( 30, 40, "ganah",             WATER, RARE,      {CHAMPION,      WATER, WATER, 2}));
+    baseHeroes.push_back(Monster( 46, 58, "dagda",             AIR,   LEGENDARY, {ADAPT,         AIR, AIR, 2}));
 }
 
 void initQuests() {
