@@ -15,7 +15,11 @@ Monster::Monster(int someHp, int someDamage, int aCost, std::string aName, Eleme
     if (this->rarity != NO_HERO) {
         this->name = this->baseName + HEROLEVEL_SEPARATOR + std::to_string(this->level);
         if (this->rarity == WORLDBOSS) {
-            this->damage += this->level-1;
+            int bonus = 0;
+            do {
+                aLevel -= ++bonus;
+            } while (aLevel > 0);
+            this->damage += bonus-1;
         } else {
             int points = this->rarity * (this->level-1);
             int value = this->hp + this->damage;
