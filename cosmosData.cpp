@@ -59,6 +59,9 @@ Monster::Monster(const Monster & baseHero, int aLevel) :
     } else if (baseHero.skill.skillType == LIFESTEAL_L) {
         this->skill.skillType = LIFESTEAL;
         this->skill.amount = (float) floor((float) aLevel * baseHero.skill.amount);
+    } else if (baseHero.skill.skillType == DAMPEN_L) {
+        this->skill.skillType = DAMPEN;
+        this->skill.amount = 1.0f - (float) aLevel * baseHero.skill.amount;
     }
 }
 

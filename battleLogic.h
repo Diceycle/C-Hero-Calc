@@ -21,6 +21,7 @@ struct TurnData {
     int protection = 0;
     int aoeDamage = 0;
     int healing = 0;
+    float dampFactor = 1;
     
     float valkyrieMult = 0;
     float valkyrieDamage = 0;
@@ -50,7 +51,7 @@ class ArmyCondition {
         inline void init(const Army & army);
         inline void afterDeath();
         inline void startNewTurn();
-        inline void getDamage(const int turncounter, const Element opposingElement, const int opposingProtection);
+        inline void getDamage(const int turncounter, const Element opposingElement, const int opposingProtection, const float opposingDampFactor);
         inline void resolveDamage(TurnData & opposing);
     
 };
@@ -94,6 +95,7 @@ inline void ArmyCondition::startNewTurn() {
     turnData.protection = 0;
     turnData.aoeDamage = 0;
     turnData.healing = 0;
+    turnData.dampFactor = 1;
     
     // Gather all skills that trigger globally
     for (i = monstersLost; i < armySize; i++) {
@@ -116,13 +118,15 @@ inline void ArmyCondition::startNewTurn() {
             case LIFESTEAL: turnData.aoeDamage += (int) skillAmounts[i];
                             turnData.healing += (int) skillAmounts[i];
                             break;
+            case DAMPEN:    turnData.dampFactor *= skillAmounts[i];
+                            break;
         }
     }
 }
 
 // Handle all self-centered abilites and other multipliers on damage
 // Protection needs to be calculated at this point. 
-inline void ArmyCondition::getDamage(const int turncounter, const Element opposingElement, const int opposingProtection) {
+inline void ArmyCondition::getDamage(const int turncounter, const Element opposingElement, const int opposingProtection, const float opposingDampFactor) {
     turnData.baseDamage = lineup[monstersLost]->damage; // Get Base damage
     
     // Handle Monsters with skills that only activate on attack.
@@ -161,6 +165,11 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     }
     
     turnData.baseDamage = castCeil(turnData.valkyrieDamage);
+    
+    // Handle enemy dampen ability and reduce aoe effects
+    turnData.valkyrieDamage *= opposingDampFactor;
+    turnData.aoeDamage = castCeil((float) turnData.aoeDamage * opposingDampFactor);
+    turnData.healing = castCeil((float) turnData.healing * opposingDampFactor);
 }
 
 // Add damage to the opposing side and check for deaths
@@ -232,8 +241,8 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         rightCondition.startNewTurn();
         
         // Get damage with all relevant multipliers
-        leftCondition.getDamage(turncounter, rightCondition.lineup[rightCondition.monstersLost]->element, rightCondition.turnData.protection);
-        rightCondition.getDamage(turncounter, leftCondition.lineup[leftCondition.monstersLost]->element, leftCondition.turnData.protection);
+        leftCondition.getDamage(turncounter, rightCondition.lineup[rightCondition.monstersLost]->element, rightCondition.turnData.protection, rightCondition.turnData.dampFactor);
+        rightCondition.getDamage(turncounter, leftCondition.lineup[leftCondition.monstersLost]->element, leftCondition.turnData.protection, leftCondition.turnData.dampFactor);
         
         // Handle Revenge Damage before anything else. Revenge Damage caused through aoe is ignored
         if (leftCondition.skillTypes[leftCondition.monstersLost] == REVENGE && 
