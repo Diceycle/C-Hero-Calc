@@ -168,8 +168,8 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     
     // Handle enemy dampen ability and reduce aoe effects
     turnData.valkyrieDamage *= opposingDampFactor;
-    turnData.aoeDamage = castCeil((float) turnData.aoeDamage * opposingDampFactor);
-    turnData.healing = castCeil((float) turnData.healing * opposingDampFactor);
+    turnData.aoeDamage = (int) ((float) turnData.aoeDamage * opposingDampFactor);
+    turnData.healing = (int) ((float) turnData.healing * opposingDampFactor);
 }
 
 // Add damage to the opposing side and check for deaths
