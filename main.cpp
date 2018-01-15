@@ -55,6 +55,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             const size_t currentArmySize, const Instance & instance) {
 
     int remainingFollowers;
+    bool removeUseless = currentArmySize == (instance.maxCombatants-1) && !instance.hasWorldBoss;
     size_t availableMonstersSize = availableMonsters.size();
     size_t availableHeroesSize = availableHeroes.size();
     size_t oldPureArmiesSize = oldPureArmies.size();
@@ -64,15 +65,22 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     for (i = 0; i < oldPureArmiesSize; i++) {
         remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
         if (!oldPureArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
-            for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
-                newPureArmies.push_back(oldPureArmies[i]);
-                newPureArmies.back().add(availableMonsters[m]);
-                newPureArmies.back().lastFightData.valid = !instance.hasAoe && !instance.hasAsymmetricAoe;
+
+            for (m = 0; m < availableMonstersSize; m++) {
+                if (monsterReference[availableMonsters[m]].cost < remainingFollowers) {
+                    if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]]) {
+                        newPureArmies.push_back(oldPureArmies[i]);
+                        newPureArmies.back().add(availableMonsters[m]);
+                        newPureArmies.back().lastFightData.valid = !instance.hasAoe && !instance.hasAsymmetricAoe;
+                    }
+                }
             }
             for (m = 0; m < availableHeroesSize; m++) {
-                newHeroArmies.push_back(oldPureArmies[i]);
-                newHeroArmies.back().add(availableHeroes[m]);
-                newHeroArmies.back().lastFightData.valid = !monsterReference[availableHeroes[m]].skill.violatesFightResults && !instance.hasAoe && !instance.hasAsymmetricAoe;
+                if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]]) {
+                    newHeroArmies.push_back(oldPureArmies[i]);
+                    newHeroArmies.back().add(availableHeroes[m]);
+                    newHeroArmies.back().lastFightData.valid = !monsterReference[availableHeroes[m]].skill.violatesFightResults && !instance.hasAoe && !instance.hasAsymmetricAoe;
+                }
             }
         }
     }
@@ -98,15 +106,26 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 usedHeroes[oldHeroArmies[i].monsters[m]] = true;
             }
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
-                newHeroArmies.push_back(oldHeroArmies[i]);
-                newHeroArmies.back().add(availableMonsters[m]);
-                newHeroArmies.back().lastFightData.valid = !instanceInvalid && !friendsInfluence && !rainbowInfluence && !invalidSkill;
+                if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]]) {
+                    newHeroArmies.push_back(oldHeroArmies[i]);
+                    newHeroArmies.back().add(availableMonsters[m]);
+                    newHeroArmies.back().lastFightData.valid = !instanceInvalid && 
+                                                               !friendsInfluence && 
+                                                               !rainbowInfluence && 
+                                                               !invalidSkill;
+                }
             }
             for (m = 0; m < availableHeroesSize; m++) {
                 if (!usedHeroes[availableHeroes[m]]) {
-                    newHeroArmies.push_back(oldHeroArmies[i]);
-                    newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = !instanceInvalid && !monsterReference[availableHeroes[m]].skill.violatesFightResults && !rainbowInfluence && !invalidSkill;
+                    if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]]) {
+                        newHeroArmies.push_back(oldHeroArmies[i]);
+                        newHeroArmies.back().add(availableHeroes[m]);
+                        newHeroArmies.back().lastFightData.valid = !instanceInvalid && 
+                                                                   !monsterReference[availableHeroes[m]].skill.violatesFightResults && 
+                                                                   !rainbowInfluence && 
+                                                                   !(monsterReference[availableHeroes[m]].skill.skillType == DAMPEN && instance.hasAoe) &&
+                                                                   !invalidSkill;
+                    }
                 }
                 usedHeroes[availableHeroes[m]] = false;
             }
