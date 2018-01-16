@@ -379,7 +379,7 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 40, 30, "ganah",              WATER, RARE,      {CHAMPION,      WATER, WATER, 2}));
     baseHeroes.push_back(Monster( 58, 46, "dagda",              AIR,   LEGENDARY, {ADAPT,         AIR, AIR, 2}));
     
-    baseHeroes.push_back(Monster(200, 60, "bubbles",            WATER, ASCENDED,  {DAMPEN_L,      ALL, WATER, 0.25f}));
+    baseHeroes.push_back(Monster(200, 60, "bubbles",            WATER, ASCENDED,  {DAMPEN_L,      ALL, WATER, 0.0025f}));
     
     baseHeroes.push_back(Monster(150, 86, "apontus",            WATER, ASCENDED,  {ADAPT,         WATER, WATER, 3}));
     baseHeroes.push_back(Monster(201, 37, "aatzar",             FIRE,  ASCENDED,  {ADAPT,         FIRE, FIRE, 3}));
