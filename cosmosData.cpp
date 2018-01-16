@@ -152,9 +152,14 @@ void Instance::setTarget(Army aTarget) {
     // Check which monsters can survive a hit from the final monster on the target. This helps reduce the amoutn of potential soluitons in the last expand
     // Heroes with global Abilities also get accepted. 
     // This produces only false positives not false negatives -> no correct solutions lost
-    int lastAttack = monsterReference[this->target.monsters[this->targetSize - 1]].damage;
+    Monster lastMonster = monsterReference[this->target.monsters[this->targetSize - 1]];
     for (size_t i = 0; i < monsterReference.size(); i++) {
-        this->monsterUsefulLast.push_back(monsterReference[i].hp > lastAttack || monsterReference[i].skill.violatesFightResults);
+        Monster currentMonster = monsterReference[i];
+        int attack = lastMonster.damage;
+        if (counter[currentMonster.element] == lastMonster.element) {
+            attack = castCeil((float) attack * elementalBoost);
+        }
+        this->monsterUsefulLast.push_back(currentMonster.hp > attack || currentMonster.skill.violatesFightResults);
     }
 }
 

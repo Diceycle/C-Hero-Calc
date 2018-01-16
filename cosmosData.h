@@ -63,6 +63,7 @@ enum Element {
     SELF         // These Values are used to specify targets of hero skills
 };
 const Element counter [] { FIRE, EARTH, AIR, WATER, SELF, SELF }; // Elemental Advantages earth = 0 -> counter[0] = fire -> fire has advantage over earth
+const float elementalBoost = 1.5; // Damage Boost if element has advantage over another
 
 enum HeroRarity { 
     NO_HERO = 0,

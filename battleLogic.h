@@ -6,7 +6,6 @@
 
 #include "cosmosData.h"
 
-const float elementalBoost = 1.5; // Damage Boost if element has advantage over another
 extern int * totalFightsSimulated;
 extern int fightsSimulatedDefault; 
 
