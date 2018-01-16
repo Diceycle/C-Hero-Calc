@@ -62,10 +62,12 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     size_t oldHeroArmiesSize = oldHeroArmies.size();
     size_t i, m;
     
+    // Expansion for non-Hero Armies
     for (i = 0; i < oldPureArmiesSize; i++) {
         remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
         if (!oldPureArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
 
+            // Add Normal Monsters. Check for Cost
             for (m = 0; m < availableMonstersSize; m++) {
                 if (monsterReference[availableMonsters[m]].cost < remainingFollowers) {
                     if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]]) {
@@ -75,6 +77,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                     }
                 }
             }
+            // Add Hero. no check needed because it is the First Added
             for (m = 0; m < availableHeroesSize; m++) {
                 if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]]) {
                     newHeroArmies.push_back(oldPureArmies[i]);
@@ -98,6 +101,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             rainbowInfluence = false;
             invalidSkill = false;
             instanceInvalid = instance.hasAoe;
+            // Check for influences that can invalidate fightresults and gather used heroes
             for (m = 0; m < currentArmySize; m++) {
                 currentSkill = monsterReference[oldHeroArmies[i].monsters[m]].skill;
                 invalidSkill |= currentSkill.hasAoe;
@@ -105,7 +109,9 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 rainbowInfluence |= currentSkill.skillType == RAINBOW && currentArmySize > m + 4; // Hardcoded number of elements required to activate rainbow
                 usedHeroes[oldHeroArmies[i].monsters[m]] = true;
             }
+            // Add Normal Monster. No checks needed except cost
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
+                // In case of a draw this could casue problems if no more suitable units are available
                 if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]]) {
                     newHeroArmies.push_back(oldHeroArmies[i]);
                     newHeroArmies.back().add(availableMonsters[m]);
@@ -115,6 +121,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                                                                !invalidSkill;
                 }
             }
+            // Add Hero. Check if hero was used before.
             for (m = 0; m < availableHeroesSize; m++) {
                 if (!usedHeroes[availableHeroes[m]]) {
                     if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]]) {
@@ -127,6 +134,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                                                                    !invalidSkill;
                     }
                 }
+                // Clean up for the next army
                 usedHeroes[availableHeroes[m]] = false;
             }
         }
