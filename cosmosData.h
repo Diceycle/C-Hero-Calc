@@ -81,6 +81,7 @@ struct HeroSkill {
     float amount;
     bool violatesFightResults;
     bool hasAoe;
+    bool hasHeal;
     bool hasAsymmetricAoe;
     
     HeroSkill(SkillType aType, Element aTarget, Element aSource, float anAmount);
@@ -207,6 +208,7 @@ struct Instance {
     int totalFightsSimulated = 0;
     
     bool hasAoe;
+    bool hasHeal;
     bool hasAsymmetricAoe;
     bool hasWorldBoss;
     int lowestBossHealth;

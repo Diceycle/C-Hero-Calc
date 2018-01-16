@@ -55,12 +55,14 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             const size_t currentArmySize, const Instance & instance) {
 
     int remainingFollowers;
-    bool removeUseless = currentArmySize == (instance.maxCombatants-1) && !instance.hasWorldBoss;
     size_t availableMonstersSize = availableMonsters.size();
     size_t availableHeroesSize = availableHeroes.size();
     size_t oldPureArmiesSize = oldPureArmies.size();
     size_t oldHeroArmiesSize = oldHeroArmies.size();
     size_t i, m;
+    
+    bool removeUseless = currentArmySize == (instance.maxCombatants-1) && !instance.hasWorldBoss;
+    bool instanceInvalid = instance.hasHeal || instance.hasAsymmetricAoe;
     
     // Expansion for non-Hero Armies
     for (i = 0; i < oldPureArmiesSize; i++) {
@@ -73,7 +75,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                     if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]]) {
                         newPureArmies.push_back(oldPureArmies[i]);
                         newPureArmies.back().add(availableMonsters[m]);
-                        newPureArmies.back().lastFightData.valid = !instance.hasAoe && !instance.hasAsymmetricAoe;
+                        newPureArmies.back().lastFightData.valid = !instanceInvalid;
                     }
                 }
             }
@@ -82,7 +84,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]]) {
                     newHeroArmies.push_back(oldPureArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = !monsterReference[availableHeroes[m]].skill.violatesFightResults && !instance.hasAoe && !instance.hasAsymmetricAoe;
+                    newHeroArmies.back().lastFightData.valid = !instanceInvalid && !monsterReference[availableHeroes[m]].skill.violatesFightResults;
                 }
             }
         }
@@ -93,18 +95,16 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     bool invalidSkill;
     bool friendsInfluence;
     bool rainbowInfluence;
-    bool instanceInvalid;
     for (i = 0; i < oldHeroArmiesSize; i++) {
         remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
         if (!oldHeroArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
             friendsInfluence = false;
             rainbowInfluence = false;
             invalidSkill = false;
-            instanceInvalid = instance.hasAoe;
             // Check for influences that can invalidate fightresults and gather used heroes
             for (m = 0; m < currentArmySize; m++) {
                 currentSkill = monsterReference[oldHeroArmies[i].monsters[m]].skill;
-                invalidSkill |= currentSkill.hasAoe;
+                invalidSkill |= currentSkill.hasHeal || currentSkill.hasAsymmetricAoe;
                 friendsInfluence |= currentSkill.skillType == FRIENDS;
                 rainbowInfluence |= currentSkill.skillType == RAINBOW && currentArmySize > m + 4; // Hardcoded number of elements required to activate rainbow
                 usedHeroes[oldHeroArmies[i].monsters[m]] = true;

@@ -71,11 +71,12 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float an
     sourceElement(aSource), 
     amount(anAmount) 
 {
-    this->hasAsymmetricAoe = (aType == VALKYRIE || aType == PIERCE);
+    this->hasAsymmetricAoe = (aType == VALKYRIE);
+    this->hasHeal = (aType == HEAL || aType == HEAL_L || 
+                     aType == LIFESTEAL || aType == LIFESTEAL_L);
     this->hasAoe = (aType == AOE || aType == AOE_L || 
-                    aType == HEAL || aType == HEAL_L || 
-                    aType == LIFESTEAL || aType == LIFESTEAL_L || 
-                    aType == REVENGE || this->hasAsymmetricAoe);
+                    aType == REVENGE || aType == PIERCE ||
+                    this->hasHeal || this->hasAsymmetricAoe);
     this->violatesFightResults = (aType == BUFF || aType == BUFF_L || 
                                   aType == PROTECT || aType == PROTECT_L ||
                                   aType == CHAMPION || aType == CHAMPION_L ||
@@ -137,11 +138,13 @@ void Instance::setTarget(Army aTarget) {
     
     HeroSkill currentSkill;
     this->hasAoe = false;
+    this->hasHeal = false;
     this->hasAsymmetricAoe = false;
     this->hasWorldBoss = false;
     for (size_t i = 0; i < this->targetSize; i++) {
         currentSkill = monsterReference[this->target.monsters[i]].skill;
         this->hasAoe |= currentSkill.hasAoe;
+        this->hasHeal |= currentSkill.hasHeal;
         this->hasAsymmetricAoe |= currentSkill.hasAsymmetricAoe;
         this->hasWorldBoss |= monsterReference[this->target.monsters[i]].rarity == WORLDBOSS;
     }
