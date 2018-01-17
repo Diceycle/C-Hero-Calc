@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <map>
 
-const std::string VERSION = "2.9.2.5";
+const std::string VERSION = "2.9.2.6";
 
 // Constants defining the basic structure of armies
 const size_t ARMY_MAX_SIZE = 6;

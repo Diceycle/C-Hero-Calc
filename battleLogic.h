@@ -223,6 +223,10 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         // Set pre-computed values to pick up where we left off
         leftCondition.init(left, left.monsterAmount-1, left.lastFightData.leftAoeDamage);
         rightCondition.init(right, left.lastFightData.monstersLost, left.lastFightData.rightAoeDamage);
+        // Check if the new addition died to Aoe
+        if (leftCondition.remainingHealths[leftCondition.monstersLost] <= 0) {
+            leftCondition.monstersLost++;
+        }
         
         rightCondition.remainingHealths[rightCondition.monstersLost] = left.lastFightData.frontHealth;
         rightCondition.berserkProcs        = left.lastFightData.berserk;
