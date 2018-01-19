@@ -363,8 +363,8 @@ void solveInstance(Instance & instance, size_t firstDominance) {
         // Start Expansion routine if there is still room
         if (armySize < instance.maxCombatants) { 
             // Manage output format 
-            if (armySize == firstDominance && iomanager.outputLevel == BASIC_OUTPUT) {
-                iomanager.outputLevel = DETAILED_OUTPUT; // Switch output level after pure brutefore is exhausted
+            if (armySize == firstDominance && config.outputLevel == BASIC_OUTPUT) {
+                config.outputLevel = DETAILED_OUTPUT; // Switch output level after pure brutefore is exhausted
             }
             if (armySize == firstDominance) {
                 iomanager.outputMessage("", DETAILED_OUTPUT);
@@ -410,7 +410,7 @@ void outputSolution(Instance instance, bool replayStrings) {
     sane = !instance.hasWorldBoss && (!instance.bestSolution.lastFightData.rightWon || instance.bestSolution.isEmpty());
     sane |= instance.hasWorldBoss && instance.bestSolution.lastFightData.frontHealth == instance.lowestBossHealth;
     
-    if (iomanager.outputLevel == SERVER_OUTPUT) {
+    if (config.outputLevel == SERVER_OUTPUT) {
         iomanager.outputMessage(makeJSONFromInstance(instance, sane), SERVER_OUTPUT);
     } else {
         iomanager.outputMessage(makeStringFromInstance(instance, sane, replayStrings), CMD_OUTPUT);
@@ -418,48 +418,23 @@ void outputSolution(Instance instance, bool replayStrings) {
 }
 
 int main(int argc, char** argv) {
-    
     // Declare Variables
-    vector<int> heroLevels;
     int32_t minimumMonsterCost;
     int32_t userFollowerUpperBound;
     vector<Instance> instances;
     bool userWantsContinue;
- 
-    // Define User Input Data
-    size_t firstDominance = ARMY_MAX_BRUTEFORCEABLE_SIZE;   // Set this to control at which army length dominance should first be calculated. Treat with extreme caution. Not using dominance at all WILL use more RAM than you have
-    string macroFileName = "default.cqinput";               // Path to default macro file
-
-    // Flow Control Variables
-    bool useDefaultMacroFile = true;    // Set this to true to always use the specified macro file
-    bool showMacroFileInput = true;     // Set this to true to see what the macrofile inputs
-    bool individual = false;            // Set this to true if you want to simulate individual fights (lineups will be promted when you run the program)
-    bool showReplayStrings = true;      // Set this to true to see battle replay strings that can be used ingame
     
-    iomanager.outputLevel = CMD_OUTPUT;
-    // Check if the user provided a filename to be used as a macro file
-    try {
-        if (argc >= 2) {
-            if (argc >= 3 && (string) argv[2] == "-server") {
-                showMacroFileInput = false;
-                iomanager.outputLevel = SERVER_OUTPUT;
-            }
-            iomanager.initMacroFile(argv[1], showMacroFileInput);
-        }
-        else if (useDefaultMacroFile) {
-            iomanager.initMacroFile(macroFileName, showMacroFileInput);
-        }
-    } catch (InputException e) {
-        if (e == MACROFILE_MISSING) {
-            if (iomanager.outputLevel == SERVER_OUTPUT) {
-                iomanager.outputMessage(iomanager.getJSONError(e), SERVER_OUTPUT);
-                return EXIT_FAILURE;
-            } else {
-                iomanager.outputMessage("Macrofile not Found. Switching no manual Input...", CMD_OUTPUT);
-            }
-        } else {
-            throw e;
-        }
+    config.outputLevel = CMD_OUTPUT;
+    if (argc >= 3 && (string) argv[2] == "-server") {
+        config.showQueries = false;
+        config.outputLevel = SERVER_OUTPUT;
+    }
+    
+    // Check if the user provided a filename to be used as an inputfile
+    if (argc >= 2) {
+        iomanager.initFileInput(argv[1]);
+    } else {
+        iomanager.initFileInput(""); 
     }
     
     // Initialize global Data
@@ -470,7 +445,7 @@ int main(int argc, char** argv) {
     iomanager.outputMessage(welcomeMessage, CMD_OUTPUT);
     iomanager.outputMessage(helpMessage, CMD_OUTPUT);
     
-    if (individual) {
+    if (config.individualBattles) {
         iomanager.outputMessage("Simulating individual Figths", CMD_OUTPUT);
         while (true) {
             Army left = iomanager.takeInstanceInput("Enter friendly lineup: ")[0].target;
@@ -486,44 +461,23 @@ int main(int argc, char** argv) {
     }
     
     // Collect the Data via Command Line
-    try {
-        availableHeroes = iomanager.takeHerolevelInput();
-        minimumMonsterCost = stoi(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", integer));
-        userFollowerUpperBound = stoi(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", integer));
-    } catch (InputException e) {
-        if (e == MACROFILE_USED_UP) {
-            if (iomanager.outputLevel == SERVER_OUTPUT) {
-                iomanager.outputMessage(iomanager.getJSONError(e), SERVER_OUTPUT);
-                return EXIT_FAILURE;
-            }
-        } else {
-            throw e;
-        }
-    }
+    availableHeroes = iomanager.takeHerolevelInput();
+    minimumMonsterCost = stoi(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", integer));
+    userFollowerUpperBound = stoi(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", integer));
     
     // Fill monster arrays with relevant monsters
     filterMonsterData(minimumMonsterCost);
     
     do {
-        try {
-            instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
-        } catch (InputException e) {
-            if (e == MACROFILE_USED_UP) {
-                if (iomanager.outputLevel == SERVER_OUTPUT) {
-                    iomanager.outputMessage(iomanager.getJSONError(e), SERVER_OUTPUT);
-                    return EXIT_FAILURE;
-                }
-            } else {
-                throw e;
-            }
-        }
+        instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
+    
         iomanager.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", CMD_OUTPUT);
         
-        if (iomanager.outputLevel == CMD_OUTPUT) { // TODO: Reset Output Level if userwantscontinue
+        if (config.outputLevel == CMD_OUTPUT) { // TODO: Reset Output Level if userwantscontinue
             if (instances.size() > 1) {
-                iomanager.outputLevel = SOLUTION_OUTPUT;
+                config.outputLevel = SOLUTION_OUTPUT;
             } else {
-                iomanager.outputLevel = BASIC_OUTPUT;
+                config.outputLevel = BASIC_OUTPUT;
             }
         }
         
@@ -536,8 +490,8 @@ int main(int argc, char** argv) {
                 instances[i].followerUpperBound = userFollowerUpperBound;
             }
             
-            solveInstance(instances[i], firstDominance);
-            outputSolution(instances[i], showReplayStrings);
+            solveInstance(instances[i], config.firstDominance);
+            outputSolution(instances[i], config.showReplayStrings);
         }
         userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", CMD_OUTPUT, NEGATIVE_ANSWER);
     } while (userWantsContinue);

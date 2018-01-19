@@ -4,30 +4,51 @@ using namespace std;
 
 // Length of timestamp in debug messages
 const size_t FINISH_MESSAGE_LENGTH = 20;
+const string DEFAULT_MACRO = "benchmark.cqinput";
+const string DEFAULT_CONFIG = "default.cqconfig";
+Configuration config;
 
 IOManager::IOManager() {
-    this->useMacroFile = false;
-    this->showQueries = true;
-    this->outputLevel = BASIC_OUTPUT;
-    
     this->lastTimedOutput = -1;
 }
 
 bool IOManager::shouldOutput(OutputLevel urgency) {
-    return (this->outputLevel >= urgency);
+    return (config.outputLevel >= urgency);
 }
 
-// Initialize a macro file provided by filename
-void IOManager::initMacroFile(string macroFileName, bool showInput) {
-    this->macroFile.open(macroFileName);
-    
-    if (!this->macroFile.good()) {
-        this->useMacroFile = false;
-        throw MACROFILE_MISSING;
-    } else {    
-        this->useMacroFile = true;
-        this->showQueries = showInput;
+// Try to get input from a file by heirarchy
+void IOManager::initFileInput(string fileName) {
+    this->useInputFile = true;
+    // Try file specified on command line first
+    if (fileName != "") {
+        this->currentInputFile.open(fileName);
+        if (!this->currentInputFile.good()) {
+            this->outputMessage("Could not find or open specified file!", CMD_OUTPUT);
+        } else {
+            this->outputMessage("Using specified File...\n", CMD_OUTPUT);
+            return;
+        }
     }
+    // Configfiles take precedence over Macrofiles
+    this->currentInputFile.open(DEFAULT_CONFIG);
+    if (!this->currentInputFile.good()) {
+        this->outputMessage("Could not find or open default Configfile!", CMD_OUTPUT);
+    } else {
+        this->outputMessage("Using default Configfile...\n", CMD_OUTPUT);
+        return;
+    }
+    // Check Macrofile last
+    this->currentInputFile.open(DEFAULT_MACRO);
+    if (!this->currentInputFile.good()) {
+        this->outputMessage("Could not find or open default Macrofile!", CMD_OUTPUT);
+    } else {
+        this->outputMessage("Using default Macrofile...\n", CMD_OUTPUT);
+        return;
+    }
+    // If the method reaches this no file worked.
+//    this->setError(INPUTFILE_MISSING); TODO Server mode
+    this->useInputFile = false;
+    this->outputMessage("Switching to manual Input...\n", CMD_OUTPUT);
 }
 
 // Output method called only by class. takes an output level to determine if it should be printed or not
@@ -95,26 +116,26 @@ string IOManager::getResistantInput(string query, QueryType queryType) {
     string firstToken;
     while (true) {
         // Check first if there is still a line in the macro file
-        if (this->useMacroFile) {
-            this->useMacroFile = (bool) getline(this->macroFile, inputString);
+        if (this->useInputFile) {
+            this->useInputFile = (bool) getline(this->currentInputFile, inputString);
         } 
-        // in sever mode the macro file has to be complete
-        if (!this->useMacroFile && this->outputLevel == SERVER_OUTPUT) {
-            throw MACROFILE_USED_UP;
-        }
+        // in sever mode the macro file has to be complete TODO Server mode
+//        if (!this->useInputFile && this->outputLevel == SERVER_OUTPUT) {
+//            throw MACROFILE_USED_UP;
+//        }
         // Print the query only if no macro file is used or specifically asked for
-        if (!this->useMacroFile || this->showQueries) {
+        if (!this->useInputFile || config.showQueries) {
             cout << query;
         }
         // Ask for user input
-        if (!this->useMacroFile) {
+        if (!this->useInputFile) {
             getline(cin, inputString);
         }
         
         // Process Input
         inputString = split(toLower(inputString), COMMENT_DELIMITOR)[0]; // trim potential comments in a macrofile and convert to lowercase
         firstToken = split(inputString, TOKEN_SEPARATOR)[0]; // except for rare input only the first string till a space is used
-        if (this->useMacroFile && this->showQueries) {
+        if (this->useInputFile && config.showQueries) {
             cout << inputString << endl; // Show input if a macro file is used
         }
         if (queryType == question && (firstToken == POSITIVE_ANSWER || firstToken == NEGATIVE_ANSWER)) {
@@ -161,7 +182,7 @@ vector<int8_t> IOManager::takeHerolevelInput() {
     string input;
     pair<Monster, int> heroData;
     
-    if (!this->useMacroFile || this->showQueries) {
+    if (!this->useInputFile || config.showQueries) {
         cout << endl << "Enter your Heroes with levels. Press enter after every Hero." << endl;
         cout << "Press enter twice or type done to proceed without inputting additional Heroes." << endl;
     }

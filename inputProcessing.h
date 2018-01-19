@@ -49,11 +49,20 @@ enum InputException {
     MACROFILE_USED_UP
 };
 
+struct Configuration {
+    bool showQueries = true;
+    int firstDominance = ARMY_MAX_BRUTEFORCEABLE_SIZE;
+    OutputLevel outputLevel = BASIC_OUTPUT;
+    bool individualBattles = false;
+    bool showReplayStrings = true;
+    bool autoAdjustOutputLevel = true;
+};
+extern Configuration config;
+
 class IOManager {
     private:
-        bool useMacroFile;
-        bool showQueries = true;
-        std::ifstream macroFile;
+        bool useInputFile;
+        std::ifstream currentInputFile;
 
         time_t lastTimedOutput = -1;
         std::ostringstream outputStream;
@@ -64,11 +73,9 @@ class IOManager {
         void handleInputException(InputException e);
         
     public:
-        OutputLevel outputLevel;
-        
         IOManager();
         
-        void initMacroFile(std::string macroFileName, bool showInput);
+        void initFileInput(std::string fileName);
         std::string getResistantInput(std::string query, QueryType queryType = raw);
         bool askYesNoQuestion(std::string question, OutputLevel urgency, std::string defaultAnswer);
         std::vector<int8_t> takeHerolevelInput();
