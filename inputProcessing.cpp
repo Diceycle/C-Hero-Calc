@@ -4,69 +4,22 @@ using namespace std;
 
 // Length of timestamp in debug messages
 const size_t FINISH_MESSAGE_LENGTH = 20;
-const string DEFAULT_MACRO = "benchmark.cqinput";
+const string DEFAULT_MACRO = "default.cqinput";
 const string DEFAULT_CONFIG = "default.cqconfig";
 Configuration config;
+UserInterface interface;
 
-IOManager::IOManager() {
-    this->lastTimedOutput = -1;
-}
-
-bool IOManager::shouldOutput(OutputLevel urgency) {
-    return (config.outputLevel >= urgency);
-}
-
-// Try to get input from a file by heirarchy
-void IOManager::initFileInput(string fileName) {
-    this->useInputFile = true;
-    // Try file specified on command line first
-    if (fileName != "") {
-        this->currentInputFile.open(fileName);
-        if (!this->currentInputFile.good()) {
-            this->outputMessage("Could not find or open specified file!", CMD_OUTPUT);
-        } else {
-            this->outputMessage("Using specified File...\n", CMD_OUTPUT);
-            return;
-        }
-    }
-    // Configfiles take precedence over Macrofiles
-    this->currentInputFile.open(DEFAULT_CONFIG);
-    if (!this->currentInputFile.good()) {
-        this->outputMessage("Could not find or open default Configfile!", CMD_OUTPUT);
-    } else {
-        this->outputMessage("Using default Configfile...\n", CMD_OUTPUT);
-        return;
-    }
-    // Check Macrofile last
-    this->currentInputFile.open(DEFAULT_MACRO);
-    if (!this->currentInputFile.good()) {
-        this->outputMessage("Could not find or open default Macrofile!", CMD_OUTPUT);
-    } else {
-        this->outputMessage("Using default Macrofile...\n", CMD_OUTPUT);
-        return;
-    }
-    // If the method reaches this no file worked.
-//    this->setError(INPUTFILE_MISSING); TODO Server mode
-    this->useInputFile = false;
-    this->outputMessage("Switching to manual Input...\n", CMD_OUTPUT);
-}
-
-// Output method called only by class. takes an output level to determine if it should be printed or not
-void IOManager::printBuffer(OutputLevel urgency) {
-    if (this->shouldOutput(urgency)) {
+// Output the buffer to command line
+void UserInterface::printBuffer(OutputLevel urgency) {
+    if (shouldOutput(urgency)) {
         cout << this->outputStream.str();
     } 
     this->outputStream.str("");
     this->outputStream.clear();
 }
 
-// Returns the correct amount of spaces for indentation
-string IOManager::getIndent(int indent) {
-    return string(indent * INDENT_WIDTH, ' ');
-}
-
 // Output simple message
-void IOManager::outputMessage(string message, OutputLevel urgency, int indent, bool linebreak) {
+void UserInterface::outputMessage(string message, OutputLevel urgency, int indent, bool linebreak) {
     this->outputStream << this->getIndent(indent) + message;
     if (linebreak) {
         this->outputStream << endl;
@@ -75,7 +28,7 @@ void IOManager::outputMessage(string message, OutputLevel urgency, int indent, b
 }
 
 // Output message that will be terminated by a timestamp by the next timed message
-void IOManager::timedOutput(string message, OutputLevel urgency, int indent, bool reset) {
+void UserInterface::timedOutput(string message, OutputLevel urgency, int indent, bool reset) {
     if (this->lastTimedOutput >= 0 && !reset) {
         this->finishTimedOutput(urgency);
     }
@@ -85,75 +38,169 @@ void IOManager::timedOutput(string message, OutputLevel urgency, int indent, boo
 }
 
 // Finish the final timed message without adding another
-void IOManager::finishTimedOutput(OutputLevel urgency) {
+void UserInterface::finishTimedOutput(OutputLevel urgency) {
     this->outputStream << "Done! (" << right << setw(3) << time(NULL) - this->lastTimedOutput << " seconds)" << endl; // Exactly 20 characters long
     this->printBuffer(urgency);
 }
 
 // Stop timed messages for a time. used to have properly formatted output when outputting substeps
-void IOManager::suspendTimedOutputs(OutputLevel urgency) {
+void UserInterface::suspendTimedOutputs(OutputLevel urgency) {
     this->outputStream << endl;
     this->printBuffer(urgency);
 }
 
 // Start timed outputs again.
-void IOManager::resumeTimedOutputs(OutputLevel urgency) {
+void UserInterface::resumeTimedOutputs(OutputLevel urgency) {
     this->outputStream << left << setw(STANDARD_CMD_WIDTH - FINISH_MESSAGE_LENGTH) << "";
     this->printBuffer(urgency);
 }
 
 // Wait for user input before continuing. Used to stop program from closing outside of a command line.
-void IOManager::haltExecution() {
-    if (this->shouldOutput(CMD_OUTPUT)) {
+void UserInterface::haltExecution() {
+    if (shouldOutput(CMD_OUTPUT)) {
         cout << "Press enter to exit...";
         cin.get();
     }
 }
 
+vector<string> UserInterface::parseInput(string input) {
+    input = split(toLower(input), COMMENT_DELIMITOR)[0]; 
+    return split(input, TOKEN_SEPARATOR);
+}
+
+// Returns the correct amount of spaces for indentation
+string UserInterface::getIndent(int indent) {
+    return string(indent * INDENT_WIDTH, ' ');
+}
+
+// Try to get input from a file by heirarchy
+void InputFileManager::init(string fileName) {
+    // Try file specified on command line first
+    if (fileName != "" && this->readFile(fileName, true)) {
+        interface.outputMessage("Using specified File...\n", CMD_OUTPUT);
+    } else {
+        if (this->readFile(DEFAULT_CONFIG, true)) {
+            interface.outputMessage("Using default Configfile...\n", CMD_OUTPUT);
+        } else {
+            if (this->readFile(DEFAULT_MACRO, true)) {
+                interface.outputMessage("Using default Macrofile...\n", CMD_OUTPUT);
+            } else {
+                interface.outputMessage("Switching to manual Input...\n", CMD_OUTPUT);
+            }
+        }
+    }
+}
+
+// Open a file by name, read and parse its contents and follow recursive links to other files
+// Put results in inputLines which is used by other methods
+bool InputFileManager::readFile(string fileName, bool important) {
+    ifstream fileStream;
+    fileStream.open(fileName);
+    if (!fileStream.good()) {
+        string message = "Could not find or open "+ fileName +"!";
+        if (!important) {
+            message += " Ignoring...";
+        }
+        interface.outputMessage(message, CMD_OUTPUT);
+        return false;
+    }
+    string input;
+    vector<string> tokens;
+    while (getline(fileStream, input)) {
+        tokens = interface.parseInput(input);
+        if (tokens[0] == "next_file") {
+            this->readFile(tokens[1], false);
+        } else {
+            this->inputLines.push(tokens);
+        }
+    }
+    return true;
+}
+
+// Check if the first line has a specific token. If so remove it and return true
+bool InputFileManager::checkLine(string token) {
+    if (this->hasLine() && this->inputLines.front()[0] == token) {
+        this->inputLines.pop();
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// Pop and return the first line from inputLines
+vector<string> InputFileManager::getLine() {
+    vector<string> tokens = this->inputLines.front();
+    this->inputLines.pop();
+    return tokens;
+}
+
+bool InputFileManager::hasLine() {
+    return !this->inputLines.empty();
+}
+
+void IOManager::loadInputFiles(string fileName) {
+    this->fileInput.init(fileName);
+}
+
+void IOManager::getConfiguration() {
+    vector<string> tokens;
+    
+    if (this->fileInput.checkLine("config")) {
+        while (this->fileInput.hasLine()) {
+            tokens = this->fileInput.getLine();
+            if (tokens[0] == "entities") {
+                return;
+            } else {
+//                switch (tokens[0]) {
+//                    case "first_dominance":    config.firstDominance = stoi(tokens[1]);
+//                    default: cout << "unrecognized " << tokens[0];
+//                }
+            }
+        }
+    }
+}
+
 // Method for handling ALL input. Gives access to help, error resistance and macro file for input.
-string IOManager::getResistantInput(string query, QueryType queryType) {
+vector<string> IOManager::getResistantInput(string query, QueryType queryType) {
     string inputString;
+    vector<string> tokens;
     string firstToken;
     while (true) {
-        // Check first if there is still a line in the macro file
-        if (this->useInputFile) {
-            this->useInputFile = (bool) getline(this->currentInputFile, inputString);
-        } 
         // in sever mode the macro file has to be complete TODO Server mode
-//        if (!this->useInputFile && this->outputLevel == SERVER_OUTPUT) {
-//            throw MACROFILE_USED_UP;
-//        }
-        // Print the query only if no macro file is used or specifically asked for
-        if (!this->useInputFile || config.showQueries) {
+
+        // Print the query only if no input file is used or specifically asked for
+        if (!this->fileInput.hasLine() || config.showQueries) {
             cout << query;
         }
         // Ask for user input
-        if (!this->useInputFile) {
+        if (!this->fileInput.hasLine()) {
             getline(cin, inputString);
+            tokens = interface.parseInput(inputString);
+        } else {
+            tokens = this->fileInput.getLine();
+            if (config.showQueries) {
+                for (size_t i = 0; i < tokens.size(); i++) {
+                    cout << tokens[i] << TOKEN_SEPARATOR;
+                } cout << endl;
+            }
         }
-        
-        // Process Input
-        inputString = split(toLower(inputString), COMMENT_DELIMITOR)[0]; // trim potential comments in a macrofile and convert to lowercase
-        firstToken = split(inputString, TOKEN_SEPARATOR)[0]; // except for rare input only the first string till a space is used
-        if (this->useInputFile && config.showQueries) {
-            cout << inputString << endl; // Show input if a macro file is used
-        }
-        if (queryType == question && (firstToken == POSITIVE_ANSWER || firstToken == NEGATIVE_ANSWER)) {
-            return firstToken;
+
+        if (queryType == question && (tokens[0] == POSITIVE_ANSWER || tokens[0] == NEGATIVE_ANSWER)) {
+            return tokens;
         }
         if (queryType == integer) {
             try {
-                stoi(firstToken);
-                return firstToken;
+                stoi(tokens[0]);
+                return tokens;
             } catch (const exception & e) {
                 this->handleInputException(NUMBER_PARSE);
             }
         }
         if (queryType == raw) {
-            return inputString;
+            return tokens;
         }
         if (queryType == rawFirst) {
-            return firstToken;
+            return tokens;
         }
     }
 }
@@ -161,10 +208,10 @@ string IOManager::getResistantInput(string query, QueryType queryType) {
 // Ask the user a question that they can answer via command line
 bool IOManager::askYesNoQuestion(string questionMessage, OutputLevel urgency, string defaultAnswer) {
     string inputString;
-    if (!this->shouldOutput(urgency)) {
+    if (!shouldOutput(urgency)) {
         inputString = defaultAnswer;
     } else {
-        inputString = this->getResistantInput(questionMessage + " (" + POSITIVE_ANSWER + "/" + NEGATIVE_ANSWER + "): ", question);
+        inputString = this->getResistantInput(questionMessage + " (" + POSITIVE_ANSWER + "/" + NEGATIVE_ANSWER + "): ", question)[0];
     }
     
     if (inputString == NEGATIVE_ANSWER) {
@@ -179,28 +226,28 @@ bool IOManager::askYesNoQuestion(string questionMessage, OutputLevel urgency, st
 // Promt the User via command line to input his hero levels and return a vector of their indices
 vector<int8_t> IOManager::takeHerolevelInput() {
     vector<int8_t> heroes {};
-    string input;
+    vector<string> input;
     pair<Monster, int> heroData;
     
-    if (!this->useInputFile || config.showQueries) {
+    if (!fileInput.hasLine() || config.showQueries) {
         cout << endl << "Enter your Heroes with levels. Press enter after every Hero." << endl;
         cout << "Press enter twice or type done to proceed without inputting additional Heroes." << endl;
     }
     int cancelCounter = 0;
     do {
         input = this->getResistantInput("Enter Hero " + to_string(heroes.size()+1) + ": ", rawFirst);
-        if (input == "") {
+        if (input[0] == "") {
             cancelCounter++;
         } else {
             cancelCounter = 0;
             try {
-                heroData = parseHeroString(input);
+                heroData = parseHeroString(input[0]);
                 heroes.push_back(addLeveledHero(heroData.first, heroData.second));
             } catch (InputException e) {
                 this->handleInputException(e);
             };
         }
-    } while (input != "done" && cancelCounter < 2);
+    } while (input[0] != "done" && cancelCounter < 2);
     
     return heroes;
 }
@@ -208,17 +255,14 @@ vector<int8_t> IOManager::takeHerolevelInput() {
 // Promts the user to input instance(s) to be solved 
 vector<Instance> IOManager::takeInstanceInput(string prompt) {
     vector<Instance> instances;
-    vector<string> instanceStrings;
-    
-    string input;
+    vector<string> tokens;
     
     while (true) {
-        input = this->getResistantInput(prompt, raw);
+        tokens = this->getResistantInput(prompt, raw);
         instances.clear();
-        instanceStrings = split(input, TOKEN_SEPARATOR);
         try {
-            for (size_t i = 0; i < instanceStrings.size(); i++) {
-                instances.push_back(makeInstanceFromString(instanceStrings[i]));
+            for (size_t i = 0; i < tokens.size(); i++) {
+                instances.push_back(makeInstanceFromString(tokens[i]));
             }
             return instances;
         } catch (InputException e) {
@@ -262,6 +306,11 @@ string IOManager::getJSONError(InputException e) {
         s << "\"errorType\""  << ":" << "\"" << errorType << "\"";
     s << "}}";
     return s.str();
+}
+
+// Determine whether a message should be printed depending on the outputlevel
+bool shouldOutput(OutputLevel urgency) {
+    return (config.outputLevel >= urgency);
 }
 
 // Convert a lineup string into an actual instance to solve
@@ -440,7 +489,7 @@ string makeStringFromInstance(Instance instance, bool valid, bool showReplayStri
     return s.str();
 }
 
-// Splits strings into a vector of strings.
+// Splits strings into a vector of strings. Always returns at least 1 empty string
 vector<string> split(string target, string separator) {
     vector<string> output;
     string substring;

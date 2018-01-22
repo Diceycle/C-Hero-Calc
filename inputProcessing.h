@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -36,7 +37,7 @@ enum OutputLevel {
     CMD_OUTPUT      = 2,
     SOLUTION_OUTPUT = 3,
     BASIC_OUTPUT    = 4,
-    DETAILED_OUTPUT = 5
+    DETAILED_OUTPUT = 5 // TODO Query input
 };
 
 // TODO: Detect double hero inputs
@@ -59,38 +60,57 @@ struct Configuration {
 };
 extern Configuration config;
 
-class IOManager {
+class UserInterface {
     private:
-        bool useInputFile;
-        std::ifstream currentInputFile;
-
         time_t lastTimedOutput = -1;
         std::ostringstream outputStream;
         
-        std::string getIndent(int indent);
         void printBuffer(OutputLevel urgency);
-        bool shouldOutput(OutputLevel urgency);
-        void handleInputException(InputException e);
+        std::string getIndent(int indent);
         
-    public:
-        IOManager();
-        
-        void initFileInput(std::string fileName);
-        std::string getResistantInput(std::string query, QueryType queryType = raw);
-        bool askYesNoQuestion(std::string question, OutputLevel urgency, std::string defaultAnswer);
-        std::vector<int8_t> takeHerolevelInput();
-        std::vector<Instance> takeInstanceInput(std::string promt);
-        
+    public:     
         void outputMessage(std::string message, OutputLevel urgency, int indent = 0, bool linebreak = true);
         void timedOutput(std::string message, OutputLevel urgency, int indent = 0, bool reset = false);
         void suspendTimedOutputs(OutputLevel urgency);
         void resumeTimedOutputs(OutputLevel urgency);
         void finishTimedOutput(OutputLevel urgency);
-        
-        std::string getJSONError(InputException e);
-        
         void haltExecution();
+        
+        std::vector<std::string> parseInput(std::string input);
 };
+extern UserInterface interface;
+
+class InputFileManager {
+    private:
+        std::queue<std::vector<std::string>> inputLines;
+        
+    public: 
+        void init(std::string fileName);
+        bool readFile(std::string fileName, bool important);
+        
+        bool checkLine(std::string token);
+        std::vector<std::string> getLine();
+        bool hasLine();
+};
+
+class IOManager {
+    private:
+        InputFileManager fileInput;
+        
+        void handleInputException(InputException e);
+        
+    public:
+        void loadInputFiles(std::string fileName);
+        void getConfiguration();
+        bool askYesNoQuestion(std::string question, OutputLevel urgency, std::string defaultAnswer);   
+        std::vector<std::string> getResistantInput(std::string query, QueryType queryType = raw);
+        std::vector<int8_t> takeHerolevelInput();
+        std::vector<Instance> takeInstanceInput(std::string promt);
+
+        std::string getJSONError(InputException e);
+};
+
+bool shouldOutput(OutputLevel urgency);
 
 // Convert a lineup string into an actual instance to solve
 Instance makeInstanceFromString(std::string instanceString);
