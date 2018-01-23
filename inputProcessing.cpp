@@ -108,7 +108,7 @@ bool InputFileManager::readFile(string fileName, bool important) {
     vector<string> tokens;
     while (getline(fileStream, input)) {
         tokens = interface.parseInput(input);
-        if (tokens[0] == "next_file") {
+        if (tokens[0] == TOKENS.NEXT_FILE) {
             this->readFile(tokens[1], false);
         } else {
             this->inputLines.push(tokens);
@@ -145,16 +145,33 @@ void IOManager::loadInputFiles(string fileName) {
 void IOManager::getConfiguration() {
     vector<string> tokens;
     
-    if (this->fileInput.checkLine("config")) {
+    if (this->fileInput.checkLine(TOKENS.START_CONFIG)) {
         while (this->fileInput.hasLine()) {
             tokens = this->fileInput.getLine();
-            if (tokens[0] == "entities") {
+            if (tokens[0] == TOKENS.START_ENTITIES) {
                 return;
-            } else {
-//                switch (tokens[0]) {
-//                    case "first_dominance":    config.firstDominance = stoi(tokens[1]);
-//                    default: cout << "unrecognized " << tokens[0];
-//                }
+            } else if (config.allowConfig) {
+                try {
+                    if (tokens[0] == TOKENS.AUTO_ADJUST_OUTPUT) {
+                        config.autoAdjustOutputLevel = parseBool(tokens.at(1));
+                    } else if (tokens[0] == TOKENS.FIRST_DOMINANCE) {
+                        config.firstDominance = parseInt(tokens.at(1));
+                    } else if (tokens[0] == TOKENS.IGNORE_EMPTY) {
+                        config.ignoreEmptyLines = parseBool(tokens.at(1));
+                    } else if (tokens[0] == TOKENS.OUTPUT_LEVEL) {
+//                        config.outputLevel = parseOutputLevel(tokens.at(1));
+                    } else if (tokens[0] == TOKENS.SHOW_QUERIES) {
+                        config.showQueries = parseBool(tokens.at(1));
+                    } else if (tokens[0] == TOKENS.SHOW_REPLAY_STRINGS) {
+                        config.showReplayStrings = parseBool(tokens.at(1));
+                    } else if (tokens[0] != TOKENS.EMPTY) {
+                        cout << "Unrecognized option '" << tokens[0] << "'" << endl;
+                    }
+                } catch (const invalid_argument &e) {
+                    cout << e.what() << " Ignoring option '" << tokens[0] << "'!" << endl;
+                } catch (const out_of_range &e) {
+                    cout << "Didn't find enough arguments for '" << tokens[0] << "'! Ignoring..." << endl;
+                }
             }
         }
     }
@@ -168,24 +185,25 @@ vector<string> IOManager::getResistantInput(string query, QueryType queryType) {
     while (true) {
         // in sever mode the macro file has to be complete TODO Server mode
 
-        // Print the query only if no input file is used or specifically asked for
-        if (!this->fileInput.hasLine() || config.showQueries) {
-            cout << query;
-        }
         // Ask for user input
         if (!this->fileInput.hasLine()) {
+            cout << query;
             getline(cin, inputString);
             tokens = interface.parseInput(inputString);
         } else {
             tokens = this->fileInput.getLine();
+            if (config.ignoreEmptyLines && tokens[0] == TOKENS.EMPTY) {
+                continue;
+            }
             if (config.showQueries) {
+                cout << query;
                 for (size_t i = 0; i < tokens.size(); i++) {
                     cout << tokens[i] << TOKEN_SEPARATOR;
                 } cout << endl;
             }
         }
 
-        if (queryType == question && (tokens[0] == POSITIVE_ANSWER || tokens[0] == NEGATIVE_ANSWER)) {
+        if (queryType == question && (tokens[0] == TOKENS.YES || tokens[0] == TOKENS.NO)) {
             return tokens;
         }
         if (queryType == integer) {
@@ -211,13 +229,13 @@ bool IOManager::askYesNoQuestion(string questionMessage, OutputLevel urgency, st
     if (!shouldOutput(urgency)) {
         inputString = defaultAnswer;
     } else {
-        inputString = this->getResistantInput(questionMessage + " (" + POSITIVE_ANSWER + "/" + NEGATIVE_ANSWER + "): ", question)[0];
+        inputString = this->getResistantInput(questionMessage + " (" + TOKENS.YES + "/" + TOKENS.NO + "): ", question)[0];
     }
     
-    if (inputString == NEGATIVE_ANSWER) {
+    if (inputString == TOKENS.NO) {
         return false;
     }
-    if (inputString == POSITIVE_ANSWER) {
+    if (inputString == TOKENS.YES) {
         return true;
     }
     return false;
@@ -236,7 +254,7 @@ vector<int8_t> IOManager::takeHerolevelInput() {
     int cancelCounter = 0;
     do {
         input = this->getResistantInput("Enter Hero " + to_string(heroes.size()+1) + ": ", rawFirst);
-        if (input[0] == "") {
+        if (input[0] == TOKENS.EMPTY) {
             cancelCounter++;
         } else {
             cancelCounter = 0;
@@ -247,7 +265,7 @@ vector<int8_t> IOManager::takeHerolevelInput() {
                 this->handleInputException(e);
             };
         }
-    } while (input[0] != "done" && cancelCounter < 2);
+    } while (input[0] != TOKENS.HEROES_FINISHED && cancelCounter < 2);
     
     return heroes;
 }
@@ -487,6 +505,21 @@ string makeStringFromInstance(Instance instance, bool valid, bool showReplayStri
         s << "FATAL ERROR!!! Please comment this output in the Forums!" << endl;
     }
     return s.str();
+}
+
+bool parseBool(string toParse) {
+    if (toParse == TOKENS.FALSE) {
+        return false;
+    } else if (toParse == TOKENS.TRUE) {
+        return true;
+    } else {
+        throw invalid_argument("Could not parse boolean from '" + toParse + "'!");
+    }
+}
+
+int parseInt(string toParse) {
+    int i = stoi(toParse);
+    return i;
 }
 
 // Splits strings into a vector of strings. Always returns at least 1 empty string

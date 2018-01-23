@@ -377,7 +377,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                 } else {
                     interface.outputMessage("Could not find a solution yet!", DETAILED_OUTPUT);
                 }
-                if (!iomanager.askYesNoQuestion("Continue calculation?", DETAILED_OUTPUT, POSITIVE_ANSWER)) {return;}
+                if (!iomanager.askYesNoQuestion("Continue calculation?", DETAILED_OUTPUT, TOKENS.YES)) {return;}
                 startTime = time(NULL);
                 interface.outputMessage("\nPreparing to work on loop for armies of size " + to_string(armySize+1), BASIC_OUTPUT);
                 interface.outputMessage("Currently considering " + to_string(pureMonsterArmies.size()) + " normal and " + to_string(heroMonsterArmies.size()) + " hero armies.", BASIC_OUTPUT);
@@ -454,7 +454,7 @@ int main(int argc, char** argv) {
             simulateFight(left, right, true);
             interface.outputMessage(to_string(left.lastFightData.rightWon) + " " + to_string(left.followerCost) + " " + to_string(right.followerCost), CMD_OUTPUT);
             
-            if (!iomanager.askYesNoQuestion("Simulate another Fight?", CMD_OUTPUT, NEGATIVE_ANSWER)) {
+            if (!iomanager.askYesNoQuestion("Simulate another Fight?", CMD_OUTPUT, TOKENS.NO)) {
                 break;
             }
         }
@@ -494,7 +494,7 @@ int main(int argc, char** argv) {
             solveInstance(instances[i], config.firstDominance);
             outputSolution(instances[i], config.showReplayStrings);
         }
-        userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", CMD_OUTPUT, NEGATIVE_ANSWER);
+        userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", CMD_OUTPUT, TOKENS.NO);
     } while (userWantsContinue);
     
     interface.outputMessage("", CMD_OUTPUT);

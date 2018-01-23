@@ -21,9 +21,6 @@ const std::string helpMessage = "If you don't know what to do you can type help 
 
 enum QueryType {question, integer, raw, rawFirst}; // Types of command line promts
 
-const std::string POSITIVE_ANSWER = "y";
-const std::string NEGATIVE_ANSWER = "n";
-
 const std::string TOKEN_SEPARATOR = " ";
 const std::string ELEMENT_SEPARATOR = ",";
 const std::string COMMENT_DELIMITOR = "//";
@@ -50,13 +47,36 @@ enum InputException {
     MACROFILE_USED_UP
 };
 
+struct ParserTokens {
+    const std::string START_CONFIG =        "config";
+    const std::string START_ENTITIES =      "entities";
+    const std::string HEROES_FINISHED =     "done";
+    const std::string NEXT_FILE =           "next_file";
+    const std::string TRUE =                "true";
+    const std::string FALSE =               "false";
+    const std::string YES =                 "y";
+    const std::string NO =                  "n";
+    const std::string EMPTY =               "";
+    
+    const std::string SHOW_QUERIES =        "show_queries";
+    const std::string FIRST_DOMINANCE =     "first_dominance";
+    const std::string OUTPUT_LEVEL =        "output_level";
+    const std::string AUTO_ADJUST_OUTPUT =  "auto_adjust_output"; 
+    const std::string SHOW_REPLAY_STRINGS = "show_replays"; 
+    const std::string IGNORE_EMPTY =        "ignore_empty_lines"; 
+}; static const ParserTokens TOKENS;
+
 struct Configuration {
-    bool showQueries = true;
-    int firstDominance = ARMY_MAX_BRUTEFORCEABLE_SIZE;
+    bool allowConfig = true; //
+    bool showReplayStrings = true; //
+    bool showQueries = true; //
+    bool ignoreEmptyLines = true; //
+    bool ignoreQuestions = false;
+    bool JSONOutput = false;
+    int firstDominance = ARMY_MAX_BRUTEFORCEABLE_SIZE; //
     OutputLevel outputLevel = BASIC_OUTPUT;
-    bool individualBattles = false;
-    bool showReplayStrings = true;
     bool autoAdjustOutputLevel = true;
+    bool individualBattles = false;
 };
 extern Configuration config;
 
@@ -128,6 +148,9 @@ std::pair<Monster, int> parseHeroString(std::string heroString);
 std::string makeBattleReplay(Army friendly, Army hostile);
 std::string getReplaySetup(Army setup);
 std::string getReplayHeroes(Army setup);
+
+bool parseBool(std::string toParse);
+int parseInt(std::string toParse);
 
 // Splits strings into a vector of strings. No need to optimize, only used for input.
 std::vector<std::string> split(std::string target, std::string separator);
