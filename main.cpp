@@ -363,10 +363,13 @@ void solveInstance(Instance & instance, size_t firstDominance) {
         // Start Expansion routine if there is still room
         if (armySize < instance.maxCombatants) { 
             // Manage output format 
-            if (armySize == firstDominance && config.outputLevel == BASIC_OUTPUT) {
+            if (armySize == firstDominance && config.outputLevel == BASIC_OUTPUT && config.autoAdjustOutputLevel) {
                 config.outputLevel = DETAILED_OUTPUT; // Switch output level after pure brutefore is exhausted
             }
             if (armySize == firstDominance) {
+                if (!config.autoAdjustOutputLevel) {
+                    interface.finishTimedOutput(DETAILED_OUTPUT);
+                }
                 interface.outputMessage("", DETAILED_OUTPUT);
                 if (!instance.bestSolution.isEmpty()) {
                     interface.outputMessage("Best Solution so far:", DETAILED_OUTPUT);
@@ -379,8 +382,8 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                 }
                 if (!iomanager.askYesNoQuestion("Continue calculation?", DETAILED_OUTPUT, TOKENS.YES)) {return;}
                 startTime = time(NULL);
-                interface.outputMessage("\nPreparing to work on loop for armies of size " + to_string(armySize+1), BASIC_OUTPUT);
-                interface.outputMessage("Currently considering " + to_string(pureMonsterArmies.size()) + " normal and " + to_string(heroMonsterArmies.size()) + " hero armies.", BASIC_OUTPUT);
+                interface.outputMessage("\nPreparing to work on loop for armies of size " + to_string(armySize+1), DETAILED_OUTPUT);
+                interface.outputMessage("Currently considering " + to_string(pureMonsterArmies.size()) + " normal and " + to_string(heroMonsterArmies.size()) + " hero armies.", DETAILED_OUTPUT);
             }
                 
             // Calculate which results are strictly better than others (dominance)
@@ -403,17 +406,17 @@ void solveInstance(Instance & instance, size_t firstDominance) {
     instance.calculationTime = time(NULL) - startTime;
 }
 
-void outputSolution(Instance instance, bool replayStrings) {
+void outputSolution(Instance instance) {
     instance.bestSolution.lastFightData.valid = false;
     simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
     bool sane;
     sane = !instance.hasWorldBoss && (!instance.bestSolution.lastFightData.rightWon || instance.bestSolution.isEmpty());
     sane |= instance.hasWorldBoss && instance.bestSolution.lastFightData.frontHealth == instance.lowestBossHealth;
     
-    if (config.outputLevel == SERVER_OUTPUT) {
-        interface.outputMessage(makeJSONFromInstance(instance, sane), SERVER_OUTPUT);
+    if (config.JSONOutput) {
+        interface.outputMessage(makeJSONFromInstance(instance, sane), SOLUTION_OUTPUT);
     } else {
-        interface.outputMessage(makeStringFromInstance(instance, sane, replayStrings), CMD_OUTPUT);
+        interface.outputMessage(makeStringFromInstance(instance, sane, config.showReplayStrings), SOLUTION_OUTPUT);
     }
 }
 
@@ -424,18 +427,24 @@ int main(int argc, char** argv) {
     vector<Instance> instances;
     bool userWantsContinue;
     
-    config.outputLevel = CMD_OUTPUT;
     if (argc >= 3 && (string) argv[2] == "-server") {
         config.showQueries = false;
-        config.outputLevel = SERVER_OUTPUT;
+        config.ignoreQuestions = true;
+        config.JSONOutput = true;
+        config.outputLevel = SOLUTION_OUTPUT;
+        config.allowConfig = false;
     }
+    
+    interface.outputMessage(welcomeMessage, NOTIFICATION_OUTPUT);
+    interface.outputMessage(helpMessage + "\n", NOTIFICATION_OUTPUT);
     
     // Check if the user provided a filename to be used as an inputfile
     if (argc >= 2) {
         iomanager.loadInputFiles(argv[1]);
     } else {
         iomanager.loadInputFiles(""); 
-    }
+    } 
+    interface.outputMessage("", NOTIFICATION_OUTPUT);
     iomanager.getConfiguration();
     
     // Initialize global Data
@@ -447,14 +456,14 @@ int main(int argc, char** argv) {
     iomanager.outputMessage(helpMessage, CMD_OUTPUT);
     
     if (config.individualBattles) {
-        interface.outputMessage("Simulating individual Figths", CMD_OUTPUT);
+        interface.outputMessage("Simulating individual Figths", NOTIFICATION_OUTPUT);
         while (true) {
             Army left = iomanager.takeInstanceInput("Enter friendly lineup: ")[0].target;
             Army right = iomanager.takeInstanceInput("Enter hostile lineup: ")[0].target;
             simulateFight(left, right, true);
-            interface.outputMessage(to_string(left.lastFightData.rightWon) + " " + to_string(left.followerCost) + " " + to_string(right.followerCost), CMD_OUTPUT);
+            interface.outputMessage(to_string(left.lastFightData.rightWon) + " " + to_string(left.followerCost) + " " + to_string(right.followerCost), SOLUTION_OUTPUT);
             
-            if (!iomanager.askYesNoQuestion("Simulate another Fight?", CMD_OUTPUT, TOKENS.NO)) {
+            if (!iomanager.askYesNoQuestion("Simulate another Fight?", NOTIFICATION_OUTPUT, TOKENS.NO)) {
                 break;
             }
         }
@@ -472,14 +481,13 @@ int main(int argc, char** argv) {
     do {
         instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
     
-        interface.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", CMD_OUTPUT);
+        interface.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", BASIC_OUTPUT);
         
-        if (config.outputLevel == CMD_OUTPUT) { // TODO: Reset Output Level if userwantscontinue
-            if (instances.size() > 1) {
-                config.outputLevel = SOLUTION_OUTPUT;
-            } else {
-                config.outputLevel = BASIC_OUTPUT;
-            }
+        if (config.outputLevel == DETAILED_OUTPUT && config.autoAdjustOutputLevel) {
+            config.outputLevel = BASIC_OUTPUT;
+        }
+        if (config.outputLevel == BASIC_OUTPUT && instances.size() > 1 && config.autoAdjustOutputLevel) { // TODO: Reset Output Level if userwantscontinue
+            config.outputLevel = SOLUTION_OUTPUT;
         }
         
         for (size_t i = 0; i < instances.size(); i++) {
@@ -492,12 +500,12 @@ int main(int argc, char** argv) {
             }
             
             solveInstance(instances[i], config.firstDominance);
-            outputSolution(instances[i], config.showReplayStrings);
+            outputSolution(instances[i]);
         }
-        userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", CMD_OUTPUT, TOKENS.NO);
+        userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", NOTIFICATION_OUTPUT, TOKENS.NO);
     } while (userWantsContinue);
     
-    interface.outputMessage("", CMD_OUTPUT);
+    interface.outputMessage("", NOTIFICATION_OUTPUT);
     interface.haltExecution();
     return EXIT_SUCCESS;
 }

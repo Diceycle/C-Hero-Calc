@@ -17,7 +17,7 @@ const size_t STANDARD_CMD_WIDTH = 80;
 const int INDENT_WIDTH = 2;
 
 const std::string welcomeMessage = "Welcome to Diceycle's PvE Instance Solver!";
-const std::string helpMessage = "If you don't know what to do you can type help at any time to get an explanation about the current step.";
+const std::string helpMessage = "If you are new to using this Calculator I recommend reading the Github README.";
 
 enum QueryType {question, integer, raw, rawFirst}; // Types of command line promts
 
@@ -29,12 +29,12 @@ const std::string QUEST_NUMBER_SEPARTOR = "-";
 
 // Enum to control the amount of output generate
 enum OutputLevel {
-    VITAL_OUTPUT    = 0,
-    SERVER_OUTPUT   = 1,
-    CMD_OUTPUT      = 2,
-    SOLUTION_OUTPUT = 3,
-    BASIC_OUTPUT    = 4,
-    DETAILED_OUTPUT = 5 // TODO Query input
+    VITAL_OUTPUT        = 0,
+    SOLUTION_OUTPUT     = 1,
+    NOTIFICATION_OUTPUT = 2,
+    BASIC_OUTPUT        = 3,
+    DETAILED_OUTPUT     = 4,
+    QUERY_OUTPUT
 };
 
 // TODO: Detect double hero inputs
@@ -64,18 +64,22 @@ struct ParserTokens {
     const std::string AUTO_ADJUST_OUTPUT =  "auto_adjust_output"; 
     const std::string SHOW_REPLAY_STRINGS = "show_replays"; 
     const std::string IGNORE_EMPTY =        "ignore_empty_lines"; 
+    
+    const std::string T_SOLUTION_OUTPUT =   "solution"; 
+    const std::string T_BASIC_OUTPUT =      "basic"; 
+    const std::string T_DETAILED_OUPUT =    "detailed";
 }; static const ParserTokens TOKENS;
 
 struct Configuration {
     bool allowConfig = true; //
     bool showReplayStrings = true; //
     bool showQueries = true; //
-    bool ignoreEmptyLines = true; //
+    bool ignoreEmptyLines = false; //
     bool ignoreQuestions = false;
     bool JSONOutput = false;
     int firstDominance = ARMY_MAX_BRUTEFORCEABLE_SIZE; //
-    OutputLevel outputLevel = BASIC_OUTPUT;
-    bool autoAdjustOutputLevel = true;
+    OutputLevel outputLevel = BASIC_OUTPUT; //
+    bool autoAdjustOutputLevel = true; //
     bool individualBattles = false;
 };
 extern Configuration config;
@@ -151,6 +155,7 @@ std::string getReplayHeroes(Army setup);
 
 bool parseBool(std::string toParse);
 int parseInt(std::string toParse);
+OutputLevel parseOutputLevel(std::string toParse);
 
 // Splits strings into a vector of strings. No need to optimize, only used for input.
 std::vector<std::string> split(std::string target, std::string separator);

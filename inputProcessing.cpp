@@ -57,7 +57,7 @@ void UserInterface::resumeTimedOutputs(OutputLevel urgency) {
 
 // Wait for user input before continuing. Used to stop program from closing outside of a command line.
 void UserInterface::haltExecution() {
-    if (shouldOutput(CMD_OUTPUT)) {
+    if (shouldOutput(NOTIFICATION_OUTPUT)) {
         cout << "Press enter to exit...";
         cin.get();
     }
@@ -77,15 +77,15 @@ string UserInterface::getIndent(int indent) {
 void InputFileManager::init(string fileName) {
     // Try file specified on command line first
     if (fileName != "" && this->readFile(fileName, true)) {
-        interface.outputMessage("Using specified File...\n", CMD_OUTPUT);
+        interface.outputMessage("Using specified File...", NOTIFICATION_OUTPUT);
     } else {
         if (this->readFile(DEFAULT_CONFIG, true)) {
-            interface.outputMessage("Using default Configfile...\n", CMD_OUTPUT);
+            interface.outputMessage("Using default Configfile...", NOTIFICATION_OUTPUT);
         } else {
             if (this->readFile(DEFAULT_MACRO, true)) {
-                interface.outputMessage("Using default Macrofile...\n", CMD_OUTPUT);
+                interface.outputMessage("Using default Macrofile...", NOTIFICATION_OUTPUT);
             } else {
-                interface.outputMessage("Switching to manual Input...\n", CMD_OUTPUT);
+                interface.outputMessage("Switching to manual Input...", NOTIFICATION_OUTPUT);
             }
         }
     }
@@ -101,7 +101,7 @@ bool InputFileManager::readFile(string fileName, bool important) {
         if (!important) {
             message += " Ignoring...";
         }
-        interface.outputMessage(message, CMD_OUTPUT);
+        interface.outputMessage(message, NOTIFICATION_OUTPUT);
         return false;
     }
     string input;
@@ -131,6 +131,9 @@ bool InputFileManager::checkLine(string token) {
 vector<string> InputFileManager::getLine() {
     vector<string> tokens = this->inputLines.front();
     this->inputLines.pop();
+    if (!this->hasLine()) {
+        config.showQueries = true;
+    }
     return tokens;
 }
 
@@ -159,18 +162,18 @@ void IOManager::getConfiguration() {
                     } else if (tokens[0] == TOKENS.IGNORE_EMPTY) {
                         config.ignoreEmptyLines = parseBool(tokens.at(1));
                     } else if (tokens[0] == TOKENS.OUTPUT_LEVEL) {
-//                        config.outputLevel = parseOutputLevel(tokens.at(1));
+                        config.outputLevel = parseOutputLevel(tokens.at(1));
                     } else if (tokens[0] == TOKENS.SHOW_QUERIES) {
                         config.showQueries = parseBool(tokens.at(1));
                     } else if (tokens[0] == TOKENS.SHOW_REPLAY_STRINGS) {
                         config.showReplayStrings = parseBool(tokens.at(1));
                     } else if (tokens[0] != TOKENS.EMPTY) {
-                        cout << "Unrecognized option '" << tokens[0] << "'" << endl;
+                        interface.outputMessage("Unrecognized option '" + tokens[0] + "'", NOTIFICATION_OUTPUT);
                     }
                 } catch (const invalid_argument &e) {
-                    cout << e.what() << " Ignoring option '" << tokens[0] << "'!" << endl;
+                    interface.outputMessage((string) (e.what()) + " Ignoring option '" + tokens[0] + "'!", NOTIFICATION_OUTPUT);
                 } catch (const out_of_range &e) {
-                    cout << "Didn't find enough arguments for '" << tokens[0] << "'! Ignoring..." << endl;
+                    interface.outputMessage("Didn't find enough arguments for '" + tokens[0] + "'! Ignoring...", NOTIFICATION_OUTPUT);
                 }
             }
         }
@@ -187,7 +190,7 @@ vector<string> IOManager::getResistantInput(string query, QueryType queryType) {
 
         // Ask for user input
         if (!this->fileInput.hasLine()) {
-            cout << query;
+            interface.outputMessage(query, QUERY_OUTPUT, 0, false);
             getline(cin, inputString);
             tokens = interface.parseInput(inputString);
         } else {
@@ -196,10 +199,10 @@ vector<string> IOManager::getResistantInput(string query, QueryType queryType) {
                 continue;
             }
             if (config.showQueries) {
-                cout << query;
+                interface.outputMessage(query, QUERY_OUTPUT, 0, false);
                 for (size_t i = 0; i < tokens.size(); i++) {
-                    cout << tokens[i] << TOKEN_SEPARATOR;
-                } cout << endl;
+                    interface.outputMessage(tokens[i] + TOKEN_SEPARATOR, QUERY_OUTPUT, 0, false);;
+                } interface.outputMessage("", QUERY_OUTPUT);
             }
         }
 
@@ -247,10 +250,9 @@ vector<int8_t> IOManager::takeHerolevelInput() {
     vector<string> input;
     pair<Monster, int> heroData;
     
-    if (!fileInput.hasLine() || config.showQueries) {
-        cout << endl << "Enter your Heroes with levels. Press enter after every Hero." << endl;
-        cout << "Press enter twice or type done to proceed without inputting additional Heroes." << endl;
-    }
+    interface.outputMessage("\nEnter your Heroes with levels. Press enter after every Hero.", QUERY_OUTPUT);
+    interface.outputMessage("Press enter twice or type" + TOKENS.HEROES_FINISHED + "to proceed without inputting additional Heroes.", QUERY_OUTPUT);
+        
     int cancelCounter = 0;
     do {
         input = this->getResistantInput("Enter Hero " + to_string(heroes.size()+1) + ": ", rawFirst);
@@ -328,7 +330,11 @@ string IOManager::getJSONError(InputException e) {
 
 // Determine whether a message should be printed depending on the outputlevel
 bool shouldOutput(OutputLevel urgency) {
-    return (config.outputLevel >= urgency);
+    if (urgency == QUERY_OUTPUT) {
+        return config.showQueries;
+    } else {
+        return (config.outputLevel >= urgency);
+    }
 }
 
 // Convert a lineup string into an actual instance to solve
@@ -518,8 +524,23 @@ bool parseBool(string toParse) {
 }
 
 int parseInt(string toParse) {
-    int i = stoi(toParse);
-    return i;
+    try {
+        return stoi(toParse);
+    } catch (const invalid_argument &e) {
+        throw invalid_argument("Could not parse number from '" + toParse + "'!");
+    }
+}
+
+OutputLevel parseOutputLevel(string toParse) {
+    if (toParse == TOKENS.T_BASIC_OUTPUT) {
+        return BASIC_OUTPUT;
+    } else if (toParse == TOKENS.T_DETAILED_OUPUT) {
+        return DETAILED_OUTPUT;
+    } else if (toParse == TOKENS.T_SOLUTION_OUTPUT) {
+        return SOLUTION_OUTPUT;
+    } else {
+        throw invalid_argument("Could not parse OutputLevel from '" + toParse + "'!");
+    }
 }
 
 // Splits strings into a vector of strings. Always returns at least 1 empty string
