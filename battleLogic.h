@@ -212,7 +212,7 @@ extern ArmyCondition leftCondition;
 extern ArmyCondition rightCondition;
 
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
-inline void simulateFight(Army & left, Army & right, bool verbose = false) {
+inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
     // left[0] and right[0] are the first monsters to fight
     (*totalFightsSimulated)++;
     
@@ -288,7 +288,6 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
     left.lastFightData.turncounter = (int8_t) turncounter;
     
     if (leftCondition.monstersLost >= leftCondition.armySize) { //draws count as right wins. 
-        left.lastFightData.rightWon = true;
         left.lastFightData.monstersLost = (int8_t) rightCondition.monstersLost; 
         left.lastFightData.berserk = (int8_t) rightCondition.berserkProcs;
         if (rightCondition.monstersLost < rightCondition.armySize) {
@@ -296,11 +295,12 @@ inline void simulateFight(Army & left, Army & right, bool verbose = false) {
         } else {
             left.lastFightData.frontHealth = 0;
         }
+        return false;
     } else {
-        left.lastFightData.rightWon = false;
         left.lastFightData.monstersLost = (int8_t) leftCondition.monstersLost; 
         left.lastFightData.frontHealth = (int16_t) (leftCondition.remainingHealths[leftCondition.monstersLost]);
         left.lastFightData.berserk = (int8_t) leftCondition.berserkProcs;
+        return true;
     }
 }
 

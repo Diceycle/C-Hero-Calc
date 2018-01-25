@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <map>
 
-const std::string VERSION = "2.9.3.0";
+const std::string VERSION = "2.9.3.1";
 
 // Constants defining the basic structure of armies
 const size_t ARMY_MAX_SIZE = 6;
@@ -150,7 +150,6 @@ struct FightResult {
     int8_t berserk;            // berserk multiplier, if there is a berserker in the front
     int8_t monstersLost;    // how many mobs lost on the winning side (the other side lost all)
     int8_t turncounter;     // how many turns have passed since the battle started
-    bool rightWon;          // false -> left win, true -> right win.
     bool valid;             // If the result is valid
     bool dominated;         // If the result is worse than another
                 

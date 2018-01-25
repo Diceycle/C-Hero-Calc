@@ -22,8 +22,7 @@ void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
     if (!instance.hasWorldBoss) {
         for (size_t i = 0; i < armyAmount; i++) {
             if (armies[i].followerCost < instance.followerUpperBound) { // Ignore if a cheaper solution exists
-                simulateFight(armies[i], instance.target);
-                if (!armies[i].lastFightData.rightWon) {  // left (our side) wins:
+                if (simulateFight(armies[i], instance.target)) {  // left (our side) wins:
                     if (!newFound) {
                         interface.suspendTimedOutputs(DETAILED_OUTPUT);
                     }
@@ -258,8 +257,7 @@ void getQuickSolutions(Instance & instance) {
             for (size_t m = 0; m < availableMonsters.size(); m++) {
                 tempArmy = Army(greedy);
                 tempArmy.add(availableMonsters[m]);
-                simulateFight(tempArmy, instance.target);
-                if (!tempArmy.lastFightData.rightWon || (tempArmy.lastFightData.monstersLost > (int) i && i+1 < instance.maxCombatants)) { // the last monster has to win the encounter
+                if (simulateFight(tempArmy, instance.target) || (tempArmy.lastFightData.monstersLost > (int) i && i+1 < instance.maxCombatants)) { // the last monster has to win the encounter
                     greedy.push_back(availableMonsters[m]);
                     break;
                 }
@@ -280,8 +278,7 @@ void getQuickSolutions(Instance & instance) {
                     greedyTemp = greedyHeroes;
                     greedyTemp[i] = availableHeroes[m];
                     tempArmy = Army(greedyTemp);
-                    simulateFight(tempArmy, instance.target);
-                    if (!tempArmy.lastFightData.rightWon) { // Setup still needs to win
+                    if (simulateFight(tempArmy, instance.target)) { // Setup still needs to win
                         greedyHeroes = greedyTemp;
                         break;
                     }
@@ -326,8 +323,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
     }
     if (optimizable) { // Check with normal Mobs
         for (i = 0; i < pureMonsterArmies.size(); i++) {
-            simulateFight(pureMonsterArmies[i], tempArmy);
-            if (!pureMonsterArmies[i].lastFightData.rightWon) { // Monster won the fight
+            if (simulateFight(pureMonsterArmies[i], tempArmy)) { // Monster won the fight
                 optimizable = false;
                 break;
             }
@@ -335,8 +331,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
     }
     if (optimizable) { // Check with Heroes
         for (i = 0; i < heroMonsterArmies.size(); i++) {
-            simulateFight(heroMonsterArmies[i], tempArmy);
-            if (!heroMonsterArmies[i].lastFightData.rightWon) { // Hero won the fight
+            if (simulateFight(heroMonsterArmies[i], tempArmy)) { // Hero won the fight
                 optimizable = false;
                 break;
             }
@@ -408,9 +403,9 @@ void solveInstance(Instance & instance, size_t firstDominance) {
 
 void outputSolution(Instance instance) {
     instance.bestSolution.lastFightData.valid = false;
-    simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
+    bool leftWins = simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
     bool sane;
-    sane = !instance.hasWorldBoss && (!instance.bestSolution.lastFightData.rightWon || instance.bestSolution.isEmpty());
+    sane = !instance.hasWorldBoss && (leftWins || instance.bestSolution.isEmpty());
     sane |= instance.hasWorldBoss && instance.bestSolution.lastFightData.frontHealth == instance.lowestBossHealth;
     
     if (config.JSONOutput) {
@@ -457,8 +452,8 @@ int main(int argc, char** argv) {
         while (true) {
             Army left = iomanager.takeInstanceInput("Enter friendly lineup: ")[0].target;
             Army right = iomanager.takeInstanceInput("Enter hostile lineup: ")[0].target;
-            simulateFight(left, right, true);
-            interface.outputMessage(to_string(left.lastFightData.rightWon) + " " + to_string(left.followerCost) + " " + to_string(right.followerCost), SOLUTION_OUTPUT);
+            bool leftWins = simulateFight(left, right, true);
+            interface.outputMessage(to_string(leftWins) + " " + to_string(left.followerCost) + " " + to_string(right.followerCost), SOLUTION_OUTPUT);
             
             if (!iomanager.askYesNoQuestion("Simulate another Fight?", NOTIFICATION_OUTPUT, TOKENS.NO)) {
                 break;
