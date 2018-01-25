@@ -416,8 +416,8 @@ void outputSolution(Instance instance) {
 
 int main(int argc, char** argv) {
     // Declare Variables
-    int64_t minimumMonsterCost;
-    int64_t userFollowerUpperBound;
+    FollowerCount minimumMonsterCost;
+    FollowerCount userFollowerUpperBound;
     vector<Instance> instances;
     bool userWantsContinue;
     
@@ -462,11 +462,22 @@ int main(int argc, char** argv) {
     }
     // Collect the Data via Command Line
     availableHeroes = iomanager.takeHerolevelInput();
-    minimumMonsterCost = parseInt(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", integer)[0]);
-    userFollowerUpperBound = parseInt(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", integer)[0]);
+    int64_t minFollowerTemp = parseInt(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", integer)[0]);
+    int64_t maxFollowerTemp = parseInt(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", integer)[0]);
+    
+    if (minFollowerTemp < 0) {
+        minimumMonsterCost = numeric_limits<FollowerCount>::max();
+    } else {
+        minimumMonsterCost = (FollowerCount) minFollowerTemp; // should not overflow due to parseInt
+    }
+    if (maxFollowerTemp < 0) {
+        userFollowerUpperBound = numeric_limits<FollowerCount>::max();
+    } else {
+        userFollowerUpperBound = (FollowerCount) maxFollowerTemp; // should not overflow due to parseInt
+    }
     
     // Fill monster arrays with relevant monsters
-    filterMonsterData(minimumMonsterCost);
+    filterMonsterData(minimumMonsterCost, userFollowerUpperBound);
     
     do {
         instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
@@ -483,11 +494,7 @@ int main(int argc, char** argv) {
         for (size_t i = 0; i < instances.size(); i++) {
             totalFightsSimulated = &(instances[i].totalFightsSimulated);
             
-            if (userFollowerUpperBound < 0) {
-                instances[i].followerUpperBound = numeric_limits<FollowerCount>::max();
-            } else {
-                instances[i].followerUpperBound = (FollowerCount) userFollowerUpperBound; // should not overflow due to parseInt
-            }
+            instances[i].followerUpperBound = userFollowerUpperBound;
             
             solveInstance(instances[i], config.firstDominance);
             outputSolution(instances[i]);

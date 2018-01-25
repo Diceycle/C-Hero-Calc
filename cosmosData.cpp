@@ -564,12 +564,12 @@ void initGameData() {
 
 // Filter monsters according to user input. Fills the available-references
 // Must be called before any instance can be solved
-void filterMonsterData(int64_t minimumMonsterCost) {
+void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumArmyCost) {
     std::vector<Monster> tempMonsterList = monsterBaseList; // Get a temporary list to sort
     sort(tempMonsterList.begin(), tempMonsterList.end(), isCheaper);
     
     for (size_t i = 0; i < tempMonsterList.size(); i++) {
-        if (minimumMonsterCost >= 0 && minimumMonsterCost <= tempMonsterList[i].cost) {
+        if (minimumMonsterCost <= tempMonsterList[i].cost && maximumArmyCost >= tempMonsterList[i].cost) {
             availableMonsters.push_back(monsterMap[tempMonsterList[i].name]);
         }
     }

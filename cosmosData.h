@@ -144,7 +144,7 @@ void initGameData();
 
 // Filter monsters according to user input. Fills the available-references
 // Must be called before any instance can be solved
-void filterMonsterData(int64_t minimumMonsterCost);
+void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumArmyCost);
 
 // Defines the results of a fight between two armies; monstersLost and damage desribe the condition of the winning side
 struct FightResult {
