@@ -65,7 +65,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     
     // Expansion for non-Hero Armies
     for (i = 0; i < oldPureArmiesSize; i++) {
-        if (instance.followerUpperBound <= oldPureArmies[i].followerCost && !oldPureArmies[i].lastFightData.dominated) {
+        if (instance.followerUpperBound >= oldPureArmies[i].followerCost && !oldPureArmies[i].lastFightData.dominated) {
             remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
             // Add Normal Monsters. Check for Cost
             for (m = 0; m < availableMonstersSize; m++) {
@@ -94,7 +94,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     bool friendsInfluence;
     bool rainbowInfluence;
     for (i = 0; i < oldHeroArmiesSize; i++) {
-        if (instance.followerUpperBound <= oldHeroArmies[i].followerCost && !oldHeroArmies[i].lastFightData.dominated) {
+        if (instance.followerUpperBound >= oldHeroArmies[i].followerCost && !oldHeroArmies[i].lastFightData.dominated) {
             remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
             friendsInfluence = false;
             rainbowInfluence = false;
