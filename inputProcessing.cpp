@@ -63,6 +63,7 @@ void UserInterface::haltExecution() {
     }
 }
 
+// Takes a raw line from an Input file or command line input and splits it into tokens
 vector<string> UserInterface::parseInput(string input) {
     input = split(toLower(input), COMMENT_DELIMITOR)[0]; 
     return split(input, TOKEN_SEPARATOR);
@@ -141,10 +142,13 @@ bool InputFileManager::hasLine() {
     return !this->inputLines.empty();
 }
 
+// Wrapper method to initialize InputFileManager
 void IOManager::loadInputFiles(string fileName) {
     this->fileInput.init(fileName);
 }
 
+// Read from the input and set configuration values accordingly. 
+// Outputs warnings to the command line if something is out of order
 void IOManager::getConfiguration() {
     vector<string> tokens;
     
@@ -180,7 +184,7 @@ void IOManager::getConfiguration() {
     }
 }
 
-// Method for handling ALL input. Gives access to help, error resistance and macro file for input.
+// Method for handling ALL input. Gives access to error resistance and input files.
 vector<string> IOManager::getResistantInput(string query, QueryType queryType) {
     string inputString;
     vector<string> tokens;
@@ -244,7 +248,7 @@ bool IOManager::askYesNoQuestion(string questionMessage, OutputLevel urgency, st
     return false;
 }
 
-// Promt the User via command line to input his hero levels and return a vector of their indices
+// Promt the User via command line to input his hero levels and return a vector of their indices in the monster reference
 vector<int8_t> IOManager::takeHerolevelInput() {
     vector<int8_t> heroes {};
     vector<string> input;

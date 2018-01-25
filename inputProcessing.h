@@ -71,16 +71,17 @@ struct ParserTokens {
 }; static const ParserTokens TOKENS;
 
 struct Configuration {
-    bool allowConfig = true; //
-    bool showReplayStrings = true; //
-    bool showQueries = true; //
-    bool ignoreEmptyLines = false; //
-    bool ignoreQuestions = false;
-    bool JSONOutput = false;
-    int firstDominance = ARMY_MAX_BRUTEFORCEABLE_SIZE; //
-    OutputLevel outputLevel = BASIC_OUTPUT; //
-    bool autoAdjustOutputLevel = true; //
-    bool individualBattles = false;
+    bool allowConfig = true;
+    bool showReplayStrings = true;
+    bool showQueries = true;
+    bool ignoreEmptyLines = false;
+    bool ignoreQuestions = false; //
+    bool JSONOutput = false; //
+    int firstDominance = ARMY_MAX_BRUTEFORCEABLE_SIZE;
+    OutputLevel outputLevel = BASIC_OUTPUT;
+    bool autoAdjustOutputLevel = true;
+    bool individualBattles = false; //
+    bool unlimitedWorldbossHealth = false; //
 };
 extern Configuration config;
 
