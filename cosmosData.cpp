@@ -275,7 +275,7 @@ void initMonsterData() {
     monsterBaseList.push_back(Monster(288, 192,  13001000, "f16", FIRE));
     monsterBaseList.push_back(Monster(286, 198,  13475000, "w16", WATER));	
                                                  
-    monsterBaseList.push_back(Monster(318, 208,  16765000, "a17", AIR));
+    monsterBaseList.push_back(Monster(318, 206,  16765000, "a17", AIR));
     monsterBaseList.push_back(Monster(302, 214,  16429000, "e17", EARTH));
     monsterBaseList.push_back(Monster(310, 224,  18297000, "f17", FIRE));
     monsterBaseList.push_back(Monster(306, 220,  17466000, "w17", WATER));
