@@ -245,9 +245,9 @@ void calculateDominance(Instance & instance, bool optimizable,
 // Greedy approach for 4 or less monsters is obsolete, as bruteforce is still fast enough
 void getQuickSolutions(Instance & instance) {
     Army tempArmy;
-    vector<int8_t> greedy;
-    vector<int8_t> greedyHeroes;
-    vector<int8_t> greedyTemp;
+    vector<uint8_t> greedy;
+    vector<uint8_t> greedyHeroes;
+    vector<uint8_t> greedyTemp;
     bool invalid = false;
     
     interface.outputMessage("Trying to find solutions greedily...", DETAILED_OUTPUT);
@@ -451,9 +451,6 @@ int main(int argc, char** argv) {
     initGameData();
     
     // -------------------------------------------- Program Start --------------------------------------------    
-    
-    iomanager.outputMessage(welcomeMessage, CMD_OUTPUT);
-    iomanager.outputMessage(helpMessage, CMD_OUTPUT);
     
     if (config.individualBattles) {
         interface.outputMessage("Simulating individual Figths", NOTIFICATION_OUTPUT);

@@ -129,7 +129,7 @@ class IOManager {
         void getConfiguration();
         bool askYesNoQuestion(std::string question, OutputLevel urgency, std::string defaultAnswer);   
         std::vector<std::string> getResistantInput(std::string query, QueryType queryType = raw);
-        std::vector<int8_t> takeHerolevelInput();
+        std::vector<uint8_t> takeHerolevelInput();
         std::vector<Instance> takeInstanceInput(std::string promt);
 
         std::string getJSONError(InputException e);

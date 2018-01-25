@@ -184,10 +184,10 @@ int isQuest(Army & army) {
 }
 
 // Access tools for monsters 
-std::map<std::string, int8_t> monsterMap; // Maps monster Names to their indices in monsterReference
+std::map<std::string, uint8_t> monsterMap; // Maps monster Names to their indices in monsterReference
 std::vector<Monster> monsterReference; // Global lookup for monster stats indices of monsters here can be used instead of the objects
-std::vector<int8_t> availableMonsters; // Contains indices of all monsters the user allows. Is affected by filters
-std::vector<int8_t> availableHeroes; // Contains all user heroes' indices 
+std::vector<uint8_t> availableMonsters; // Contains indices of all monsters the user allows. Is affected by filters
+std::vector<uint8_t> availableHeroes; // Contains all user heroes' indices 
 
 // Storage for Game Data
 std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actual Objects
@@ -270,12 +270,12 @@ void initMonsterData() {
     monsterBaseList.push_back(Monster(234, 136,   5676000, "f15", FIRE));
     monsterBaseList.push_back(Monster(276, 142,   7758000, "w15", WATER));
     
-	monsterBaseList.push_back(Monster(280, 196,  12855000, "a16", AIR));
+    monsterBaseList.push_back(Monster(280, 196,  12855000, "a16", AIR));
     monsterBaseList.push_back(Monster(284, 190,  12534000, "e16", EARTH));
     monsterBaseList.push_back(Monster(288, 192,  13001000, "f16", FIRE));
     monsterBaseList.push_back(Monster(286, 198,  13475000, "w16", WATER));	
                                                  
-	monsterBaseList.push_back(Monster(318, 208,  16765000, "a17", AIR));
+    monsterBaseList.push_back(Monster(318, 208,  16765000, "a17", AIR));
     monsterBaseList.push_back(Monster(302, 214,  16429000, "e17", EARTH));
     monsterBaseList.push_back(Monster(310, 224,  18297000, "f17", FIRE));
     monsterBaseList.push_back(Monster(306, 220,  17466000, "w17", WATER));
@@ -465,47 +465,47 @@ void initBaseHeroes() {
 }
 
 void initQuests() {
-	quests.push_back({""});
-	quests.push_back({"w5"});
-	quests.push_back({"f1", "a1", "f1", "a1", "f1", "a1"});
-	quests.push_back({"f5", "a5"});
-	quests.push_back({"f2", "a2", "e2", "w2", "f3", "a3"});
-	quests.push_back({"w3", "e3", "w3", "e3", "w3", "e3"});       //5
-	quests.push_back({"w4", "e1", "a4", "f4", "w1", "e4"});
-	quests.push_back({"f5", "a5", "f4", "a3", "f2", "a1"});
-	quests.push_back({"e4", "w4", "w5", "e5", "w4", "e4"});
-	quests.push_back({"w5", "f5", "e5", "a5", "w4", "f4"});
-	quests.push_back({"w5", "e5", "a5", "f5", "e5", "w5"});       //10
-	quests.push_back({"f5", "f6", "e5", "e6", "a5", "a6"});
-	quests.push_back({"e5", "w5", "f5", "e6", "f6", "w6"});
-	quests.push_back({"a8", "a7", "a6", "a5", "a4", "a3"});
-	quests.push_back({"f7", "f6", "f5", "e7", "e6", "e6"});
-	quests.push_back({"w5", "e6", "w6", "e8", "w8"});             //15
-	quests.push_back({"a9", "f8", "a8"});
-	quests.push_back({"w5", "e6", "w7", "e8", "w8"});
-	quests.push_back({"f7", "f6", "a6", "f5", "a7", "a8"});
-	quests.push_back({"e7", "w9", "f9", "e9"});
-	quests.push_back({"f2", "a4", "f5", "a7", "f8", "a10"});      //20
-	quests.push_back({"w10", "a10", "w10"});
-	quests.push_back({"w9", "e10", "f10"});
-	quests.push_back({"e9", "a9", "w8", "f8", "e8"});
-	quests.push_back({"f6", "a7", "f7", "a8", "f8", "a9"});
-	quests.push_back({"w8", "w7", "w8", "w8", "w7", "w8"});       //25
+    quests.push_back({""});
+    quests.push_back({"w5"});
+    quests.push_back({"f1", "a1", "f1", "a1", "f1", "a1"});
+    quests.push_back({"f5", "a5"});
+    quests.push_back({"f2", "a2", "e2", "w2", "f3", "a3"});
+    quests.push_back({"w3", "e3", "w3", "e3", "w3", "e3"});       //5
+    quests.push_back({"w4", "e1", "a4", "f4", "w1", "e4"});
+    quests.push_back({"f5", "a5", "f4", "a3", "f2", "a1"});
+    quests.push_back({"e4", "w4", "w5", "e5", "w4", "e4"});
+    quests.push_back({"w5", "f5", "e5", "a5", "w4", "f4"});
+    quests.push_back({"w5", "e5", "a5", "f5", "e5", "w5"});       //10
+    quests.push_back({"f5", "f6", "e5", "e6", "a5", "a6"});
+    quests.push_back({"e5", "w5", "f5", "e6", "f6", "w6"});
+    quests.push_back({"a8", "a7", "a6", "a5", "a4", "a3"});
+    quests.push_back({"f7", "f6", "f5", "e7", "e6", "e6"});
+    quests.push_back({"w5", "e6", "w6", "e8", "w8"});             //15
+    quests.push_back({"a9", "f8", "a8"});
+    quests.push_back({"w5", "e6", "w7", "e8", "w8"});
+    quests.push_back({"f7", "f6", "a6", "f5", "a7", "a8"});
+    quests.push_back({"e7", "w9", "f9", "e9"});
+    quests.push_back({"f2", "a4", "f5", "a7", "f8", "a10"});      //20
+    quests.push_back({"w10", "a10", "w10"});
+    quests.push_back({"w9", "e10", "f10"});
+    quests.push_back({"e9", "a9", "w8", "f8", "e8"});
+    quests.push_back({"f6", "a7", "f7", "a8", "f8", "a9"});
+    quests.push_back({"w8", "w7", "w8", "w8", "w7", "w8"});       //25
     quests.push_back({"a9", "w7", "w8", "e7", "e8", "f10"});
-	quests.push_back({"e9", "f9", "w9", "f7", "w7", "w7"});
-	quests.push_back({"a10", "a8", "a9", "a10", "a9"});
-	quests.push_back({"a10", "w7", "f7", "e8", "a9", "a9"});
-	quests.push_back({"e10", "e10", "e10", "f10"});               //30
-	quests.push_back({"e9", "f10", "f9", "f9", "a10", "a7"});
-	quests.push_back({"w1", "a9", "f10", "e9", "a10", "w10"});
-	quests.push_back({"e9", "a9", "a9", "f9", "a9", "f10"});
-	quests.push_back({"f8", "e9", "w9", "a9", "a10", "a10"});
-	quests.push_back({"w8", "w8", "w10", "a10", "a10", "f10"});   //35
-	quests.push_back({"a8", "a10", "f10", "a10", "a10", "a10"});
-	quests.push_back({"e8", "a10", "e10", "f10", "f10", "e10"});
-	quests.push_back({"f10", "e10", "w10", "a10", "w10", "w10"});
-	quests.push_back({"w9", "a10", "w10", "e10", "a10", "a10"});
-	quests.push_back({"w10", "a10", "w10", "a10", "w10", "a10"}); //40
+    quests.push_back({"e9", "f9", "w9", "f7", "w7", "w7"});
+    quests.push_back({"a10", "a8", "a9", "a10", "a9"});
+    quests.push_back({"a10", "w7", "f7", "e8", "a9", "a9"});
+    quests.push_back({"e10", "e10", "e10", "f10"});               //30
+    quests.push_back({"e9", "f10", "f9", "f9", "a10", "a7"});
+    quests.push_back({"w1", "a9", "f10", "e9", "a10", "w10"});
+    quests.push_back({"e9", "a9", "a9", "f9", "a9", "f10"});
+    quests.push_back({"f8", "e9", "w9", "a9", "a10", "a10"});
+    quests.push_back({"w8", "w8", "w10", "a10", "a10", "f10"});   //35
+    quests.push_back({"a8", "a10", "f10", "a10", "a10", "a10"});
+    quests.push_back({"e8", "a10", "e10", "f10", "f10", "e10"});
+    quests.push_back({"f10", "e10", "w10", "a10", "w10", "w10"});
+    quests.push_back({"w9", "a10", "w10", "e10", "a10", "a10"});
+    quests.push_back({"w10", "a10", "w10", "a10", "w10", "a10"}); //40
     quests.push_back({"e12", "e11", "a11", "f11", "a12"});
     quests.push_back({"a11", "a11", "e11", "a11", "e11", "a11"});
     quests.push_back({"a8", "a11", "a10", "w10", "a12", "e12"});
@@ -558,7 +558,7 @@ void initGameData() {
 
     for (size_t i = 0; i < monsterBaseList.size(); i++) {
         monsterReference.push_back(monsterBaseList[i]);
-        monsterMap.insert(std::pair<std::string, int8_t>(monsterBaseList[i].name, i));
+        monsterMap.insert(std::pair<std::string, uint8_t>(monsterBaseList[i].name, i));
     }
 }
 
@@ -576,11 +576,11 @@ void filterMonsterData(int minimumMonsterCost) {
 }
 
 // Add a leveled hero to the databse and return its corresponding index
-int8_t addLeveledHero(Monster & hero, int level) {
+uint8_t addLeveledHero(Monster & hero, int level) {
     Monster m(hero, level);
     monsterReference.emplace_back(m);
     
-    return (int8_t) (monsterReference.size() - 1);
+    return (uint8_t) (monsterReference.size() - 1);
 }
 
 // Get Index corresponding to the id used ingame. monsters >= 0, heroes <= -2, empty spot = -1

@@ -121,10 +121,10 @@ class Monster {
 };
 
 // Access tools for monsters 
-extern std::map<std::string, int8_t> monsterMap; // Maps monster Names to their indices in monsterReference
+extern std::map<std::string, uint8_t> monsterMap; // Maps monster Names to their indices in monsterReference
 extern std::vector<Monster> monsterReference; // Global lookup for monster stats indices of monsters here can be used instead of the objects
-extern std::vector<int8_t> availableMonsters; // Contains indices of all monsters the user allows. Is affected by filters
-extern std::vector<int8_t> availableHeroes; // Contains all user heroes' indices 
+extern std::vector<uint8_t> availableMonsters; // Contains indices of all monsters the user allows. Is affected by filters
+extern std::vector<uint8_t> availableHeroes; // Contains all user heroes' indices 
 
 // Storage for Game Data
 extern std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actual Objects
@@ -173,10 +173,10 @@ class Army {
     public:
         FightResult lastFightData;
         int32_t followerCost;
-        int8_t monsters[ARMY_MAX_SIZE];
+        uint8_t monsters[ARMY_MAX_SIZE];
         int8_t monsterAmount;
         
-        Army(std::vector<int8_t> someMonsters = {}) :
+        Army(std::vector<uint8_t> someMonsters = {}) :
             followerCost(0),
             monsterAmount(0)
         {
@@ -186,7 +186,7 @@ class Army {
         }
         
         // Add monster to the back of the army
-        void add(const int8_t m) {
+        void add(const uint8_t m) {
             this->monsters[monsterAmount] = m;
             this->followerCost += monsterReference[m].cost;
             this->monsterAmount++;
@@ -234,7 +234,7 @@ inline bool isCheaper(const Monster & a, const Monster & b) {
 }
 
 // Add a leveled hero to the databse and return its corresponding index
-int8_t addLeveledHero(Monster & hero, int level);
+uint8_t addLeveledHero(Monster & hero, int level);
 
 // Returns the index of a quest if the lineup is the same. Returns -1 if not a quest
 int isQuest(Army & army);

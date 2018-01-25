@@ -249,13 +249,13 @@ bool IOManager::askYesNoQuestion(string questionMessage, OutputLevel urgency, st
 }
 
 // Promt the User via command line to input his hero levels and return a vector of their indices in the monster reference
-vector<int8_t> IOManager::takeHerolevelInput() {
-    vector<int8_t> heroes {};
+vector<uint8_t> IOManager::takeHerolevelInput() {
+    vector<uint8_t> heroes {};
     vector<string> input;
     pair<Monster, int> heroData;
     
     interface.outputMessage("\nEnter your Heroes with levels. Press enter after every Hero.", QUERY_OUTPUT);
-    interface.outputMessage("Press enter twice or type" + TOKENS.HEROES_FINISHED + "to proceed without inputting additional Heroes.", QUERY_OUTPUT);
+    interface.outputMessage("Press enter twice or type " + TOKENS.HEROES_FINISHED + " to proceed without inputting additional Heroes.", QUERY_OUTPUT);
         
     int cancelCounter = 0;
     do {
