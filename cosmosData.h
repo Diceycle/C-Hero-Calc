@@ -13,6 +13,10 @@
 
 const std::string VERSION = "2.9.3.1";
 
+using MonsterIndex = uint8_t;
+using FollowerCount = uint32_t;
+
+
 // Constants defining the basic structure of armies
 const size_t ARMY_MAX_SIZE = 6;
 const size_t TOURNAMENT_LINES = 5;
@@ -96,12 +100,12 @@ const HeroSkill NO_SKILL = HeroSkill({NOTHING, AIR, AIR, 1}); // base skill used
 // Defines a Monster or Hero
 class Monster {
     private:
-        Monster(int hp, int damage, int cost, std::string name, Element element, HeroRarity rarity, HeroSkill skill, int level);
+        Monster(int hp, int damage, FollowerCount cost, std::string name, Element element, HeroRarity rarity, HeroSkill skill, int level);
         
     public :
         int hp;
         int damage;
-        int cost;
+        FollowerCount cost;
         std::string baseName; // Hero names without levels
         Element element;
         
@@ -112,7 +116,7 @@ class Monster {
         
         std::string name; // display name
         
-        Monster(int hp, int damage, int cost, std::string name, Element element);
+        Monster(int hp, int damage, FollowerCount cost, std::string name, Element element);
         Monster(int hp, int damage, std::string name, Element element, HeroRarity rarity, HeroSkill skill);
         Monster(const Monster & baseHero, int level);
         Monster() {};
@@ -121,10 +125,10 @@ class Monster {
 };
 
 // Access tools for monsters 
-extern std::map<std::string, uint8_t> monsterMap; // Maps monster Names to their indices in monsterReference
+extern std::map<std::string, MonsterIndex> monsterMap; // Maps monster Names to their indices in monsterReference
 extern std::vector<Monster> monsterReference; // Global lookup for monster stats indices of monsters here can be used instead of the objects
-extern std::vector<uint8_t> availableMonsters; // Contains indices of all monsters the user allows. Is affected by filters
-extern std::vector<uint8_t> availableHeroes; // Contains all user heroes' indices 
+extern std::vector<MonsterIndex> availableMonsters; // Contains indices of all monsters the user allows. Is affected by filters
+extern std::vector<MonsterIndex> availableHeroes; // Contains all user heroes' indices 
 
 // Storage for Game Data
 extern std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actual Objects
@@ -140,7 +144,7 @@ void initGameData();
 
 // Filter monsters according to user input. Fills the available-references
 // Must be called before any instance can be solved
-void filterMonsterData(int minimumMonsterCost);
+void filterMonsterData(int64_t minimumMonsterCost);
 
 // Defines the results of a fight between two armies; monstersLost and damage desribe the condition of the winning side
 struct FightResult {
@@ -171,11 +175,11 @@ struct FightResult {
 class Army {
     public:
         FightResult lastFightData;
-        int32_t followerCost;
-        uint8_t monsters[ARMY_MAX_SIZE];
+        FollowerCount followerCost;
+        MonsterIndex monsters[ARMY_MAX_SIZE];
         int8_t monsterAmount;
         
-        Army(std::vector<uint8_t> someMonsters = {}) :
+        Army(std::vector<MonsterIndex> someMonsters = {}) :
             followerCost(0),
             monsterAmount(0)
         {
@@ -185,7 +189,7 @@ class Army {
         }
         
         // Add monster to the back of the army
-        void add(const uint8_t m) {
+        void add(const MonsterIndex m) {
             this->monsters[monsterAmount] = m;
             this->followerCost += monsterReference[m].cost;
             this->monsterAmount++;
@@ -204,7 +208,7 @@ struct Instance {
     size_t targetSize;
     size_t maxCombatants;
     
-    int followerUpperBound;
+    FollowerCount followerUpperBound;
     Army bestSolution;
     
     time_t calculationTime;
@@ -233,7 +237,7 @@ inline bool isCheaper(const Monster & a, const Monster & b) {
 }
 
 // Add a leveled hero to the databse and return its corresponding index
-uint8_t addLeveledHero(Monster & hero, int level);
+MonsterIndex addLeveledHero(Monster & hero, int level);
 
 // Returns the index of a quest if the lineup is the same. Returns -1 if not a quest
 int isQuest(Army & army);

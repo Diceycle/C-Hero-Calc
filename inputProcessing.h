@@ -37,7 +37,6 @@ enum OutputLevel {
     QUERY_OUTPUT
 };
 
-// TODO: Detect double hero inputs
 enum InputException {
     MONSTER_PARSE,
     HERO_PARSE,
@@ -129,7 +128,7 @@ class IOManager {
         void getConfiguration();
         bool askYesNoQuestion(std::string question, OutputLevel urgency, std::string defaultAnswer);   
         std::vector<std::string> getResistantInput(std::string query, QueryType queryType = raw);
-        std::vector<uint8_t> takeHerolevelInput();
+        std::vector<MonsterIndex> takeHerolevelInput();
         std::vector<Instance> takeInstanceInput(std::string promt);
 
         std::string getJSONError(InputException e);
@@ -155,7 +154,7 @@ std::string getReplaySetup(Army setup);
 std::string getReplayHeroes(Army setup);
 
 bool parseBool(std::string toParse);
-int parseInt(std::string toParse);
+int64_t parseInt(std::string toParse);
 OutputLevel parseOutputLevel(std::string toParse);
 
 // Splits strings into a vector of strings. No need to optimize, only used for input.

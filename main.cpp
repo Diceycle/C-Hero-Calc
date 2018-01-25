@@ -53,7 +53,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             const vector<Army> & oldPureArmies, const vector<Army> & oldHeroArmies, 
             const size_t currentArmySize, const Instance & instance) {
 
-    int remainingFollowers;
+    FollowerCount remainingFollowers;
     size_t availableMonstersSize = availableMonsters.size();
     size_t availableHeroesSize = availableHeroes.size();
     size_t oldPureArmiesSize = oldPureArmies.size();
@@ -65,9 +65,8 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     
     // Expansion for non-Hero Armies
     for (i = 0; i < oldPureArmiesSize; i++) {
-        remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
-        if (!oldPureArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
-
+        if (instance.followerUpperBound <= oldPureArmies[i].followerCost && !oldPureArmies[i].lastFightData.dominated) {
+            remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
             // Add Normal Monsters. Check for Cost
             for (m = 0; m < availableMonstersSize; m++) {
                 if (monsterReference[availableMonsters[m]].cost < remainingFollowers) {
@@ -95,8 +94,8 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     bool friendsInfluence;
     bool rainbowInfluence;
     for (i = 0; i < oldHeroArmiesSize; i++) {
-        remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
-        if (!oldHeroArmies[i].lastFightData.dominated && remainingFollowers >= 0) {
+        if (instance.followerUpperBound <= oldHeroArmies[i].followerCost && !oldHeroArmies[i].lastFightData.dominated) {
+            remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
             friendsInfluence = false;
             rainbowInfluence = false;
             invalidSkill = false;
@@ -148,7 +147,7 @@ void calculateDominance(Instance & instance, bool optimizable,
     size_t pureMonsterArmiesSize = pureMonsterArmies.size();
     size_t heroMonsterArmiesSize = heroMonsterArmies.size();
     
-    int leftFollowerCost;
+    FollowerCount leftFollowerCost;
     FightResult * currentFightResult;
     
     // First Check dominance for non-Hero setups
@@ -244,9 +243,9 @@ void calculateDominance(Instance & instance, bool optimizable,
 // Greedy approach for 4 or less monsters is obsolete, as bruteforce is still fast enough
 void getQuickSolutions(Instance & instance) {
     Army tempArmy;
-    vector<uint8_t> greedy;
-    vector<uint8_t> greedyHeroes;
-    vector<uint8_t> greedyTemp;
+    vector<MonsterIndex> greedy;
+    vector<MonsterIndex> greedyHeroes;
+    vector<MonsterIndex> greedyTemp;
     bool invalid = false;
     
     interface.outputMessage("Trying to find solutions greedily...", DETAILED_OUTPUT);
@@ -417,8 +416,8 @@ void outputSolution(Instance instance) {
 
 int main(int argc, char** argv) {
     // Declare Variables
-    int32_t minimumMonsterCost;
-    int32_t userFollowerUpperBound;
+    int64_t minimumMonsterCost;
+    int64_t userFollowerUpperBound;
     vector<Instance> instances;
     bool userWantsContinue;
     
@@ -461,11 +460,10 @@ int main(int argc, char** argv) {
         }
         return EXIT_SUCCESS;
     }
-    
     // Collect the Data via Command Line
     availableHeroes = iomanager.takeHerolevelInput();
-    minimumMonsterCost = stoi(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", integer)[0]);
-    userFollowerUpperBound = stoi(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", integer)[0]);
+    minimumMonsterCost = parseInt(iomanager.getResistantInput("Set a lower follower limit on monsters used: ", integer)[0]);
+    userFollowerUpperBound = parseInt(iomanager.getResistantInput("Set an upper follower limit that you want to use: ", integer)[0]);
     
     // Fill monster arrays with relevant monsters
     filterMonsterData(minimumMonsterCost);
@@ -478,7 +476,7 @@ int main(int argc, char** argv) {
         if (config.outputLevel == DETAILED_OUTPUT && config.autoAdjustOutputLevel) {
             config.outputLevel = BASIC_OUTPUT;
         }
-        if (config.outputLevel == BASIC_OUTPUT && instances.size() > 1 && config.autoAdjustOutputLevel) { // TODO: Reset Output Level if userwantscontinue
+        if (config.outputLevel == BASIC_OUTPUT && instances.size() > 1 && config.autoAdjustOutputLevel) {
             config.outputLevel = SOLUTION_OUTPUT;
         }
         
@@ -486,9 +484,9 @@ int main(int argc, char** argv) {
             totalFightsSimulated = &(instances[i].totalFightsSimulated);
             
             if (userFollowerUpperBound < 0) {
-                instances[i].followerUpperBound = numeric_limits<int>::max();
+                instances[i].followerUpperBound = numeric_limits<FollowerCount>::max();
             } else {
-                instances[i].followerUpperBound = userFollowerUpperBound;
+                instances[i].followerUpperBound = (FollowerCount) userFollowerUpperBound; // should not overflow due to parseInt
             }
             
             solveInstance(instances[i], config.firstDominance);

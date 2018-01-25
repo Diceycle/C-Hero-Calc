@@ -1,7 +1,7 @@
 #include "cosmosData.h"
 
 // Private constructor that is called by all public ones. Fully initializes all attributes
-Monster::Monster(int someHp, int someDamage, int aCost, std::string aName, Element anElement, HeroRarity aRarity, HeroSkill aSkill, int aLevel) : 
+Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aName, Element anElement, HeroRarity aRarity, HeroSkill aSkill, int aLevel) : 
     hp(someHp),
     damage(someDamage),
     cost(aCost),
@@ -30,7 +30,7 @@ Monster::Monster(int someHp, int someDamage, int aCost, std::string aName, Eleme
 }
 
 // Contructor for normal Monsters
-Monster::Monster(int someHp, int someDamage, int aCost, std::string aName, Element anElement) : 
+Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aName, Element anElement) : 
     Monster(someHp, someDamage, aCost, aName, anElement, NO_HERO, NO_SKILL, 0) {}
 
 // Constructor for Heroes
@@ -184,10 +184,10 @@ int isQuest(Army & army) {
 }
 
 // Access tools for monsters 
-std::map<std::string, uint8_t> monsterMap; // Maps monster Names to their indices in monsterReference
+std::map<std::string, MonsterIndex> monsterMap; // Maps monster Names to their indices in monsterReference
 std::vector<Monster> monsterReference; // Global lookup for monster stats indices of monsters here can be used instead of the objects
-std::vector<uint8_t> availableMonsters; // Contains indices of all monsters the user allows. Is affected by filters
-std::vector<uint8_t> availableHeroes; // Contains all user heroes' indices 
+std::vector<MonsterIndex> availableMonsters; // Contains indices of all monsters the user allows. Is affected by filters
+std::vector<MonsterIndex> availableHeroes; // Contains all user heroes' indices 
 
 // Storage for Game Data
 std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actual Objects
@@ -558,13 +558,13 @@ void initGameData() {
 
     for (size_t i = 0; i < monsterBaseList.size(); i++) {
         monsterReference.push_back(monsterBaseList[i]);
-        monsterMap.insert(std::pair<std::string, uint8_t>(monsterBaseList[i].name, i));
+        monsterMap.insert(std::pair<std::string, MonsterIndex>(monsterBaseList[i].name, i));
     }
 }
 
 // Filter monsters according to user input. Fills the available-references
 // Must be called before any instance can be solved
-void filterMonsterData(int minimumMonsterCost) {
+void filterMonsterData(int64_t minimumMonsterCost) {
     std::vector<Monster> tempMonsterList = monsterBaseList; // Get a temporary list to sort
     sort(tempMonsterList.begin(), tempMonsterList.end(), isCheaper);
     
@@ -576,11 +576,11 @@ void filterMonsterData(int minimumMonsterCost) {
 }
 
 // Add a leveled hero to the databse and return its corresponding index
-uint8_t addLeveledHero(Monster & hero, int level) {
+MonsterIndex addLeveledHero(Monster & hero, int level) {
     Monster m(hero, level);
     monsterReference.emplace_back(m);
     
-    return (uint8_t) (monsterReference.size() - 1);
+    return (MonsterIndex) (monsterReference.size() - 1);
 }
 
 // Get Index corresponding to the id used ingame. monsters >= 0, heroes <= -2, empty spot = -1

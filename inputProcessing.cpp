@@ -162,7 +162,7 @@ void IOManager::getConfiguration() {
                     if (tokens[0] == TOKENS.AUTO_ADJUST_OUTPUT) {
                         config.autoAdjustOutputLevel = parseBool(tokens.at(1));
                     } else if (tokens[0] == TOKENS.FIRST_DOMINANCE) {
-                        config.firstDominance = parseInt(tokens.at(1));
+                        config.firstDominance = (int) parseInt(tokens.at(1));
                     } else if (tokens[0] == TOKENS.IGNORE_EMPTY) {
                         config.ignoreEmptyLines = parseBool(tokens.at(1));
                     } else if (tokens[0] == TOKENS.OUTPUT_LEVEL) {
@@ -215,7 +215,7 @@ vector<string> IOManager::getResistantInput(string query, QueryType queryType) {
         }
         if (queryType == integer) {
             try {
-                stoi(tokens[0]);
+                parseInt(tokens[0]);
                 return tokens;
             } catch (const exception & e) {
                 this->handleInputException(NUMBER_PARSE);
@@ -249,8 +249,8 @@ bool IOManager::askYesNoQuestion(string questionMessage, OutputLevel urgency, st
 }
 
 // Promt the User via command line to input his hero levels and return a vector of their indices in the monster reference
-vector<uint8_t> IOManager::takeHerolevelInput() {
-    vector<uint8_t> heroes {};
+vector<MonsterIndex> IOManager::takeHerolevelInput() {
+    vector<MonsterIndex> heroes {};
     vector<string> input;
     pair<Monster, int> heroData;
     
@@ -356,9 +356,9 @@ Instance makeInstanceFromString(string instanceString) {
     
     if (instanceString.compare(0, QUEST_PREFIX.length(), QUEST_PREFIX) == 0) {
         try {
-            int questNumber = stoi(instanceString.substr(QUEST_PREFIX.length(), dashPosition-QUEST_PREFIX.length()));
+            int questNumber = (int) parseInt(instanceString.substr(QUEST_PREFIX.length(), dashPosition-QUEST_PREFIX.length()));
             instance.setTarget(makeArmyFromStrings(quests[questNumber]));
-            instance.maxCombatants = ARMY_MAX_SIZE - (stoi(instanceString.substr(dashPosition+1, 1)) - 1);
+            instance.maxCombatants = ARMY_MAX_SIZE - (parseInt(instanceString.substr(dashPosition+1, 1)) - 1);
         } catch (const exception & e) {
             throw QUEST_PARSE;
         }
@@ -395,7 +395,7 @@ pair<Monster, int> parseHeroString(string heroString) {
     string name = heroString.substr(0, heroString.find(HEROLEVEL_SEPARATOR));
     int level;
     try {
-        level = stoi(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR)+1));
+        level = (int) parseInt(heroString.substr(heroString.find(HEROLEVEL_SEPARATOR)+1));
     } catch (const exception & e) {
         throw HERO_PARSE;
     }
@@ -535,10 +535,17 @@ bool parseBool(string toParse) {
     }
 }
 
-int parseInt(string toParse) {
-    try {
-        return stoi(toParse);
-    } catch (const invalid_argument &e) {
+int64_t parseInt(string toParse) {
+    int64_t num;
+    istringstream is(toParse);
+    is >> num;
+    if (!is.fail()) {
+        if (num > numeric_limits<uint32_t>::max()) {
+            return numeric_limits<uint32_t>::max();
+        } else {
+            return num; 
+        }
+    } else {
         throw invalid_argument("Could not parse number from '" + toParse + "'!");
     }
 }
