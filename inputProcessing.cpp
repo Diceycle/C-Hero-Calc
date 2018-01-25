@@ -266,7 +266,15 @@ vector<uint8_t> IOManager::takeHerolevelInput() {
             cancelCounter = 0;
             try {
                 heroData = parseHeroString(input[0]);
-                heroes.push_back(addLeveledHero(heroData.first, heroData.second));
+                bool heroUsed = false;
+                for (size_t i = 0; i < heroes.size(); i++) {
+                    heroUsed |= (heroData.first.baseName == monsterReference[heroes[i]].baseName);
+                }
+                if (!heroUsed) {
+                    heroes.push_back(addLeveledHero(heroData.first, heroData.second));
+                } else {
+                    interface.outputMessage(heroData.first.baseName + " already used. Ignoring...", NOTIFICATION_OUTPUT);
+                }
             } catch (InputException e) {
                 this->handleInputException(e);
             };
