@@ -57,7 +57,7 @@ void UserInterface::resumeTimedOutputs(OutputLevel urgency) {
 
 // Wait for user input before continuing. Used to stop program from closing outside of a command line.
 void UserInterface::haltExecution() {
-    if (shouldOutput(NOTIFICATION_OUTPUT)) {
+    if (!config.ignoreExecutionHalt) {
         cout << "Press enter to exit...";
         cin.get();
     }

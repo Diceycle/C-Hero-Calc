@@ -63,6 +63,7 @@ struct ParserTokens {
     const std::string AUTO_ADJUST_OUTPUT =  "auto_adjust_output"; 
     const std::string SHOW_REPLAY_STRINGS = "show_replays"; 
     const std::string IGNORE_EMPTY =        "ignore_empty_lines"; 
+    const std::string IGNORE_EXEC_HALT =    "ignore_execution_halt"; 
     
     const std::string T_SOLUTION_OUTPUT =   "solution"; 
     const std::string T_BASIC_OUTPUT =      "basic"; 
@@ -75,6 +76,7 @@ struct Configuration {
     bool showQueries = true;
     bool ignoreEmptyLines = false;
     bool ignoreQuestions = false; //
+    bool ignoreExecutionHalt = false;
     bool JSONOutput = false; //
     int firstDominance = ARMY_MAX_BRUTEFORCEABLE_SIZE;
     OutputLevel outputLevel = BASIC_OUTPUT;
