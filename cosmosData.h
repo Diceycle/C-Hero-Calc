@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <map>
 
-const std::string VERSION = "2.9.2.6";
+const std::string VERSION = "2.9.3.0";
 
 // Constants defining the basic structure of armies
 const size_t ARMY_MAX_SIZE = 6;
@@ -46,6 +46,7 @@ enum SkillType {
     REVENGE,    // After this monster dies it damages the entire opposing army
     PIERCE,     // If this monster attacks it also damages every monster behind the attacked
     VALKYRIE,   // This monsters damage is done to all monsters, the value beeing reduced for each monster it hits. Hardcoded to 50%
+    TRAMPLE,    // This monsters attack damages n units from the front 
     
     BUFF_L,     // Buff ability that scales with level
     PROTECT_L,  // Protect ability that scales with level
