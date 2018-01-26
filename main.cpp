@@ -426,6 +426,7 @@ int main(int argc, char** argv) {
         config.ignoreQuestions = true;
         config.JSONOutput = true;
         config.outputLevel = SOLUTION_OUTPUT;
+        config.ignoreExecutionHalt = true;
         config.allowConfig = false;
     }
     
