@@ -171,6 +171,8 @@ void IOManager::getConfiguration() {
                         config.showQueries = parseBool(tokens.at(1));
                     } else if (tokens[0] == TOKENS.SHOW_REPLAY_STRINGS) {
                         config.showReplayStrings = parseBool(tokens.at(1));
+                    } else if (tokens[0] == TOKENS.IGNORE_EXEC_HALT) {
+                        config.ignoreExecutionHalt = parseBool(tokens.at(1));
                     } else if (tokens[0] != TOKENS.EMPTY) {
                         interface.outputMessage("Unrecognized option '" + tokens[0] + "'", NOTIFICATION_OUTPUT);
                     }
