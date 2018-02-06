@@ -463,7 +463,7 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 78, 40, "rua",                FIRE,  LEGENDARY, {TRAMPLE,       ALL, FIRE, 2}));
     baseHeroes.push_back(Monster( 82, 44, "dorth",              WATER, LEGENDARY, {TRAMPLE,       ALL, WATER, 2}));
     
-    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 125, "mother", EARTH, WORLDBOSS, {DAMPEN,      ALL, EARTH, .5}));
+    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 125, "moak", EARTH, WORLDBOSS, {DAMPEN,      ALL, EARTH, .5}));
 }
 
 void initQuests() {
