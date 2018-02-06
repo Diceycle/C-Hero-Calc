@@ -338,10 +338,10 @@ void initMonsterData() {
     monsterBaseList.push_back(Monster(834, 616, 368000000, "a29", AIR));
     monsterBaseList.push_back(Monster(830, 614, 363000000, "e29", EARTH));
     monsterBaseList.push_back(Monster(746, 676, 358000000, "f29", FIRE));
-    monsterBaseList.push_back(Monster(1008, 512, 370000000, "w29", WATER));
+    monsterBaseList.push_back(Monster(1008,512, 370000000, "w29", WATER));
 
     monsterBaseList.push_back(Monster(700, 906, 505000000, "a30", AIR));
-    monsterBaseList.push_back(Monster(1022, 614, 497000000, "e30", EARTH));
+    monsterBaseList.push_back(Monster(1022,614, 497000000, "e30", EARTH));
     monsterBaseList.push_back(Monster(930, 690, 514000000, "f30", FIRE));
     monsterBaseList.push_back(Monster(802, 802, 515000000, "w30", WATER));
 }
@@ -444,7 +444,6 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster(116,116, "ageror",             AIR,   ASCENDED,  {FRIENDS,       SELF, AIR, 1.3f}));
     
     baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 60, "lordofchaos", FIRE, WORLDBOSS, {AOE,      ALL, FIRE, 20}));
-    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 125, "mother", EARTH, WORLDBOSS, {DAMPEN,      ALL, EARTH, .5}));
     
     baseHeroes.push_back(Monster( 38, 24, "christmaself",       WATER, COMMON,    {HEAL_L,        ALL, WATER, 0.112f}));
     baseHeroes.push_back(Monster( 54, 36, "reindeer",           AIR,   RARE,      {AOE_L,         ALL, AIR, 0.112f}));
@@ -463,6 +462,8 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 74, 36, "arshen",             AIR,   LEGENDARY, {TRAMPLE,       ALL, AIR, 2}));
     baseHeroes.push_back(Monster( 78, 40, "rua",                FIRE,  LEGENDARY, {TRAMPLE,       ALL, FIRE, 2}));
     baseHeroes.push_back(Monster( 82, 44, "dorth",              WATER, LEGENDARY, {TRAMPLE,       ALL, WATER, 2}));
+    
+    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 125, "mother", EARTH, WORLDBOSS, {DAMPEN,      ALL, EARTH, .5}));
 }
 
 void initQuests() {
