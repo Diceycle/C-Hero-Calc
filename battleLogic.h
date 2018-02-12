@@ -271,13 +271,18 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
         
         if (verbose) {
             std::cout << "After Turn " << turncounter << ":" << std::endl;
-            int i;
-            std::cout << "  Left:  ";
-            for (i = 0; i < leftCondition.armySize; i++) {
+            
+            std::cout << "Left:" << std::endl;
+            std::cout << "  Damage: " << std::setw(4) << leftCondition.turnData.baseDamage << std::endl;
+            std::cout << "  Health: ";
+            for (int i = 0; i < leftCondition.armySize; i++) {
                 std::cout << std::setw(4) << leftCondition.remainingHealths[i] << " ";
             } std::cout << std::endl;
-            std::cout << "  Right: ";
-            for (i = 0; i < rightCondition.armySize; i++) {
+            
+            std::cout << "Right:" << std::endl;
+            std::cout << "  Damage: " << std::setw(4) << rightCondition.turnData.baseDamage << std::endl;
+            std::cout << "  Health: ";
+            for (int i = 0; i < rightCondition.armySize; i++) {
                 std::cout << std::setw(4) << rightCondition.remainingHealths[i] << " ";
             } std::cout << std::endl;
         }
