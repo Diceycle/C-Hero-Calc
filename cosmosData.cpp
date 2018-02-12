@@ -14,13 +14,7 @@ Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aN
 {
     if (this->rarity != NO_HERO) {
         this->name = this->baseName + HEROLEVEL_SEPARATOR + std::to_string(this->level);
-        if (this->rarity == WORLDBOSS) {
-            int bonus = 0;
-            do {
-                aLevel -= ++bonus;
-            } while (aLevel > 0);
-            this->damage += bonus-1;
-        } else {
+        if (this->rarity != WORLDBOSS) {
             int points = this->rarity * (this->level-1);
             int value = this->hp + this->damage;
             this->hp = this->hp + (int) round((float) points * (float) this->hp / (float) value);
@@ -443,7 +437,7 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster(222,  8, "ageum",              EARTH, ASCENDED,  {BERSERK,       SELF, EARTH, 2}));
     baseHeroes.push_back(Monster(116,116, "ageror",             AIR,   ASCENDED,  {FRIENDS,       SELF, AIR, 1.3f}));
     
-    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 65, "lordofchaos", FIRE, WORLDBOSS, {AOE,      ALL, FIRE, 20}));
+    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 73, "lordofchaos", FIRE, WORLDBOSS, {AOE,      ALL, FIRE, 20}));
     
     baseHeroes.push_back(Monster( 38, 24, "christmaself",       WATER, COMMON,    {HEAL_L,        ALL, WATER, 0.112f}));
     baseHeroes.push_back(Monster( 54, 36, "reindeer",           AIR,   RARE,      {AOE_L,         ALL, AIR, 0.112f}));
