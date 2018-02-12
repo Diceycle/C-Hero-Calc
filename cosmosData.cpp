@@ -340,10 +340,10 @@ void initMonsterData() {
     monsterBaseList.push_back(Monster(746, 676, 358120000, "f29", FIRE));
     monsterBaseList.push_back(Monster(1008,512, 370760000, "w29", WATER));
 
-    monsterBaseList.push_back(Monster(700, 906, 505000000, "a30", AIR));
+    monsterBaseList.push_back(Monster(700, 906, 505055000, "a30", AIR));
     monsterBaseList.push_back(Monster(1022,614, 497082000, "e30", EARTH));
     monsterBaseList.push_back(Monster(930, 690, 514040000, "f30", FIRE));
-    monsterBaseList.push_back(Monster(802, 802, 515000000, "w30", WATER));
+    monsterBaseList.push_back(Monster(802, 802, 515849000, "w30", WATER));
 }
 
 void initBaseHeroes() {
