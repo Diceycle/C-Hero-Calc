@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <map>
 
-const std::string VERSION = "2.9.4.0";
+const std::string VERSION = "2.9.4.5";
 
 using MonsterIndex = uint8_t;
 using FollowerCount = uint32_t;

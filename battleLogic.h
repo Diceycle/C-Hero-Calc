@@ -24,6 +24,7 @@ struct TurnData {
     
     float valkyrieMult = 0;
     float valkyrieDamage = 0;
+    bool trampleTriggered = false;
     int paoeDamage = 0;
     int witherer = -1;
 };
@@ -130,6 +131,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     
     // Handle Monsters with skills that only activate on attack.
     turnData.paoeDamage = 0;
+    turnData.trampleTriggered = false;
     turnData.valkyrieMult = 0;
     turnData.witherer = -1;
     turnData.multiplier = 1;
@@ -150,6 +152,8 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
         case PIERCE:    turnData.paoeDamage = (int) ((float) lineup[monstersLost]->damage * skillAmounts[monstersLost]); 
                         break;
         case VALKYRIE:  turnData.valkyrieMult = skillAmounts[monstersLost]; 
+                        break;
+        case TRAMPLE:   turnData.trampleTriggered = true;
                         break;
     }
     turnData.valkyrieDamage = (float) turnData.baseDamage * turnData.multiplier + (float) turnData.buffDamage;
@@ -180,7 +184,11 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     int frontliner = monstersLost; // save original frontliner
     
     // Apply normal attack damage to the frontliner
-    remainingHealths[monstersLost] -= opposing.baseDamage;
+    remainingHealths[frontliner] -= opposing.baseDamage;
+    
+    if (opposing.trampleTriggered && armySize > frontliner + 1) {
+        remainingHealths[frontliner + 1] -= opposing.valkyrieDamage;
+    }
     
     // Handle aoe Damage for all combatants
     for (i = frontliner; i < armySize; i++) {
