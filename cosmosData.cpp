@@ -421,6 +421,11 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 32, 64, "lordkirk",           FIRE,  LEGENDARY, {PROTECT_L,     FIRE, FIRE, 0.112f}));
     baseHeroes.push_back(Monster( 30, 70, "neptunius",          WATER, LEGENDARY, {PROTECT_L,     WATER, WATER, 0.112f}));
     
+    baseHeroes.push_back(Monster( 42, 50, "hosokawa",           AIR,   LEGENDARY, {BUFF_L,        AIR, AIR, 0.112f}));
+    baseHeroes.push_back(Monster( 32, 66, "takeda",             EARTH, LEGENDARY, {BUFF_L,        EARTH, EARTH, 0.112f}));
+    baseHeroes.push_back(Monster( 38, 56, "hirate",             FIRE,  LEGENDARY, {BUFF_L,        FIRE, FIRE, 0.112f}));
+    baseHeroes.push_back(Monster( 44, 48, "hattori",            WATER, LEGENDARY, {BUFF_L,        WATER, WATER, 0.112f}));
+    
     baseHeroes.push_back(Monster( 65, 12, "sigrun",             FIRE,  LEGENDARY, {VALKYRIE,      ALL, FIRE, 0.5f}));
     baseHeroes.push_back(Monster( 70, 14, "koldis",             WATER, LEGENDARY, {VALKYRIE,      ALL, WATER, 0.5f}));
     baseHeroes.push_back(Monster( 75, 16, "alvitr",             EARTH, LEGENDARY, {VALKYRIE,      ALL, EARTH, 0.5f}));
