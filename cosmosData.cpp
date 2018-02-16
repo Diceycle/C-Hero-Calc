@@ -543,7 +543,14 @@ void initQuests() {
     quests.push_back({"w14", "a15", "w14", "e15", "a15", "w14"});
     quests.push_back({"w15", "w15", "w15", "w15", "f15", "f15"});
     quests.push_back({"a15", "a15", "a15", "a15", "a15", "w14"});
-    quests.push_back({"f15", "w15", "w15", "w15", "w15", "w15"});
+    quests.push_back({"f15", "w15", "w15", "w15", "w15", "w15"}); // 80
+    quests.push_back({"f14", "e16", "e16", "e16", "e16"});
+    quests.push_back({"w14", "a15", "f15", "a16", "f16", "f15"});
+    quests.push_back({"w15", "f15", "w15", "w15", "a16", "w16"});
+    quests.push_back({"a16", "w15", "a16", "e16", "a17"});
+    quests.push_back({"f15", "w15", "w15", "w15", "e17", "e16"}); // 85
+    quests.push_back({"a13", "a16", "a16", "a16", "a16", "f16"});
+    quests.push_back({"e16", "f16", "f16", "f17", "a17"});
 }
 
 // Fills all references and storages with real data.
