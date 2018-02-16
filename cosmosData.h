@@ -11,19 +11,28 @@
 #include <algorithm>
 #include <map>
 
+// Version number not used anywhere except in output to know immediately which version the user is running
 const std::string VERSION = "2.9.4.5";
 
+const size_t GIGABYTE = ((size_t) (1) << 30);
+
+// Alias for dataTypes makes Code more readable
+// An index describing a spot in the monsterReference. 
 using MonsterIndex = uint8_t;
+// A type used to denote FollowerCounts. 
 using FollowerCount = uint32_t;
 
 
 // Constants defining the basic structure of armies
 const size_t ARMY_MAX_SIZE = 6;
-const size_t TOURNAMENT_LINES = 5;
 const size_t ARMY_MAX_BRUTEFORCEABLE_SIZE = 4;
 const std::string HEROLEVEL_SEPARATOR = ":";
+
+// Needed for BattleReplays
+const size_t TOURNAMENT_LINES = 5;
 const int INDEX_NO_MONSTER = -1;
 
+// Worldboss Health maximum larger values get lost because FightResults only accept int16_t too
 const int16_t WORLDBOSS_HEALTH = 32000;
 
 // Define types of HeroSkills, Elements and Rarities
@@ -65,19 +74,19 @@ enum Element {
     EARTH   = 0,
     AIR     = 1, 
     WATER   = 2, 
-    FIRE    = 3, // Discrete Values needed to quickly determine counters
-    ALL,         
-    SELF         // These Values are used to specify targets of hero skills
+    FIRE    = 3, 
+    ALL     = 4, // Discrete Values needed to quickly determine counters        
+    SELF         // These Values are also used to specify targets of hero skills
 };
-const Element counter [] { FIRE, EARTH, AIR, WATER, SELF, SELF }; // Elemental Advantages earth = 0 -> counter[0] = fire -> fire has advantage over earth
+const Element counter [] { FIRE, EARTH, AIR, WATER, SELF, SELF }; // Elemental Advantages Ex.: earth = 0 -> counter[0] = fire -> fire has advantage over earth
 const float elementalBoost = 1.5; // Damage Boost if element has advantage over another
 
 enum HeroRarity { 
     NO_HERO = 0,
     COMMON = 1, 
     RARE = 2, 
-    LEGENDARY = 6, // Values define how many stat points per level a hero of this rarity gets
-    ASCENDED = 12,
+    LEGENDARY = 6, 
+    ASCENDED = 12, // Values define how many stat points per level a hero of this rarity gets
     WORLDBOSS
 };
 
@@ -85,12 +94,12 @@ enum HeroRarity {
 struct HeroSkill {
     SkillType skillType;
     Element target;
-    Element sourceElement;
-    float amount;
-    bool violatesFightResults;
-    bool hasAoe;
+    Element sourceElement;          // Not used anywhere
+    float amount;                   // Contains various information dependend on the type
+    bool violatesFightResults;      // True if a hero invalidates the data in FightResults i9f he is added to the army
+    bool hasAoe;               
     bool hasHeal;
-    bool hasAsymmetricAoe;
+    bool hasAsymmetricAoe;          // Aoe that doesnt damage the entire enemy army equally Ex.: Valkyrie
     
     HeroSkill(SkillType aType, Element aTarget, Element aSource, float anAmount);
     HeroSkill() {};
@@ -125,8 +134,8 @@ class Monster {
 };
 
 // Access tools for monsters 
-extern std::map<std::string, MonsterIndex> monsterMap; // Maps monster Names to their indices in monsterReference
-extern std::vector<Monster> monsterReference; // Global lookup for monster stats indices of monsters here can be used instead of the objects
+extern std::map<std::string, MonsterIndex> monsterMap; // Maps monster Names to their indices in monsterReference used to parse input
+extern std::vector<Monster> monsterReference; // Global lookup for monster stats. Enables using indices of monsters instead of the objects. Saves tons of memory. Also consumes less memory than pointers
 extern std::vector<MonsterIndex> availableMonsters; // Contains indices of all monsters the user allows. Is affected by filters
 extern std::vector<MonsterIndex> availableHeroes; // Contains all user heroes' indices 
 
@@ -135,7 +144,7 @@ extern std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actu
 void initMonsters();
 extern std::vector<Monster> baseHeroes; // Raw, unleveld Hero Data, holds actual Objects
 void initBaseHeroes();
-extern std::vector<std::vector<std::string>> quests; // Quest Lineup from the game
+extern std::vector<std::vector<std::string>> quests; // Quest Lineups from the game
 void initQuests();
 
 // Fills all references and storages with real data.
@@ -147,21 +156,32 @@ void initGameData();
 void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumArmyCost);
 
 // Defines the results of a fight between two armies; monstersLost and damage desribe the condition of the winning side
+// The idea behind FightResults is to save the data and be able to restore the state when the battle ended easily. 
+// When solving an Instance many armies with the same 5 Monsters fight the target Army again with a different 6th Monster
+// Using FightResults you only have to calculate the fight with 5 Monsters once and then pick up where you left off with the 6th monster.
+// Ideally that would work for any battle. Unfortunately as Abilities grew more complex the amount of data needing to be saved outweight the benefit of not having to run the fight again.
+// So a few Abilities Invalidate FightResults. Like BUFF. Since the first 5 Monsters would have had more Attack with the buff, the battle might have played out differently. 
+// So the data in here can't be used if f.e. a BUFF hero is added to the Army
+// Similarly some Abilities like Valkyrie produce a Fight state that can't be efficiently captured in a FightResult. 
+// If one of those heroes is in an Army its FightResult is always invalid
+//
+// In a FightResult it is always implied that the target won against the proposed solution. 
 struct FightResult {
     int16_t frontHealth;        // how much health remaining to the current leading mob of the winning side
     int16_t leftAoeDamage;      // how much aoe damage left took
     int16_t rightAoeDamage;     // how much aoe damage right took
-    int8_t berserk;            // berserk multiplier, if there is a berserker in the front
-    int8_t monstersLost;    // how many mobs lost on the winning side (the other side lost all)
-    int8_t turncounter;     // how many turns have passed since the battle started
-    bool valid;             // If the result is valid
-    bool dominated;         // If the result is worse than another
+    int8_t berserk;             // berserk multiplier, if there is a berserker in the front
+    int8_t monstersLost;        // how many mobs lost on the winning side (the other side lost all)
+    int8_t turncounter;         // how many turns have passed since the battle started
+    bool valid;                 // If the result is valid
+    bool dominated;             // If the result is worse than another
                 
     FightResult() : valid(false) {}
     
-    bool operator <=(const FightResult & toCompare) const { // both results are expected to not have won
+    // Comparator for FightResults Used to do dominance. 
+    bool operator <=(const FightResult & toCompare) const { // both results are expected to not have won against the target
         if(this->leftAoeDamage < toCompare.leftAoeDamage || this->rightAoeDamage > toCompare.rightAoeDamage) {
-            return false; // left is not certainly worse than right
+            return false; // left is not certainly worse than right because the AOE damage is different
         }
         if (this->monstersLost == toCompare.monstersLost) {
             return this->frontHealth > toCompare.frontHealth; // less damage dealt to the enemy -> left is worse
@@ -201,19 +221,22 @@ class Army {
         std::string toString();
         std::string toJSON();
 };
+const size_t ARMY_BUFFER_MAX_SIZE = GIGABYTE / sizeof(Army);
 
 // An instance to be solved by the program
 struct Instance {
     Army target;
     size_t targetSize;
-    size_t maxCombatants;
+    size_t maxCombatants; // Used for Quest Difficulties
     
-    FollowerCount followerUpperBound;
+    FollowerCount followerUpperBound; // Contains either a used defined limit or the cost of bestSolution
     Army bestSolution;
     
+    // Stats for Benchmarking
     time_t calculationTime;
     int totalFightsSimulated = 0;
     
+    // Propagates from Hero Abilities
     bool hasAoe;
     bool hasHeal;
     bool hasAsymmetricAoe;

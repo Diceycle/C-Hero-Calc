@@ -79,6 +79,7 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float an
                                   aType == LIFESTEAL || aType == LIFESTEAL_L);
 }
 
+// JSON Functions to provide results in an easily readable output format. Used my Latas for example
 std::string Monster::toJSON() {
     std::stringstream s;
     s << "{";
@@ -188,6 +189,7 @@ std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actual Obje
 std::vector<Monster> baseHeroes; // Raw, unleveld Hero Data, holds actual Objects
 std::vector<std::vector<std::string>> quests; // Quest Lineup from the game
 
+// Fill MonsterBaseList With Monsters Order is important for ReplayStrings
 void initMonsterData() {
     monsterBaseList.push_back(Monster( 20,   8,      1000,  "a1", AIR));
     monsterBaseList.push_back(Monster( 44,   4,      1300,  "e1", EARTH));
@@ -340,6 +342,7 @@ void initMonsterData() {
     monsterBaseList.push_back(Monster(802, 802, 515849000, "w30", WATER));
 }
 
+// Fill BaseHeroes with Heroes. Order is important 
 void initBaseHeroes() {
     baseHeroes.push_back(Monster( 45, 20, "ladyoftwilight",     AIR,   COMMON,    {PROTECT,       ALL, AIR, 1}));
     baseHeroes.push_back(Monster( 70, 30, "tiny",               EARTH, RARE,      {AOE,           ALL, EARTH, 2}));
