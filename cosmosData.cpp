@@ -424,11 +424,6 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 32, 64, "lordkirk",           FIRE,  LEGENDARY, {PROTECT_L,     FIRE, FIRE, 0.112f}));
     baseHeroes.push_back(Monster( 30, 70, "neptunius",          WATER, LEGENDARY, {PROTECT_L,     WATER, WATER, 0.112f}));
     
-    baseHeroes.push_back(Monster( 42, 50, "hosokawa",           AIR,   LEGENDARY, {BUFF_L,        AIR, AIR, 0.112f}));
-    baseHeroes.push_back(Monster( 32, 66, "takeda",             EARTH, LEGENDARY, {BUFF_L,        EARTH, EARTH, 0.112f}));
-    baseHeroes.push_back(Monster( 38, 56, "hirate",             FIRE,  LEGENDARY, {BUFF_L,        FIRE, FIRE, 0.112f}));
-    baseHeroes.push_back(Monster( 44, 48, "hattori",            WATER, LEGENDARY, {BUFF_L,        WATER, WATER, 0.112f}));
-    
     baseHeroes.push_back(Monster( 65, 12, "sigrun",             FIRE,  LEGENDARY, {VALKYRIE,      ALL, FIRE, 0.5f}));
     baseHeroes.push_back(Monster( 70, 14, "koldis",             WATER, LEGENDARY, {VALKYRIE,      ALL, WATER, 0.5f}));
     baseHeroes.push_back(Monster( 75, 16, "alvitr",             EARTH, LEGENDARY, {VALKYRIE,      ALL, EARTH, 0.5f}));
@@ -468,6 +463,11 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster(141, 99, "arigr",              EARTH, ASCENDED,  {ADAPT,         EARTH, EARTH, 3}));
     
     baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 125, "moak", EARTH, WORLDBOSS, {DAMPEN,      ALL, EARTH, .5}));
+    
+    baseHeroes.push_back(Monster( 42, 50, "hosokawa",           AIR,   LEGENDARY, {BUFF_L,        AIR, AIR, 0.112f}));
+    baseHeroes.push_back(Monster( 32, 66, "takeda",             EARTH, LEGENDARY, {BUFF_L,        EARTH, EARTH, 0.112f}));
+    baseHeroes.push_back(Monster( 38, 56, "hirate",             FIRE,  LEGENDARY, {BUFF_L,        FIRE, FIRE, 0.112f}));
+    baseHeroes.push_back(Monster( 44, 48, "hattori",            WATER, LEGENDARY, {BUFF_L,        WATER, WATER, 0.112f}));
 }
 
 void initQuests() {
@@ -559,6 +559,19 @@ void initQuests() {
     quests.push_back({"f15", "w15", "w15", "w15", "e17", "e16"}); // 85
     quests.push_back({"a13", "a16", "a16", "a16", "a16", "f16"});
     quests.push_back({"e16", "f16", "f16", "f17", "a17"});
+    quests.push_back({"w15", "f16", "a16", "a16", "f16", "e17"});
+    quests.push_back({"f16", "f17", "a17", "a15", "a16", "a16"});
+    quests.push_back({"f16", "f16", "f16", "f16", "f16", "a18"});  //90
+    quests.push_back({"e16", "e16", "a17", "f17", "a17", "w15"});
+    quests.push_back({"f17", "a18", "a18", "w17", "a17", "e16"});
+    quests.push_back({"e18", "f16", "f16", "f16", "w16", "f18"});
+    quests.push_back({"a21", "a20", "f20", "a21"});
+    quests.push_back({"e18", "e17", "a18", "e17", "e17", "e20"}); //95
+    quests.push_back({"a19", "a19", "w18", "w18", "f15", "e16"}); 
+    quests.push_back({"w18", "f19", "f19", "e18", "e18", "a19"}); 
+    quests.push_back({"f18", "w19", "w19", "e19", "e19", "f18"}); 
+    quests.push_back({"f19", "a19", "e19", "f20", "a20", "f19"}); 
+    quests.push_back({"a20", "w18", "w18", "a19", "w20", "f20"}); // 100
 }
 
 // Fills all references and storages with real data.

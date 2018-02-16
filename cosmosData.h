@@ -12,7 +12,7 @@
 #include <map>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "2.9.4.5";
+const std::string VERSION = "2.9.5.0";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
