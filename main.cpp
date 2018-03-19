@@ -63,6 +63,9 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     bool removeUseless = currentArmySize == (instance.maxCombatants-1) && !instance.hasWorldBoss;
     bool instanceInvalid = instance.hasHeal || instance.hasAsymmetricAoe;
     
+	// enemy booze will invalidate Fightresults
+	bool boozeInfluence = instance.hasBeer && currentArmySize >= instance.targetSize;
+	
     // Expansion for non-Hero Armies
     for (i = 0; i < oldPureArmiesSize; i++) {
         if (instance.followerUpperBound >= oldPureArmies[i].followerCost && !oldPureArmies[i].lastFightData.dominated) {
@@ -73,7 +76,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                     if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]]) {
                         newPureArmies.push_back(oldPureArmies[i]);
                         newPureArmies.back().add(availableMonsters[m]);
-                        newPureArmies.back().lastFightData.valid = !instanceInvalid;
+                        newPureArmies.back().lastFightData.valid = !instanceInvalid && !boozeInfluence;
                     }
                 }
             }
@@ -82,7 +85,9 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]]) {
                     newHeroArmies.push_back(oldPureArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = !instanceInvalid && !monsterReference[availableHeroes[m]].skill.violatesFightResults;
+                    newHeroArmies.back().lastFightData.valid = !instanceInvalid && 
+															   !boozeInfluence &&
+															   !monsterReference[availableHeroes[m]].skill.violatesFightResults;
                 }
             }
         }
@@ -105,8 +110,10 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 invalidSkill |= currentSkill.hasHeal || currentSkill.hasAsymmetricAoe;
                 friendsInfluence |= currentSkill.skillType == FRIENDS;
                 rainbowInfluence |= currentSkill.skillType == RAINBOW && currentArmySize > m + 4; // Hardcoded number of elements required to activate rainbow
+				boozeInfluence   |= currentSkill.skillType == BEER;
                 usedHeroes[oldHeroArmies[i].monsters[m]] = true;
             }
+
             // Add Normal Monster. No checks needed except cost
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
                 // In case of a draw this could casue problems if no more suitable units are available
@@ -115,7 +122,8 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                     newHeroArmies.back().add(availableMonsters[m]);
                     newHeroArmies.back().lastFightData.valid = !instanceInvalid && 
                                                                !friendsInfluence && 
-                                                               !rainbowInfluence && 
+                                                               !rainbowInfluence &&
+															   !boozeInfluence &&
                                                                !invalidSkill;
                 }
             }
@@ -128,6 +136,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                         newHeroArmies.back().lastFightData.valid = !instanceInvalid && 
                                                                    !monsterReference[availableHeroes[m]].skill.violatesFightResults && 
                                                                    !rainbowInfluence && 
+																   !boozeInfluence &&
                                                                    !(monsterReference[availableHeroes[m]].skill.skillType == DAMPEN && instance.hasAoe) &&
                                                                    !invalidSkill;
                     }

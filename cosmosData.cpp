@@ -76,7 +76,8 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float an
                                   aType == CHAMPION || aType == CHAMPION_L ||
                                   aType == AOE || aType == AOE_L || 
                                   aType == HEAL || aType == HEAL_L ||
-                                  aType == LIFESTEAL || aType == LIFESTEAL_L);
+                                  aType == LIFESTEAL || aType == LIFESTEAL_L ||
+								  aType == BEER);
 }
 
 // JSON Functions to provide results in an easily readable output format. Used my Latas for example
@@ -135,12 +136,14 @@ void Instance::setTarget(Army aTarget) {
     this->hasAoe = false;
     this->hasHeal = false;
     this->hasAsymmetricAoe = false;
+	this->hasBeer = false;
     this->hasWorldBoss = false;
     for (size_t i = 0; i < this->targetSize; i++) {
         currentSkill = monsterReference[this->target.monsters[i]].skill;
         this->hasAoe |= currentSkill.hasAoe;
         this->hasHeal |= currentSkill.hasHeal;
         this->hasAsymmetricAoe |= currentSkill.hasAsymmetricAoe;
+		this->hasBeer |= currentSkill.skillType == BEER;
         this->hasWorldBoss |= monsterReference[this->target.monsters[i]].rarity == WORLDBOSS;
     }
     
@@ -371,7 +374,7 @@ void initBaseHeroes() {
 
     baseHeroes.push_back(Monster( 22, 32, "nicte",              AIR,   RARE,      {BUFF,          AIR, AIR, 4}));
 
-    baseHeroes.push_back(Monster( 50, 12, "james",              EARTH, LEGENDARY, {PIERCE,        ALL, EARTH, 1}));
+    baseHeroes.push_back(Monster( 50, 12, "james",              EARTH, LEGENDARY, {VALKYRIE,      ALL, EARTH, 0.75f}));
 
     baseHeroes.push_back(Monster( 28, 16, "k41ry",              AIR,   COMMON,    {BUFF,          AIR, AIR, 3}));
     baseHeroes.push_back(Monster( 46, 20, "t4urus",             EARTH, RARE,      {BUFF,          ALL, EARTH, 1}));
@@ -468,6 +471,14 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 32, 66, "takeda",             EARTH, LEGENDARY, {BUFF_L,        EARTH, EARTH, 0.112f}));
     baseHeroes.push_back(Monster( 38, 56, "hirate",             FIRE,  LEGENDARY, {BUFF_L,        FIRE, FIRE, 0.112f}));
     baseHeroes.push_back(Monster( 44, 48, "hattori",            WATER, LEGENDARY, {BUFF_L,        WATER, WATER, 0.112f}));
+
+	baseHeroes.push_back(Monster(135, 107,"adagda",				AIR,	ASCENDED,	{ ADAPT,      AIR, AIR, 3 }));
+
+	baseHeroes.push_back(Monster( 30, 20, "bylar",				EARTH,	COMMON,		{ BUFF,       EARTH, EARTH, 4 }));
+	baseHeroes.push_back(Monster( 36, 36, "boor",				FIRE,	RARE,		{ TRAINING,   SELF, FIRE, 3 }));
+	baseHeroes.push_back(Monster( 52, 52, "bavah",				WATER,	LEGENDARY,	{ CHAMPION,   ALL, WATER, 2 }));
+	
+	baseHeroes.push_back(Monster( 75, 25, "leprechaun",			EARTH,	LEGENDARY,	{ BEER,       ALL, EARTH, 0 }));
 }
 
 void initQuests() {
@@ -616,7 +627,7 @@ int getRealIndex(Monster & monster) {
     if (monster.rarity != NO_HERO) {
         for (i = 0; i < baseHeroes.size(); i++) {
             if (baseHeroes[i].baseName == monster.baseName) {
-                index = (int) (-i - 2);
+                index = (-int(i) - 2);
             }
         }
     } else {

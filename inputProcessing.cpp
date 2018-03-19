@@ -584,7 +584,8 @@ vector<string> split(string target, string separator) {
 // Convert a string to lowercase where available
 string toLower(string input) {
     for (size_t i = 0; i < input.length(); i++) {
-        input[i] = tolower(input[i], locale());
+        input[i] = tolower(input[i]);
+		//input[i] = tolower(input[i], locale()); 
     }
     return input;
 }

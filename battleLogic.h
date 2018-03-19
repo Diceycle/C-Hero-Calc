@@ -35,12 +35,15 @@ class ArmyCondition {
         int armySize;
         Monster * lineup[ARMY_MAX_SIZE];
         int remainingHealths[ARMY_MAX_SIZE];
+		int maxHealths[ARMY_MAX_SIZE];
         SkillType skillTypes[ARMY_MAX_SIZE];
         Element skillTargets[ARMY_MAX_SIZE];
         float skillAmounts[ARMY_MAX_SIZE];
         
         bool rainbowConditions[ARMY_MAX_SIZE]; // for rainbow ability
         int pureMonsters[ARMY_MAX_SIZE]; // for friends ability
+
+		bool booze{ false }; // for leprechaun's ability
         
         int berserkProcs; // for berserk ability
         
@@ -68,6 +71,8 @@ inline void ArmyCondition::init(const Army & army, const int oldMonstersLost, co
     monstersLost = oldMonstersLost;
     berserkProcs = 0;
     
+	booze = false;
+
     for (i = armySize -1; i >= monstersLost; i--) {
         lineup[i] = &monsterReference[army.monsters[i]];
         
@@ -76,7 +81,10 @@ inline void ArmyCondition::init(const Army & army, const int oldMonstersLost, co
         skillTargets[i] = skill->target;
         skillAmounts[i] = skill->amount;
         remainingHealths[i] = lineup[i]->hp - aoeDamage;
-        
+
+		maxHealths[i] = lineup[i]->hp;
+		if (skill->skillType == BEER) booze = true;
+
         rainbowConditions[i] = tempRainbowCondition == VALID_RAINBOW_CONDITION;
         pureMonsters[i] = tempPureMonsters;
         
@@ -204,8 +212,8 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
             skillTypes[i] = NOTHING; // disable dead hero's ability
         } else {
             remainingHealths[i] += turnData.healing;
-            if (remainingHealths[i] > lineup[i]->hp) { // Avoid overhealing
-                remainingHealths[i] = lineup[i]->hp;
+            if (remainingHealths[i] > maxHealths[i]) { // Avoid overhealing
+                remainingHealths[i] = maxHealths[i];
             }
         }
         opposing.valkyrieDamage *= opposing.valkyrieMult;
@@ -243,6 +251,20 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
         // Load Army data into conditions
         leftCondition.init(left, 0, 0);
         rightCondition.init(right, 0, 0);
+
+		// Apply Leprechaun's skill (Beer)
+		if (leftCondition.booze && leftCondition.armySize < rightCondition.armySize)
+			for (size_t i = 0; i < ARMY_MAX_SIZE; ++i) {
+				rightCondition.maxHealths[i] = int(rightCondition.maxHealths[i] * leftCondition.armySize / rightCondition.armySize);
+				rightCondition.remainingHealths[i] = rightCondition.maxHealths[i];
+			}
+
+		if (rightCondition.booze && rightCondition.armySize < leftCondition.armySize)
+			for (size_t i = 0; i < ARMY_MAX_SIZE; ++i) {
+				leftCondition.maxHealths[i] = int(leftCondition.maxHealths[i] * rightCondition.armySize / leftCondition.armySize);
+				leftCondition.remainingHealths[i] = leftCondition.maxHealths[i];
+			}
+
         // Reset Potential values in fightresults
         left.lastFightData.leftAoeDamage = 0;
         left.lastFightData.rightAoeDamage = 0;

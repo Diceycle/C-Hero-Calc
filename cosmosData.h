@@ -68,6 +68,8 @@ enum SkillType {
     HEAL_L,     // Heal ability that scales with level
     LIFESTEAL_L,// Lifesteal ability that scales with level
     DAMPEN_L,   // Dampen Ability that scales with level
+
+	BEER,		// Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
 };
 
 enum Element {
@@ -240,6 +242,7 @@ struct Instance {
     bool hasAoe;
     bool hasHeal;
     bool hasAsymmetricAoe;
+	bool hasBeer;
     bool hasWorldBoss;
     int lowestBossHealth;
     
