@@ -70,6 +70,7 @@ enum SkillType {
     DAMPEN_L,   // Dampen Ability that scales with level
 
 	BEER,		// Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
+	GROW,		// Increase stats gained per lvl
 };
 
 enum Element {

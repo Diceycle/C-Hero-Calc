@@ -17,8 +17,10 @@ Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aN
         if (this->rarity != WORLDBOSS) {
             int points = this->rarity * (this->level-1);
             int value = this->hp + this->damage;
-            this->hp = this->hp + (int) round((float) points * (float) this->hp / (float) value);
-            this->damage = this->damage + (int) round((float) points * (float) this->damage / (float) value);
+
+			int mult = (aSkill.skillType == GROW) ? aSkill.amount : 1;
+            this->hp = this->hp + (int) round((float) points * mult * (float) this->hp / (float) value);
+            this->damage = this->damage + (int) round((float) points * mult * (float) this->damage / (float) value);
         }
     }
 }
@@ -479,6 +481,10 @@ void initBaseHeroes() {
 	baseHeroes.push_back(Monster( 52, 52, "bavah",				WATER,	LEGENDARY,	{ CHAMPION,   ALL, WATER, 2 }));
 	
 	baseHeroes.push_back(Monster( 75, 25, "leprechaun",			EARTH,	LEGENDARY,	{ BEER,       ALL, EARTH, 0 }));
+
+	baseHeroes.push_back(Monster(30, 30, "sparks",				FIRE,	COMMON,		{ GROW,       ALL, FIRE, 2 }));
+	baseHeroes.push_back(Monster(48, 42, "leaf",				EARTH,	RARE,		{ GROW,       ALL, EARTH, 2 }));
+	baseHeroes.push_back(Monster(70, 48, "flynn",				AIR,	LEGENDARY,	{ GROW,       ALL, AIR, 2 }));
 }
 
 void initQuests() {
