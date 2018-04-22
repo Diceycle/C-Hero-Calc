@@ -394,15 +394,36 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                 calculateDominance(instance, optimizable, pureMonsterArmies, heroMonsterArmies, armySize, firstDominance);
             }
                 
-            // now we expand to add the next monster to all non-dominated armies
-            interface.timedOutput("Expanding Lineups by one... ", DETAILED_OUTPUT, 1);
-            vector<Army> nextPureArmies;
-            vector<Army> nextHeroArmies;
-            expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies, armySize, instance);
+			if (armySize < instance.maxCombatants - 1) {
+				// now we expand to add the next monster to all non-dominated armies
+				interface.timedOutput("Expanding Lineups by one... ", DETAILED_OUTPUT, 1);
+				vector<Army> nextPureArmies;
+				vector<Army> nextHeroArmies;
+				expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies, armySize, instance);
 
-            interface.timedOutput("Moving Data... ", DETAILED_OUTPUT, 1);
-            pureMonsterArmies = move(nextPureArmies);
-            heroMonsterArmies = move(nextHeroArmies);
+				interface.timedOutput("Moving Data... ", DETAILED_OUTPUT, 1);
+				pureMonsterArmies = move(nextPureArmies);
+				heroMonsterArmies = move(nextHeroArmies);
+			}
+			else {
+				// for the last expansion, expand and fight each lineups individually (or in small packets) to keep memory usage low
+				interface.finishTimedOutput(DETAILED_OUTPUT);
+				interface.outputMessage("Starting loop for armies of size " + to_string(armySize + 1), BASIC_OUTPUT);
+				interface.timedOutput("Simulating fights by expanding Lineups one by one ...", DETAILED_OUTPUT, 1, true);
+				
+				for (size_t i = 0, j = 0; i < pureMonsterArmies.size() || j < heroMonsterArmies.size(); ) {
+					vector<Army> tempArmies, pureBranchArmies, heroBranchArmies;
+					for (size_t k = 0; k < config.branchwiseExpansionLimit; ++k) {
+						if (i < pureMonsterArmies.size()) pureBranchArmies.push_back(pureMonsterArmies[i++]);
+						if (j < heroMonsterArmies.size()) heroBranchArmies.push_back(heroMonsterArmies[j++]);
+					}
+					expand(tempArmies, tempArmies, pureBranchArmies, heroBranchArmies, armySize, instance);
+					simulateMultipleFights(tempArmies, instance);
+				}
+
+				interface.finishTimedOutput(DETAILED_OUTPUT);
+				break;
+			}
         }
         interface.finishTimedOutput(DETAILED_OUTPUT);
     }
@@ -489,28 +510,28 @@ int main(int argc, char** argv) {
     // Fill monster arrays with relevant monsters
     filterMonsterData(minimumMonsterCost, userFollowerUpperBound);
     
-    do {
-        instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
-    
-        interface.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", BASIC_OUTPUT);
-        
-        if (config.outputLevel == DETAILED_OUTPUT && config.autoAdjustOutputLevel) {
-            config.outputLevel = BASIC_OUTPUT;
-        }
-        if (config.outputLevel == BASIC_OUTPUT && instances.size() > 1 && config.autoAdjustOutputLevel) {
-            config.outputLevel = SOLUTION_OUTPUT;
-        }
-        
-        for (size_t i = 0; i < instances.size(); i++) {
-            totalFightsSimulated = &(instances[i].totalFightsSimulated);
-            
-            instances[i].followerUpperBound = userFollowerUpperBound;
-            
-            solveInstance(instances[i], config.firstDominance);
-            outputSolution(instances[i]);
-        }
-        userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", NOTIFICATION_OUTPUT, TOKENS.NO);
-    } while (userWantsContinue);
+	do {
+		instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
+
+		interface.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", BASIC_OUTPUT);
+
+		if (config.outputLevel == DETAILED_OUTPUT && config.autoAdjustOutputLevel) {
+			config.outputLevel = BASIC_OUTPUT;
+		}
+		if (config.outputLevel == BASIC_OUTPUT && instances.size() > 1 && config.autoAdjustOutputLevel) {
+			config.outputLevel = SOLUTION_OUTPUT;
+		}
+
+		for (size_t i = 0; i < instances.size(); i++) {
+			totalFightsSimulated = &(instances[i].totalFightsSimulated);
+
+			instances[i].followerUpperBound = userFollowerUpperBound;
+
+			solveInstance(instances[i], config.firstDominance);
+			outputSolution(instances[i]);
+		}
+		userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", NOTIFICATION_OUTPUT, TOKENS.NO);
+	} while (userWantsContinue);
     
     interface.outputMessage("", NOTIFICATION_OUTPUT);
     interface.haltExecution();
