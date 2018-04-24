@@ -83,6 +83,8 @@ struct Configuration {
     bool autoAdjustOutputLevel = true;
     bool individualBattles = false; //
     bool unlimitedWorldbossHealth = false; //
+
+	size_t branchwiseExpansionLimit = 100;
 };
 extern Configuration config;
 
