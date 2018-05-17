@@ -39,10 +39,15 @@ void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
     } else {
         for (size_t i = 0; i < armyAmount; i++) {
             simulateFight(armies[i], instance.target);
-            if (instance.lowestBossHealth == -1 || armies[i].lastFightData.frontHealth < instance.lowestBossHealth) {
+            if ( //instance.lowestBossHealth == -1 || 
+				armies[i].lastFightData.frontHealth < instance.lowestBossHealth) {
                 instance.bestSolution = armies[i];
                 instance.lowestBossHealth = armies[i].lastFightData.frontHealth;
             }
+			else if (armies[i].lastFightData.frontHealth > 0) { // reached the limit
+				instance.bestSolution = armies[i];
+				instance.lowestBossHealth = numeric_limits<DamageType>::min();
+			}
         }
     }
 }

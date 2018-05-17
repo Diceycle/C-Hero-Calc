@@ -167,4 +167,8 @@ std::vector<std::string> split(std::string target, std::string separator);
 // Convert a string to lowercase where available
 std::string toLower(std::string input);
 
+const char thousandSeparator = ',';
+// display a large number with thousand separators
+std::string numberWithSepartors(const uint64_t& largeNumber);
+
 #endif

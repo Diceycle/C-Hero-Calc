@@ -79,7 +79,7 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float an
                                   aType == AOE || aType == AOE_L || 
                                   aType == HEAL || aType == HEAL_L ||
                                   aType == LIFESTEAL || aType == LIFESTEAL_L ||
-								  aType == BEER);
+								  aType == BEER || aType == AOEZero_L);
 }
 
 // JSON Functions to provide results in an easily readable output format. Used my Latas for example
@@ -132,7 +132,7 @@ std::string Army::toJSON() {
 void Instance::setTarget(Army aTarget) {
     this->target = aTarget;
     this->targetSize = aTarget.monsterAmount;
-    this->lowestBossHealth = -1;
+    this->lowestBossHealth = 0;
     
     HeroSkill currentSkill;
     this->hasAoe = false;
@@ -482,9 +482,21 @@ void initBaseHeroes() {
 	
 	baseHeroes.push_back(Monster( 75, 25, "leprechaun",			EARTH,	LEGENDARY,	{ BEER,       ALL, EARTH, 0 }));
 
-	baseHeroes.push_back(Monster(30, 30, "sparks",				FIRE,	COMMON,		{ GROW,       ALL, FIRE, 2 }));
-	baseHeroes.push_back(Monster(48, 42, "leaf",				EARTH,	RARE,		{ GROW,       ALL, EARTH, 2 }));
-	baseHeroes.push_back(Monster(70, 48, "flynn",				AIR,	LEGENDARY,	{ GROW,       ALL, AIR, 2 }));
+	baseHeroes.push_back(Monster( 30, 30, "sparks",				FIRE,	COMMON,		{ GROW,       ALL, FIRE, 2 }));
+	baseHeroes.push_back(Monster( 48, 42, "leaf",				EARTH,	RARE,		{ GROW,       ALL, EARTH, 2 }));
+	baseHeroes.push_back(Monster( 70, 48, "flynn",				AIR,	LEGENDARY,	{ GROW,       ALL, AIR, 2 }));
+
+	baseHeroes.push_back(Monster(122,122, "abavah",				WATER,	ASCENDED,	{ CHAMPION_L, ALL, ALL, 0.152f }));
+
+	baseHeroes.push_back(Monster( 66, 60, "drhawking",			AIR,	LEGENDARY,	{ AOEZero_L,  ALL, AIR, 1 }));
+
+	baseHeroes.push_back(Monster(150, 90, "masterlee",			AIR,	ASCENDED,	{ COUNTER,    AIR, AIR, 0.5f }));
+
+	baseHeroes.push_back(Monster( 70, 38, "kumusan",			FIRE,	LEGENDARY,	{ COUNTER,    FIRE, FIRE, 0.2f }));
+	baseHeroes.push_back(Monster( 78, 42, "liucheng",			WATER,	LEGENDARY,	{ COUNTER,    WATER, WATER, 0.25f }));
+	baseHeroes.push_back(Monster( 86, 44, "hidoka",				EARTH,	LEGENDARY,	{ COUNTER,    EARTH, EARTH, 0.3f }));
+
+	baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 11, "kryton", AIR, WORLDBOSS, { TRAINING,      SELF, AIR, 10 }));
 }
 
 void initQuests() {
