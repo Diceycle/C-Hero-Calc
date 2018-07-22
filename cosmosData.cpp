@@ -1,7 +1,7 @@
 #include "cosmosData.h"
 
 // Private constructor that is called by all public ones. Fully initializes all attributes
-Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aName, Element anElement, HeroRarity aRarity, HeroSkill aSkill, int aLevel) : 
+Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aName, Element anElement, HeroRarity aRarity, HeroSkill aSkill, int aLevel) :
     hp(someHp),
     damage(someDamage),
     cost(aCost),
@@ -19,14 +19,14 @@ Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aN
             int value = this->hp + this->damage;
 
 			int mult = (aSkill.skillType == GROW) ? aSkill.amount : 1;
-            this->hp = this->hp + (int) round((float) points * mult * (float) this->hp / (float) value);
-            this->damage = this->damage + (int) round((float) points * mult * (float) this->damage / (float) value);
+            this->hp = this->hp + (int) round((double) points * mult * (double) this->hp / (double) value);
+            this->damage = this->damage + (int) round((double) points * mult * (double) this->damage / (double) value);
         }
     }
 }
 
 // Contructor for normal Monsters
-Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aName, Element anElement) : 
+Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aName, Element anElement) :
     Monster(someHp, someDamage, aCost, aName, anElement, NO_HERO, NO_SKILL, 0) {}
 
 // Constructor for Heroes
@@ -35,48 +35,48 @@ Monster::Monster(int someHp, int someDamage, std::string aName, Element anElemen
 
 // Constructor for leveled heroes
 Monster::Monster(const Monster & baseHero, int aLevel) :
-    Monster(baseHero.hp, baseHero.damage, baseHero.cost, baseHero.baseName, baseHero.element, baseHero.rarity, baseHero.skill, aLevel) 
+    Monster(baseHero.hp, baseHero.damage, baseHero.cost, baseHero.baseName, baseHero.element, baseHero.rarity, baseHero.skill, aLevel)
 {
     if (baseHero.skill.skillType == BUFF_L) {
         this->skill.skillType = BUFF;
-        this->skill.amount = (float) floor((float) aLevel * baseHero.skill.amount);
+        this->skill.amount = (double) floor((double) aLevel * baseHero.skill.amount);
     } else if (baseHero.skill.skillType == PROTECT_L) {
         this->skill.skillType = PROTECT;
-        this->skill.amount = (float) floor((float) aLevel * baseHero.skill.amount);
+        this->skill.amount = (double) floor((double) aLevel * baseHero.skill.amount);
     } else if (baseHero.skill.skillType == CHAMPION_L) {
         this->skill.skillType = CHAMPION;
-        this->skill.amount = (float) floor((float) aLevel * baseHero.skill.amount);
+        this->skill.amount = (double) floor((double) aLevel * baseHero.skill.amount);
     } else if (baseHero.skill.skillType == HEAL_L) {
         this->skill.skillType = HEAL;
-        this->skill.amount = (float) floor((float) aLevel * baseHero.skill.amount);
+        this->skill.amount = (double) floor((double) aLevel * baseHero.skill.amount);
     } else if (baseHero.skill.skillType == AOE_L) {
         this->skill.skillType = AOE;
-        this->skill.amount = (float) floor((float) aLevel * baseHero.skill.amount);
+        this->skill.amount = (double) floor((double) aLevel * baseHero.skill.amount);
     } else if (baseHero.skill.skillType == LIFESTEAL_L) {
         this->skill.skillType = LIFESTEAL;
-        this->skill.amount = (float) floor((float) aLevel * baseHero.skill.amount);
+        this->skill.amount = (double) floor((double) aLevel * baseHero.skill.amount);
     } else if (baseHero.skill.skillType == DAMPEN_L) {
         this->skill.skillType = DAMPEN;
-        this->skill.amount = 1.0f - (float) aLevel * baseHero.skill.amount;
+        this->skill.amount = 1.0f - (double) aLevel * baseHero.skill.amount;
     }
 }
 
-HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float anAmount) :
-    skillType(aType), 
-    target(aTarget), 
-    sourceElement(aSource), 
-    amount(anAmount) 
+HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, double anAmount) :
+    skillType(aType),
+    target(aTarget),
+    sourceElement(aSource),
+    amount(anAmount)
 {
     this->hasAsymmetricAoe = (aType == VALKYRIE || aType == TRAMPLE);
-    this->hasHeal = (aType == HEAL || aType == HEAL_L || 
+    this->hasHeal = (aType == HEAL || aType == HEAL_L ||
                      aType == LIFESTEAL || aType == LIFESTEAL_L);
-    this->hasAoe = (aType == AOE || aType == AOE_L || 
+    this->hasAoe = (aType == AOE || aType == AOE_L ||
                     aType == REVENGE || aType == PIERCE ||
                     this->hasHeal || this->hasAsymmetricAoe);
-    this->violatesFightResults = (aType == BUFF || aType == BUFF_L || 
+    this->violatesFightResults = (aType == BUFF || aType == BUFF_L ||
                                   aType == PROTECT || aType == PROTECT_L ||
                                   aType == CHAMPION || aType == CHAMPION_L ||
-                                  aType == AOE || aType == AOE_L || 
+                                  aType == AOE || aType == AOE_L ||
                                   aType == HEAL || aType == HEAL_L ||
                                   aType == LIFESTEAL || aType == LIFESTEAL_L ||
 								  aType == BEER || aType == AOEZero_L);
@@ -99,20 +99,20 @@ std::string Army::toString() {
     std::stringstream s;
     s << "[";
     int index = isQuest(*this);
-    
+
     if (index != -1) {
         s << "quest" << index << " | ";
     }
     s << "Followers: " << std::setw(7) << this->followerCost << " | ";
     for (int i = this->monsterAmount-1; i >= 0; i--) {
         s << monsterReference[this->monsters[i]].name << " "; // Print in reversed Order
-    } s << "<==]"; 
+    } s << "<==]";
     return s.str();
 }
 
 std::string Army::toJSON() {
     if (this->isEmpty()) {return "null";}
-    
+
     std::stringstream s;
     s << "{";
         s << "\"followers\"" << ":" << this->followerCost << ",";
@@ -133,7 +133,7 @@ void Instance::setTarget(Army aTarget) {
     this->target = aTarget;
     this->targetSize = aTarget.monsterAmount;
     this->lowestBossHealth = 0;
-    
+
     HeroSkill currentSkill;
     this->hasAoe = false;
     this->hasHeal = false;
@@ -148,16 +148,16 @@ void Instance::setTarget(Army aTarget) {
 		this->hasBeer |= currentSkill.skillType == BEER;
         this->hasWorldBoss |= monsterReference[this->target.monsters[i]].rarity == WORLDBOSS;
     }
-    
+
     // Check which monsters can survive a hit from the final monster on the target. This helps reduce the amoutn of potential soluitons in the last expand
-    // Heroes with global Abilities also get accepted. 
+    // Heroes with global Abilities also get accepted.
     // This produces only false positives not false negatives -> no correct solutions lost
     Monster lastMonster = monsterReference[this->target.monsters[this->targetSize - 1]];
     for (size_t i = 0; i < monsterReference.size(); i++) {
         Monster currentMonster = monsterReference[i];
         int attack = lastMonster.damage;
         if (counter[currentMonster.element] == lastMonster.element) {
-            attack = castCeil((float) attack * elementalBoost);
+            attack = castCeil((double) attack * elementalBoost);
         }
         this->monsterUsefulLast.push_back(currentMonster.hp > attack || currentMonster.skill.violatesFightResults);
     }
@@ -183,11 +183,11 @@ int isQuest(Army & army) {
     return -1;
 }
 
-// Access tools for monsters 
+// Access tools for monsters
 std::map<std::string, MonsterIndex> monsterMap; // Maps monster Names to their indices in monsterReference
 std::vector<Monster> monsterReference; // Global lookup for monster stats indices of monsters here can be used instead of the objects
 std::vector<MonsterIndex> availableMonsters; // Contains indices of all monsters the user allows. Is affected by filters
-std::vector<MonsterIndex> availableHeroes; // Contains all user heroes' indices 
+std::vector<MonsterIndex> availableHeroes; // Contains all user heroes' indices
 
 // Storage for Game Data
 std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actual Objects
@@ -200,117 +200,117 @@ void initMonsterData() {
     monsterBaseList.push_back(Monster( 44,   4,      1300,  "e1", EARTH));
     monsterBaseList.push_back(Monster( 16,  10,      1000,  "f1", FIRE));
     monsterBaseList.push_back(Monster( 30,   6,      1400,  "w1", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster( 48,   6,      3900,  "a2", AIR));
     monsterBaseList.push_back(Monster( 30,   8,      2700,  "e2", EARTH));
     monsterBaseList.push_back(Monster( 18,  16,      3900,  "f2", FIRE));
     monsterBaseList.push_back(Monster( 24,  12,      3900,  "w2", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster( 36,  12,      8000,  "a3", AIR));
     monsterBaseList.push_back(Monster( 26,  16,      7500,  "e3", EARTH));
     monsterBaseList.push_back(Monster( 54,   8,      8000,  "f3", FIRE));
     monsterBaseList.push_back(Monster( 18,  24,      8000,  "w3", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster( 24,  26,     15000,  "a4", AIR));
     monsterBaseList.push_back(Monster( 72,  10,     18000,  "e4", EARTH));
     monsterBaseList.push_back(Monster( 52,  16,     23000,  "f4", FIRE));
     monsterBaseList.push_back(Monster( 36,  20,     18000,  "w4", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster( 60,  20,     41000,  "a5", AIR));
     monsterBaseList.push_back(Monster( 36,  40,     54000,  "e5", EARTH));
     monsterBaseList.push_back(Monster( 42,  24,     31000,  "f5", FIRE));
     monsterBaseList.push_back(Monster( 78,  18,     52000,  "w5", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster( 62,  34,     96000,  "a6", AIR));
     monsterBaseList.push_back(Monster( 72,  24,     71000,  "e6", EARTH));
     monsterBaseList.push_back(Monster(104,  20,     94000,  "f6", FIRE));
     monsterBaseList.push_back(Monster( 44,  44,     84000,  "w6", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster(106,  26,    144000,  "a7", AIR));
     monsterBaseList.push_back(Monster( 66,  36,    115000,  "e7", EARTH));
     monsterBaseList.push_back(Monster( 54,  44,    115000,  "f7", FIRE));
     monsterBaseList.push_back(Monster( 92,  32,    159000,  "w7", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster( 78,  52,    257000,  "a8", AIR));
     monsterBaseList.push_back(Monster( 60,  60,    215000,  "e8", EARTH));
     monsterBaseList.push_back(Monster( 94,  50,    321000,  "f8", FIRE));
     monsterBaseList.push_back(Monster(108,  36,    241000,  "w8", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster(116,  54,    495000,  "a9", AIR));
     monsterBaseList.push_back(Monster(120,  48,    436000,  "e9", EARTH));
     monsterBaseList.push_back(Monster(102,  58,    454000,  "f9", FIRE));
     monsterBaseList.push_back(Monster( 80,  70,    418000,  "w9", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster(142,  60,    785000, "a10", AIR));
     monsterBaseList.push_back(Monster(122,  64,    689000, "e10", EARTH));
     monsterBaseList.push_back(Monster(104,  82,    787000, "f10", FIRE));
     monsterBaseList.push_back(Monster(110,  70,    675000, "w10", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster(114, 110,   1403000, "a11", AIR));
     monsterBaseList.push_back(Monster(134,  81,   1130000, "e11", EARTH));
     monsterBaseList.push_back(Monster(164,  70,   1229000, "f11", FIRE));
     monsterBaseList.push_back(Monster(152,  79,   1315000, "w11", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster(164,  88,   1733000, "a12", AIR));
     monsterBaseList.push_back(Monster(128, 120,   1903000, "e12", EARTH));
     monsterBaseList.push_back(Monster(156,  92,   1718000, "f12", FIRE));
     monsterBaseList.push_back(Monster(188,  78,   1775000, "w12", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster(210,  94,   2772000, "a13", AIR));
     monsterBaseList.push_back(Monster(190, 132,   3971000, "e13", EARTH));
     monsterBaseList.push_back(Monster(166, 130,   3169000, "f13", FIRE));
     monsterBaseList.push_back(Monster(140, 128,   2398000, "w13", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster(200, 142,   4785000, "a14", AIR));
     monsterBaseList.push_back(Monster(244, 136,   6044000, "e14", EARTH));
     monsterBaseList.push_back(Monster(168, 168,   4741000, "f14", FIRE));
     monsterBaseList.push_back(Monster(212, 122,   4159000, "w14", WATER));
-                                                  
+
     monsterBaseList.push_back(Monster(226, 190,   8897000, "a15", AIR));
     monsterBaseList.push_back(Monster(200, 186,   7173000, "e15", EARTH));
     monsterBaseList.push_back(Monster(234, 136,   5676000, "f15", FIRE));
     monsterBaseList.push_back(Monster(276, 142,   7758000, "w15", WATER));
-    
+
     monsterBaseList.push_back(Monster(280, 196,  12855000, "a16", AIR));
     monsterBaseList.push_back(Monster(284, 190,  12534000, "e16", EARTH));
     monsterBaseList.push_back(Monster(288, 192,  13001000, "f16", FIRE));
-    monsterBaseList.push_back(Monster(286, 198,  13475000, "w16", WATER));	
-                                                 
+    monsterBaseList.push_back(Monster(286, 198,  13475000, "w16", WATER));
+
     monsterBaseList.push_back(Monster(318, 206,  16765000, "a17", AIR));
     monsterBaseList.push_back(Monster(338, 192,  16531000, "e17", EARTH));
     monsterBaseList.push_back(Monster(236, 292,  18090000, "f17", FIRE));
     monsterBaseList.push_back(Monster(262, 258,  17573000, "w17", WATER));
-                                                 
+
     monsterBaseList.push_back(Monster(280, 280,  21951000, "a18", AIR));
     monsterBaseList.push_back(Monster(330, 242,  22567000, "e18", EARTH));
     monsterBaseList.push_back(Monster(392, 200,  21951000, "f18", FIRE));
     monsterBaseList.push_back(Monster(330, 230,  20909000, "w18", WATER));
-                                                 
+
     monsterBaseList.push_back(Monster(440, 206,  27288000, "a19", AIR));
     monsterBaseList.push_back(Monster(320, 282,  27107000, "e19", EARTH));
     monsterBaseList.push_back(Monster(352, 244,  25170000, "f19", FIRE));
     monsterBaseList.push_back(Monster(360, 238,  25079000, "w19", WATER));
-                                                 
+
     monsterBaseList.push_back(Monster(378, 268,  32242000, "a20", AIR));
     monsterBaseList.push_back(Monster(382, 264,  32025000, "e20", EARTH));
     monsterBaseList.push_back(Monster(388, 266,  33155600, "f20", FIRE));
     monsterBaseList.push_back(Monster(454, 232,  34182000, "w20", WATER));
-                                                 
+
     monsterBaseList.push_back(Monster(428, 286,  42826000, "a21", AIR));
     monsterBaseList.push_back(Monster(446, 272,  42252000, "e21", EARTH));
     monsterBaseList.push_back(Monster(362, 338,  42798000, "f21", FIRE));
     monsterBaseList.push_back(Monster(416, 290,  41901000, "w21", WATER));
-                                                 
+
     monsterBaseList.push_back(Monster(454, 320,  55373000, "a22", AIR));
     monsterBaseList.push_back(Monster(450, 324,  55671000, "e22", EARTH));
     monsterBaseList.push_back(Monster(458, 318,  55582000, "f22", FIRE));
     monsterBaseList.push_back(Monster(440, 340,  55877000, "w22", WATER));
-                                                 
+
     monsterBaseList.push_back(Monster(500, 348,  72580000, "a23", AIR));
     monsterBaseList.push_back(Monster(516, 340,  73483000, "e23", EARTH));
     monsterBaseList.push_back(Monster(424, 410,  72480000, "f23", FIRE));
     monsterBaseList.push_back(Monster(490, 354,  72243000, "w23", WATER));
-                                                 
+
     monsterBaseList.push_back(Monster(554, 374,  94312000, "a24", AIR));
     monsterBaseList.push_back(Monster(458, 458,  96071000, "e24", EARTH));
     monsterBaseList.push_back(Monster(534, 392,  95772000, "f24", FIRE));
@@ -347,11 +347,11 @@ void initMonsterData() {
     monsterBaseList.push_back(Monster(802, 802, 515849000, "w30", WATER));
 }
 
-// Fill BaseHeroes with Heroes. Order is important 
+// Fill BaseHeroes with Heroes. Order is important
 void initBaseHeroes() {
-    baseHeroes.push_back(Monster( 45, 20, "ladyoftwilight",     AIR,   COMMON,    {PROTECT,       ALL, AIR, 1}));
-    baseHeroes.push_back(Monster( 70, 30, "tiny",               EARTH, RARE,      {AOE,           ALL, EARTH, 2}));
-    baseHeroes.push_back(Monster( 90, 40, "nebra",              FIRE,  LEGENDARY, {BUFF,          ALL, FIRE, 8}));
+    baseHeroes.push_back(Monster( 45, 20, "ladyoftwilight",     AIR,   COMMON,    {CHAMPION,      ALL, AIR, 3}));
+    baseHeroes.push_back(Monster( 70, 30, "tiny",               EARTH, RARE,      {LIFESTEAL_L,   ALL, EARTH, 0.042f}));
+    baseHeroes.push_back(Monster(110, 40, "nebra",              FIRE,  LEGENDARY, {BUFF,          ALL, FIRE, 20}));
 
     baseHeroes.push_back(Monster( 20, 10, "valor",              AIR,   COMMON,    {PROTECT,       AIR, AIR, 1}));
     baseHeroes.push_back(Monster( 30,  8, "rokka",              EARTH, COMMON,    {PROTECT,       EARTH, EARTH, 1}));
@@ -381,7 +381,7 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 28, 16, "k41ry",              AIR,   COMMON,    {BUFF,          AIR, AIR, 3}));
     baseHeroes.push_back(Monster( 46, 20, "t4urus",             EARTH, RARE,      {BUFF,          ALL, EARTH, 1}));
     baseHeroes.push_back(Monster(100, 20, "tr0n1x",             FIRE,  LEGENDARY, {AOE,           ALL, FIRE, 3}));
- 
+
     baseHeroes.push_back(Monster( 58,  8, "aquortis",           WATER, COMMON,    {BUFF,          WATER, WATER, 3}));
     baseHeroes.push_back(Monster( 30, 32, "aeris",              AIR,   RARE,      {HEAL,          ALL, AIR, 1}));
     baseHeroes.push_back(Monster( 75,  2, "geum",               EARTH, LEGENDARY, {BERSERK,       SELF, EARTH, 2}));
@@ -428,15 +428,15 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 72, 28, "thert",              EARTH, LEGENDARY, {PROTECT_L,     EARTH, EARTH, 0.112f}));
     baseHeroes.push_back(Monster( 32, 64, "lordkirk",           FIRE,  LEGENDARY, {PROTECT_L,     FIRE, FIRE, 0.112f}));
     baseHeroes.push_back(Monster( 30, 70, "neptunius",          WATER, LEGENDARY, {PROTECT_L,     WATER, WATER, 0.112f}));
-    
+
     baseHeroes.push_back(Monster( 65, 12, "sigrun",             FIRE,  LEGENDARY, {VALKYRIE,      ALL, FIRE, 0.5f}));
     baseHeroes.push_back(Monster( 70, 14, "koldis",             WATER, LEGENDARY, {VALKYRIE,      ALL, WATER, 0.5f}));
     baseHeroes.push_back(Monster( 75, 16, "alvitr",             EARTH, LEGENDARY, {VALKYRIE,      ALL, EARTH, 0.5f}));
-    
+
     baseHeroes.push_back(Monster( 30, 18, "hama",               WATER, COMMON,    {BUFF,          WATER, WATER, 4}));
     baseHeroes.push_back(Monster( 34, 34, "hallinskidi",        AIR,   RARE,      {CHAMPION,      AIR, AIR, 2}));
     baseHeroes.push_back(Monster( 60, 42, "rigr",               EARTH, LEGENDARY, {ADAPT,         EARTH, EARTH, 2}));
-    
+
     baseHeroes.push_back(Monster(174, 46, "aalpha",             FIRE,  ASCENDED,  {AOE_L,         ALL, FIRE, 0.304f}));
     baseHeroes.push_back(Monster(162, 60, "aathos",             EARTH, ASCENDED,  {PROTECT_L,     ALL, EARTH, 0.304f}));
     baseHeroes.push_back(Monster(120,104, "arei",               AIR,   ASCENDED,  {BUFF_L,        ALL, AIR, 0.304f}));
@@ -444,59 +444,69 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster(190, 38, "atr0n1x",            FIRE,  ASCENDED,  {VALKYRIE,      ALL, FIRE, 0.75f}));
     baseHeroes.push_back(Monster(222,  8, "ageum",              EARTH, ASCENDED,  {BERSERK,       SELF, EARTH, 2}));
     baseHeroes.push_back(Monster(116,116, "ageror",             AIR,   ASCENDED,  {FRIENDS,       SELF, AIR, 1.3f}));
-    
+
     baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 73, "lordofchaos", FIRE, WORLDBOSS, {AOE,      ALL, FIRE, 20}));
-    
+
     baseHeroes.push_back(Monster( 38, 24, "christmaself",       WATER, COMMON,    {HEAL_L,        ALL, WATER, 0.112f}));
     baseHeroes.push_back(Monster( 54, 36, "reindeer",           AIR,   RARE,      {AOE_L,         ALL, AIR, 0.112f}));
     baseHeroes.push_back(Monster( 72, 48, "santaclaus",         FIRE,  LEGENDARY, {LIFESTEAL_L,   ALL, FIRE, 0.112f}));
-    baseHeroes.push_back(Monster( 44, 44, "sexysanta",          EARTH, RARE,      {VALKYRIE,      ALL, EARTH, 0.66f}));    
-    
+    baseHeroes.push_back(Monster( 44, 44, "sexysanta",          EARTH, RARE,      {VALKYRIE,      ALL, EARTH, 0.66f}));
+
     baseHeroes.push_back(Monster( 24, 24, "toth",               FIRE,  COMMON,    {BUFF,          FIRE, FIRE, 4}));
     baseHeroes.push_back(Monster( 40, 30, "ganah",              WATER, RARE,      {CHAMPION,      WATER, WATER, 2}));
     baseHeroes.push_back(Monster( 58, 46, "dagda",              AIR,   LEGENDARY, {ADAPT,         AIR, AIR, 2}));
-    
-    baseHeroes.push_back(Monster(200, 60, "bubbles",            WATER, ASCENDED,  {DAMPEN_L,      ALL, WATER, 0.0025f}));
-    
+
+    baseHeroes.push_back(Monster(300,110, "bubbles",           WATER, ASCENDED,   {DAMPEN_L,      ALL, WATER, 0.0050f}));
+
     baseHeroes.push_back(Monster(150, 86, "apontus",            WATER, ASCENDED,  {ADAPT,         WATER, WATER, 3}));
     baseHeroes.push_back(Monster(162, 81, "aatzar",             FIRE,  ASCENDED,  {ADAPT,         FIRE, FIRE, 3}));
-    
+
     baseHeroes.push_back(Monster( 74, 36, "arshen",             AIR,   LEGENDARY, {TRAMPLE,       ALL, AIR, 2}));
     baseHeroes.push_back(Monster( 78, 40, "rua",                FIRE,  LEGENDARY, {TRAMPLE,       ALL, FIRE, 2}));
     baseHeroes.push_back(Monster( 82, 44, "dorth",              WATER, LEGENDARY, {TRAMPLE,       ALL, WATER, 2}));
-    
+
     baseHeroes.push_back(Monster(141, 99, "arigr",              EARTH, ASCENDED,  {ADAPT,         EARTH, EARTH, 3}));
-    
-    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 125, "moak", EARTH, WORLDBOSS, {DAMPEN,      ALL, EARTH, .5}));
-    
+
+    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 125, "moak", EARTH, WORLDBOSS, {DAMPEN,        ALL, EARTH, 0.5}));
+
     baseHeroes.push_back(Monster( 42, 50, "hosokawa",           AIR,   LEGENDARY, {BUFF_L,        AIR, AIR, 0.112f}));
     baseHeroes.push_back(Monster( 32, 66, "takeda",             EARTH, LEGENDARY, {BUFF_L,        EARTH, EARTH, 0.112f}));
     baseHeroes.push_back(Monster( 38, 56, "hirate",             FIRE,  LEGENDARY, {BUFF_L,        FIRE, FIRE, 0.112f}));
     baseHeroes.push_back(Monster( 44, 48, "hattori",            WATER, LEGENDARY, {BUFF_L,        WATER, WATER, 0.112f}));
 
-	baseHeroes.push_back(Monster(135, 107,"adagda",				AIR,	ASCENDED,	{ ADAPT,      AIR, AIR, 3 }));
+	baseHeroes.push_back(Monster(135, 107,"adagda",				AIR,   ASCENDED,  { ADAPT,        AIR, AIR, 3 }));
 
-	baseHeroes.push_back(Monster( 30, 20, "bylar",				EARTH,	COMMON,		{ BUFF,       EARTH, EARTH, 4 }));
-	baseHeroes.push_back(Monster( 36, 36, "boor",				FIRE,	RARE,		{ TRAINING,   SELF, FIRE, 3 }));
-	baseHeroes.push_back(Monster( 52, 52, "bavah",				WATER,	LEGENDARY,	{ CHAMPION,   ALL, WATER, 2 }));
-	
-	baseHeroes.push_back(Monster( 75, 25, "leprechaun",			EARTH,	LEGENDARY,	{ BEER,       ALL, EARTH, 0 }));
+	baseHeroes.push_back(Monster( 30, 20, "bylar",				EARTH, COMMON,	  { BUFF,         EARTH, EARTH, 4 }));
+	baseHeroes.push_back(Monster( 36, 36, "boor",				FIRE,  RARE,	  { TRAINING,     SELF, FIRE, 3 }));
+	baseHeroes.push_back(Monster( 52, 52, "bavah",				WATER, LEGENDARY, { CHAMPION,     ALL, WATER, 2 }));
 
-	baseHeroes.push_back(Monster( 30, 30, "sparks",				FIRE,	COMMON,		{ GROW,       ALL, FIRE, 2 }));
-	baseHeroes.push_back(Monster( 48, 42, "leaf",				EARTH,	RARE,		{ GROW,       ALL, EARTH, 2 }));
-	baseHeroes.push_back(Monster( 70, 48, "flynn",				AIR,	LEGENDARY,	{ GROW,       ALL, AIR, 2 }));
+	baseHeroes.push_back(Monster( 75, 25, "leprechaun",			EARTH, LEGENDARY, { BEER,         ALL, EARTH, 0 }));
 
-	baseHeroes.push_back(Monster(122,122, "abavah",				WATER,	ASCENDED,	{ CHAMPION_L, ALL, ALL, 0.152f }));
+	baseHeroes.push_back(Monster( 30, 30, "sparks",				FIRE,  COMMON,	  { GROW,         ALL, FIRE, 2 }));
+	baseHeroes.push_back(Monster( 48, 42, "leaf",				EARTH, RARE,	  { GROW,         ALL, EARTH, 2 }));
+	baseHeroes.push_back(Monster( 70, 48, "flynn",				AIR,   LEGENDARY, { GROW,         ALL, AIR, 2 }));
 
-	baseHeroes.push_back(Monster( 66, 60, "drhawking",			AIR,	LEGENDARY,	{ AOEZero_L,  ALL, AIR, 1 }));
+	baseHeroes.push_back(Monster(122,122, "abavah",				WATER, ASCENDED,  { CHAMPION_L,   ALL, ALL, 0.152f }));
 
-	baseHeroes.push_back(Monster(150, 90, "masterlee",			AIR,	ASCENDED,	{ COUNTER,    AIR, AIR, 0.5f }));
+	baseHeroes.push_back(Monster( 66, 60, "drhawking",			AIR,   LEGENDARY, { AOEZero_L,    ALL, AIR, 1 }));
 
-	baseHeroes.push_back(Monster( 70, 38, "kumusan",			FIRE,	LEGENDARY,	{ COUNTER,    FIRE, FIRE, 0.2f }));
-	baseHeroes.push_back(Monster( 78, 42, "liucheng",			WATER,	LEGENDARY,	{ COUNTER,    WATER, WATER, 0.25f }));
-	baseHeroes.push_back(Monster( 86, 44, "hidoka",				EARTH,	LEGENDARY,	{ COUNTER,    EARTH, EARTH, 0.3f }));
+	baseHeroes.push_back(Monster(150, 90, "masterlee",			AIR,   ASCENDED,  { COUNTER,      AIR, AIR, 0.5f }));
+
+	baseHeroes.push_back(Monster( 70, 38, "kumusan",			FIRE,  LEGENDARY, { COUNTER,      FIRE, FIRE, 0.2f }));
+	baseHeroes.push_back(Monster( 78, 42, "liucheng",			WATER, LEGENDARY, { COUNTER,      WATER, WATER, 0.25f }));
+	baseHeroes.push_back(Monster( 86, 44, "hidoka",				EARTH, LEGENDARY, { COUNTER,      EARTH, EARTH, 0.3f }));
 
 	baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 11, "kryton", AIR, WORLDBOSS, { TRAINING,      SELF, AIR, 10 }));
+
+	baseHeroes.push_back(Monster( 25, 26, "dicemaster",			WATER, COMMON,    { DICE,         SELF, SELF, 20 }));
+	baseHeroes.push_back(Monster( 28, 60, "luxuriusmaximus",	FIRE,  RARE,      { LUX,          SELF, EARTH, 1 }));
+	baseHeroes.push_back(Monster( 70, 70, "pokerface",			EARTH, LEGENDARY, { CRIT,         EARTH, EARTH, 3 }));
+
+	baseHeroes.push_back(Monster( 25, 25, "taint",				AIR, COMMON,      { VALKYRIE,     ALL, AIR, 0.5f }));
+	baseHeroes.push_back(Monster( 48, 50, "putrid",				EARTH, RARE,      { TRAINING,     SELF, EARTH, -3 }));
+	baseHeroes.push_back(Monster( 52, 48, "defile",				FIRE, LEGENDARY,  { EXPLODE,      ALL, FIRE, 50 }));
+
+	baseHeroes.push_back(Monster(150, 15, "neil",				WATER, LEGENDARY, { ABSORB,       SELF, WATER, 0.3 }));
 }
 
 void initQuests() {
@@ -596,10 +606,10 @@ void initQuests() {
     quests.push_back({"e18", "f16", "f16", "f16", "w16", "f18"});
     quests.push_back({"a21", "a20", "f20", "a21"});
     quests.push_back({"e18", "e17", "a18", "e17", "e17", "e20"}); //95
-    quests.push_back({"a19", "a19", "w18", "w18", "f15", "e16"}); 
-    quests.push_back({"w18", "f19", "f19", "e18", "e18", "a19"}); 
-    quests.push_back({"f18", "w19", "w19", "e19", "e19", "f18"}); 
-    quests.push_back({"f19", "a19", "e19", "f20", "a20", "f19"}); 
+    quests.push_back({"a19", "a19", "w18", "w18", "f15", "e16"});
+    quests.push_back({"w18", "f19", "f19", "e18", "e18", "a19"});
+    quests.push_back({"f18", "w19", "w19", "e19", "e19", "f18"});
+    quests.push_back({"f19", "a19", "e19", "f20", "a20", "f19"});
     quests.push_back({"a20", "w18", "w18", "a19", "w20", "f20"}); // 100
 }
 
@@ -622,7 +632,7 @@ void initGameData() {
 void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumArmyCost) {
     std::vector<Monster> tempMonsterList = monsterBaseList; // Get a temporary list to sort
     sort(tempMonsterList.begin(), tempMonsterList.end(), isCheaper);
-    
+
     for (size_t i = 0; i < tempMonsterList.size(); i++) {
         if (minimumMonsterCost <= tempMonsterList[i].cost && maximumArmyCost >= tempMonsterList[i].cost) {
             availableMonsters.push_back(monsterMap[tempMonsterList[i].name]);
@@ -634,7 +644,7 @@ void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumAr
 MonsterIndex addLeveledHero(Monster & hero, int level) {
     Monster m(hero, level);
     monsterReference.emplace_back(m);
-    
+
     return (MonsterIndex) (monsterReference.size() - 1);
 }
 
