@@ -12,7 +12,7 @@
 #include <map>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.0.1.7a";
+const std::string VERSION = "3.0.1.7b";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -25,7 +25,7 @@ using FollowerCount = uint32_t;
 
 // Constants defining the basic structure of armies
 const size_t ARMY_MAX_SIZE = 6;
-const size_t ARMY_MAX_BRUTEFORCEABLE_SIZE = 6;
+const size_t ARMY_MAX_BRUTEFORCEABLE_SIZE = 4;
 const std::string HEROLEVEL_SEPARATOR = ":";
 
 // Needed for BattleReplays
