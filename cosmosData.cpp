@@ -192,6 +192,7 @@ std::vector<MonsterIndex> availableHeroes; // Contains all user heroes' indices
 // Storage for Game Data
 std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actual Objects
 std::vector<Monster> baseHeroes; // Raw, unleveld Hero Data, holds actual Objects
+std::map<std::string, std::string> heroAliases; //Alternate or shorthand names for heroes
 std::vector<std::vector<std::string>> quests; // Quest Lineup from the game
 
 // Fill MonsterBaseList With Monsters Order is important for ReplayStrings
@@ -467,7 +468,7 @@ void initBaseHeroes() {
 
     baseHeroes.push_back(Monster(141, 99, "arigr",              EARTH, ASCENDED,  {ADAPT,         EARTH, EARTH, 3}));
 
-    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 125, "moak", EARTH, WORLDBOSS, {DAMPEN,        ALL, EARTH, 0.5}));
+    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 125, "motherofallkodamas", EARTH, WORLDBOSS, {DAMPEN,        ALL, EARTH, 0.5}));
 
     baseHeroes.push_back(Monster( 42, 50, "hosokawa",           AIR,   LEGENDARY, {BUFF_L,        AIR, AIR, 0.112f}));
     baseHeroes.push_back(Monster( 32, 66, "takeda",             EARTH, LEGENDARY, {BUFF_L,        EARTH, EARTH, 0.112f}));
@@ -507,6 +508,47 @@ void initBaseHeroes() {
 	baseHeroes.push_back(Monster( 52, 48, "defile",				FIRE, LEGENDARY,  { EXPLODE,      ALL, FIRE, 50 }));
 
 	baseHeroes.push_back(Monster(150, 15, "neil",				WATER, LEGENDARY, { ABSORB,       SELF, WATER, 0.3 }));
+}
+
+void initHeroAliases() {
+    heroAliases["lady"] = "ladyoftwilight";
+    heroAliases["lot"] = "ladyoftwilight";
+    heroAliases["pyro"] = "pyromancer";
+    heroAliases["kairy"] = "k41ry";
+    heroAliases["taurus"] = "t4urus";
+    heroAliases["tronix"] = "tr0n1x";
+    heroAliases["druid"] = "forestdruid";
+    heroAliases["veil"] = "veildur";
+    heroAliases["bryn"] = "brynhildr";
+    heroAliases["gaia"] = "gaiabyte";
+    heroAliases["ww"] = "werewolf";
+    heroAliases["wolf"] = "werewolf";
+    heroAliases["jack"] = "jackoknight";
+    heroAliases["jacko"] = "jackoknight";
+    heroAliases["dull"] = "dullahan";
+    heroAliases["dulla"] = "dullahan";
+    heroAliases["odelith"] = "ladyodelith";
+    heroAliases["kirk"] = "lordkirk";
+    heroAliases["nep"] = "neptunius";
+    heroAliases["hall"] = "hallinskidi";
+    heroAliases["atronix"] = "atr0n1x";
+    heroAliases["elf"] = "christmaself";
+    heroAliases["deer"] = "reindeer";
+    heroAliases["santa"] = "santaclaus";
+    heroAliases["ss"] = "sexysanta";
+    heroAliases["lep"] = "leprechaun";
+    heroAliases["hawking"] = "drhawking";
+    heroAliases["dice"] = "dicemaster";
+    heroAliases["lux"] = "luxuriusmaximus";
+    heroAliases["poker"] = "pokerface";
+
+    heroAliases["loc"] = "lordofchaos";
+    heroAliases["fboss"] = "lordofchaos";
+    heroAliases["moak"] = "motherofallkodamas";
+    heroAliases["eboss"] = "motherofallkodamas";
+    heroAliases["aboss"] = "kryton";
+
+    heroAliases["luxurious"] = "luxuriusmaximus";
 }
 
 void initQuests() {
@@ -619,6 +661,7 @@ void initGameData() {
     // Initialize Monster Data
     initMonsterData();
     initBaseHeroes();
+    initHeroAliases();
     initQuests();
 
     for (size_t i = 0; i < monsterBaseList.size(); i++) {

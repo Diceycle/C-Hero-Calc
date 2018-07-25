@@ -12,7 +12,7 @@
 #include <map>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.0.1.7";
+const std::string VERSION = "3.0.1.7a";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -25,7 +25,7 @@ using FollowerCount = uint32_t;
 
 // Constants defining the basic structure of armies
 const size_t ARMY_MAX_SIZE = 6;
-const size_t ARMY_MAX_BRUTEFORCEABLE_SIZE = 4;
+const size_t ARMY_MAX_BRUTEFORCEABLE_SIZE = 6;
 const std::string HEROLEVEL_SEPARATOR = ":";
 
 // Needed for BattleReplays
@@ -154,6 +154,8 @@ extern std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actu
 void initMonsters();
 extern std::vector<Monster> baseHeroes; // Raw, unleveld Hero Data, holds actual Objects
 void initBaseHeroes();
+extern std::map<std::string, std::string> heroAliases; //Alternate or shorthand names for heroes
+void initHeroAliases();
 extern std::vector<std::vector<std::string>> quests; // Quest Lineups from the game
 void initQuests();
 

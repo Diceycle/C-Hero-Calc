@@ -13,7 +13,7 @@ UserInterface interface;
 void UserInterface::printBuffer(OutputLevel urgency) {
     if (shouldOutput(urgency)) {
         cout << this->outputStream.str();
-    } 
+    }
     this->outputStream.str("");
     this->outputStream.clear();
 }
@@ -65,7 +65,7 @@ void UserInterface::haltExecution() {
 
 // Takes a raw line from an Input file or command line input and splits it into tokens
 vector<string> UserInterface::parseInput(string input) {
-    input = split(toLower(input), COMMENT_DELIMITOR)[0]; 
+    input = split(toLower(input), COMMENT_DELIMITOR)[0];
     return split(input, TOKEN_SEPARATOR);
 }
 
@@ -147,11 +147,11 @@ void IOManager::loadInputFiles(string fileName) {
     this->fileInput.init(fileName);
 }
 
-// Read from the input and set configuration values accordingly. 
+// Read from the input and set configuration values accordingly.
 // Outputs warnings to the command line if something is out of order
 void IOManager::getConfiguration() {
     vector<string> tokens;
-    
+
     if (this->fileInput.checkLine(TOKENS.START_CONFIG)) {
         while (this->fileInput.hasLine()) {
             tokens = this->fileInput.getLine();
@@ -240,7 +240,7 @@ bool IOManager::askYesNoQuestion(string questionMessage, OutputLevel urgency, st
     } else {
         inputString = this->getResistantInput(questionMessage + " (" + TOKENS.YES + "/" + TOKENS.NO + "): ", question)[0];
     }
-    
+
     if (inputString == TOKENS.NO) {
         return false;
     }
@@ -255,10 +255,10 @@ vector<MonsterIndex> IOManager::takeHerolevelInput() {
     vector<MonsterIndex> heroes {};
     vector<string> input;
     pair<Monster, int> heroData;
-    
+
     interface.outputMessage("\nEnter your Heroes with levels. Press enter after every Hero.", QUERY_OUTPUT);
     interface.outputMessage("Press enter twice or type " + TOKENS.HEROES_FINISHED + " to proceed without inputting additional Heroes.", QUERY_OUTPUT);
-        
+
     int cancelCounter = 0;
     do {
         input = this->getResistantInput("Enter Hero " + to_string(heroes.size()+1) + ": ", rawFirst);
@@ -282,15 +282,15 @@ vector<MonsterIndex> IOManager::takeHerolevelInput() {
             };
         }
     } while (input[0] != TOKENS.HEROES_FINISHED && cancelCounter < 2);
-    
+
     return heroes;
 }
 
-// Promts the user to input instance(s) to be solved 
+// Promts the user to input instance(s) to be solved
 vector<Instance> IOManager::takeInstanceInput(string prompt) {
     vector<Instance> instances;
     vector<string> tokens;
-    
+
     while (true) {
         tokens = this->getResistantInput(prompt, raw);
         instances.clear();
@@ -322,13 +322,13 @@ string IOManager::getJSONError(InputException e) {
     string message;
     string errorType;
     switch (e) {
-        case MACROFILE_MISSING: 
-            message = "Could not find Macro File!"; 
+        case MACROFILE_MISSING:
+            message = "Could not find Macro File!";
             errorType = "MACROFILE_MISSING";
             break;
-        case MACROFILE_USED_UP: 
+        case MACROFILE_USED_UP:
             message = "Macro File does not provide enough input!";
-            errorType = "MARCOFILE_USED_UP";
+            errorType = "MACROFILE_USED_UP";
             break;
         default:
             message = "Unexpected Error";
@@ -355,7 +355,7 @@ bool shouldOutput(OutputLevel urgency) {
 Instance makeInstanceFromString(string instanceString) {
     Instance instance;
     int dashPosition = (int) instanceString.find(QUEST_NUMBER_SEPARTOR);
-    
+
     if (instanceString.compare(0, QUEST_PREFIX.length(), QUEST_PREFIX) == 0) {
         try {
             int questNumber = (int) parseInt(instanceString.substr(QUEST_PREFIX.length(), dashPosition-QUEST_PREFIX.length()));
@@ -376,7 +376,7 @@ Instance makeInstanceFromString(string instanceString) {
 Army makeArmyFromStrings(vector<string> stringMonsters) {
     Army army;
     pair<Monster, int> heroData;
-    
+
     for(size_t i = 0; i < stringMonsters.size(); i++) {
         if(stringMonsters[i].find(HEROLEVEL_SEPARATOR) != stringMonsters[i].npos) {
             heroData = parseHeroString(stringMonsters[i]);
@@ -401,7 +401,12 @@ pair<Monster, int> parseHeroString(string heroString) {
     } catch (const exception & e) {
         throw HERO_PARSE;
     }
-    
+
+    std::map<string, string>::iterator alias = heroAliases.find(name);
+    if (alias != heroAliases.end()) {
+        name = alias->second;
+    }
+
 	Monster hero;
 	for (size_t i = 0; i < baseHeroes.size(); i++) {
 		if (baseHeroes[i].baseName == name) {
@@ -483,7 +488,7 @@ string makeJSONFromInstance(Instance instance, bool valid) {
         s << "\"time\""  << ":" << instance.calculationTime << ",";
         s << "\"fights\"" << ":" << instance.totalFightsSimulated << ",";
         s << "\"replay\"" << ":" << "\"" << makeBattleReplay(instance.bestSolution, instance.target) << "\"";
-    
+
     s << "}";
     if (!valid) {
         s << ",\"error\" : {";
@@ -497,7 +502,7 @@ string makeJSONFromInstance(Instance instance, bool valid) {
 
 string makeStringFromInstance(Instance instance, bool valid, bool showReplayString) {
     stringstream s;
-        
+
     s << endl << "Solution for " << instance.target.toString() << ":" << endl;
     // Announce the result
     if (!instance.bestSolution.isEmpty()) {
@@ -505,7 +510,7 @@ string makeStringFromInstance(Instance instance, bool valid, bool showReplayStri
     } else {
         s << "  Could not find a solution that beats this lineup." << endl;
     } s << endl;
-    
+
     // Aditional Statistics
     if (instance.hasWorldBoss) {
 		s << "  Boss Damage Done: " << numberWithSepartors(WORLDBOSS_HEALTH - instance.lowestBossHealth) << endl;
@@ -513,12 +518,12 @@ string makeStringFromInstance(Instance instance, bool valid, bool showReplayStri
     s << "  " << instance.totalFightsSimulated << " Fights simulated." << endl;
     s << "  Total Calculation Time: " << instance.calculationTime << endl;
     s << "  Calc Version: " << VERSION << endl << endl;
-    
+
     // Replay for debugging and confirming interactions
     if (!instance.bestSolution.isEmpty() && showReplayString) {
         s << "Battle Replay (Use on Ingame Tournament Page):" << endl << makeBattleReplay(instance.bestSolution, instance.target) << endl << endl;
     }
-    
+
     // Sanity Check
     if (!valid) {
         s << "This does not beat the lineup!!!" << endl;
@@ -545,7 +550,7 @@ int64_t parseInt(string toParse) {
         if (num > numeric_limits<uint32_t>::max()) {
             return numeric_limits<uint32_t>::max();
         } else {
-            return num; 
+            return num;
         }
     } else {
         throw invalid_argument("Could not parse number from '" + toParse + "'!");
@@ -585,7 +590,7 @@ vector<string> split(string target, string separator) {
 string toLower(string input) {
     for (size_t i = 0; i < input.length(); i++) {
         input[i] = tolower(input[i]);
-		//input[i] = tolower(input[i], locale()); 
+		//input[i] = tolower(input[i], locale());
     }
     return input;
 }
