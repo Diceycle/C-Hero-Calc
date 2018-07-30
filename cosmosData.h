@@ -299,7 +299,7 @@ int isQuest(Army & army);
 
 // Custom ceil function to avoid excessive casting. Hardcoded to be effective on 32bit ints
 inline int castCeil(double f) {
-    return 2147483648 - (int)(2147483648.0f - f);
+    return 2147483647 - (int)(2147483647.0 - f);
 }
 
 #endif
