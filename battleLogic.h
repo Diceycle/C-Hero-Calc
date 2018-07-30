@@ -31,6 +31,9 @@ struct TurnData {
     bool trampleTriggered = false;
     int paoeDamage = 0;
     int witherer = -1;
+    int target = 0;
+    double critMult = 1;
+    double hate = 0;
 };
 
 // Keep track of an army's condition during a fight and save some convenience data
@@ -47,8 +50,10 @@ class ArmyCondition {
         bool rainbowConditions[ARMY_MAX_SIZE]; // for rainbow ability
         int pureMonsters[ARMY_MAX_SIZE]; // for friends ability
 
-		bool booze{ false };	// for leprechaun's ability
-		int aoeZero;			// for hawking's ability
+		bool booze;	// for leprechaun's ability
+		int aoeZero; // for hawking's ability
+
+		int64_t seed;
 
         int berserkProcs; // for berserk ability
 
@@ -61,7 +66,7 @@ class ArmyCondition {
         inline void init(const Army & army, const int oldMonstersLost, const int aoeDamage);
         inline void afterDeath();
         inline void startNewTurn();
-        inline void getDamage(const int turncounter, const Element opposingElement, const int opposingProtection, const double opposingDampFactor, const double opposingAbsorbMult);
+        inline void getDamage(const int turncounter, const ArmyCondition & opposingCondition);
         inline void resolveDamage(TurnData & opposing);
 
 };
@@ -74,6 +79,7 @@ inline void ArmyCondition::init(const Army & army, const int oldMonstersLost, co
     int tempRainbowCondition = 0;
     int tempPureMonsters = 0;
 
+    seed = army.seed;
     armySize = army.monsterAmount;
     monstersLost = oldMonstersLost;
     berserkProcs = 0;
@@ -150,8 +156,14 @@ inline void ArmyCondition::startNewTurn() {
 
 // Handle all self-centered abilites and other multipliers on damage
 // Protection needs to be calculated at this point.
-inline void ArmyCondition::getDamage(const int turncounter, const Element opposingElement, const int opposingProtection, const double opposingDampFactor, const double opposingAbsorbMult) {
+inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition & opposingCondition) {
     turnData.baseDamage = lineup[monstersLost]->damage; // Get Base damage
+
+    const Element opposingElement = opposingCondition.lineup[opposingCondition.monstersLost]->element;
+    const int opposingProtection = opposingCondition.turnData.protection;
+    const double opposingDampFactor = opposingCondition.turnData.dampFactor;
+    const double opposingAbsorbMult = opposingCondition.turnData.absorbMult;
+    const int64_t turnSeed = (opposingCondition.seed + (101 - turncounter)*(101 - turncounter)*(101 - turncounter)) % (int64_t)round((double)opposingCondition.seed / (101 - turncounter) + (101 - turncounter)*(101 - turncounter));
 
     // Handle Monsters with skills that only activate on attack.
     turnData.paoeDamage = 0;
@@ -159,8 +171,12 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     turnData.explodeDamage = 0;
     turnData.valkyrieMult = 0;
     turnData.witherer = -1;
-    turnData.multiplier = 1;
+    turnData.multiplier = 1; // Not used outside this function, does it need to be stored in turnData?
+    turnData.critMult = 1; // same as above
+    turnData.hate = 0; // same as above
 	turnData.counter = 0;
+	turnData.target = 0;
+
 
     switch (skillTypes[monstersLost]) {
         case FRIENDS:   turnData.multiplier *= (double) pow(skillAmounts[monstersLost], pureMonsters[monstersLost]);
@@ -181,8 +197,19 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
                         break;
         case TRAMPLE:   turnData.trampleTriggered = true;
                         break;
-		case COUNTER:	turnData.counter = skillAmounts[monstersLost]; break;
-		case EXPLODE:   turnData.explodeDamage = skillAmounts[monstersLost]; break;
+		case COUNTER:	turnData.counter = skillAmounts[monstersLost];
+                        break;
+		case EXPLODE:   turnData.explodeDamage = skillAmounts[monstersLost]; // Explode damage gets added here, but still won't apply unless enemy frontliner dies
+                        break;
+		case DICE:      turnData.baseDamage += opposingCondition.seed % (int)(skillAmounts[monstersLost] + 1); // Only adds dice attack effect if dice is in front, max health is done before battle
+                        break;
+        // Pick a target, Bubbles currently dampens lux damage if not targeting first according to game code, interaction should be added if this doesn't change
+        case LUX:       turnData.target = turnSeed % (opposingCondition.armySize - opposingCondition.monstersLost);
+                        break;
+        case CRIT:      turnData.critMult *= turnSeed % 2 == 1 ? skillAmounts[monstersLost] : 1;
+                        break;
+        case HATE:      turnData.hate = skillAmounts[monstersLost];
+                        break;
 
 		default:        break;
 
@@ -190,13 +217,15 @@ inline void ArmyCondition::getDamage(const int turncounter, const Element opposi
     turnData.valkyrieDamage = (double) turnData.baseDamage * turnData.multiplier + (double) turnData.buffDamage;
 
     if (counter[opposingElement] == lineup[monstersLost]->element) {
-        turnData.valkyrieDamage *= elementalBoost;
+        turnData.valkyrieDamage *= elementalBoost + turnData.hate;
     }
-    if (turnData.valkyrieDamage > opposingProtection) { // Handle Protection
+    if (turnData.valkyrieDamage > opposingProtection) { // Handle Protection, when this takes place currently varies based on the side the army is on according to game code
         turnData.valkyrieDamage -= (double) opposingProtection;
     } else {
         turnData.valkyrieDamage = 0;
     }
+
+    turnData.valkyrieDamage *= turnData.critMult;
 
     //absorb damage, damage rounded up later
     turnData.absorbDamage = turnData.valkyrieDamage * opposingAbsorbMult;
@@ -224,7 +253,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     int frontliner = monstersLost; // save original frontliner
 
     // Apply normal attack damage to the frontliner
-	remainingHealths[frontliner] -= opposing.baseDamage;
+	remainingHealths[frontliner + opposing.target] -= opposing.baseDamage;
 
 	if (opposing.counter && (worldboss || remainingHealths[frontliner] > 0))
 		remainingHealths[frontliner] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
@@ -298,6 +327,21 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
 
 		//----- turn zero -----
 
+		// Apply Dicemaster max health bonus here, attack bonus applied during battle
+        for (int i = 0; i < leftCondition.armySize; i++) {
+            if (leftCondition.skillTypes[i] == DICE) {
+                leftCondition.maxHealths[i] += rightCondition.seed % ((int)leftCondition.skillAmounts[i] + 1);
+                leftCondition.remainingHealths[i] = leftCondition.maxHealths[i];
+            }
+        }
+
+        for (int i = 0; i < rightCondition.armySize; i++) {
+            if (rightCondition.skillTypes[i] == DICE) {
+                rightCondition.maxHealths[i] += leftCondition.seed % ((int)rightCondition.skillAmounts[i] + 1);
+                rightCondition.remainingHealths[i] = rightCondition.maxHealths[i];
+            }
+        }
+
 		// Apply Leprechaun's skill (Beer)
 		if (leftCondition.booze && leftCondition.armySize < rightCondition.armySize)
 			for (size_t i = 0; i < ARMY_MAX_SIZE; ++i) {
@@ -341,8 +385,8 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
         rightCondition.startNewTurn();
 
         // Get damage with all relevant multipliers
-        leftCondition.getDamage(turncounter, rightCondition.lineup[rightCondition.monstersLost]->element, rightCondition.turnData.protection, rightCondition.turnData.dampFactor, rightCondition.turnData.absorbMult);
-        rightCondition.getDamage(turncounter, leftCondition.lineup[leftCondition.monstersLost]->element, leftCondition.turnData.protection, leftCondition.turnData.dampFactor, leftCondition.turnData.absorbMult);
+        leftCondition.getDamage(turncounter, rightCondition);
+        rightCondition.getDamage(turncounter, leftCondition);
 
         // Handle Revenge Damage before anything else. Revenge Damage caused through aoe is ignored
         if (leftCondition.skillTypes[leftCondition.monstersLost] == REVENGE &&

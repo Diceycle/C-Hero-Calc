@@ -372,7 +372,7 @@ Instance makeInstanceFromString(string instanceString) {
     return instance;
 }
 
-// Parse string linup input into actual monsters. If there are heroes in the input, a leveled hero is added to the database
+// Parse string lineup input into actual monsters. If there are heroes in the input, a leveled hero is added to the database
 Army makeArmyFromStrings(vector<string> stringMonsters) {
     Army army;
     pair<Monster, int> heroData;

@@ -12,7 +12,7 @@
 #include <map>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.0.1.7b";
+const std::string VERSION = "3.0.1.8";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -32,7 +32,7 @@ const std::string HEROLEVEL_SEPARATOR = ":";
 const size_t TOURNAMENT_LINES = 5;
 const int INDEX_NO_MONSTER = -1;
 
-// Worldboss Health maximum larger values get lost because FightResults only accept int16_t too
+// Worldboss Health maximum larger values, maximum value is decided by DamageType
 const int64_t WORLDBOSS_HEALTH = 0;
 
 // Define types of HeroSkills, Elements and Rarities
@@ -59,7 +59,7 @@ enum SkillType {
 
     REVENGE,    // After this monster dies it damages the entire opposing army
     PIERCE,     // If this monster attacks it also damages every monster behind the attacked
-    VALKYRIE,   // This monsters damage is done to all monsters, the value beeing reduced for each monster it hits. Hardcoded to 50%
+    VALKYRIE,   // This monsters damage is done to all monsters, the value being reduced for each monster it hits.
     TRAMPLE,    // This monsters attack damages n units from the front
 
     BUFF_L,     // Buff ability that scales with level
@@ -73,11 +73,12 @@ enum SkillType {
 	BEER,		// Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
 	GROW,		// Increase stats gained per lvl
 	COUNTER,    // counters % of inflicted damage
-	DICE,
-	LUX,
-	CRIT,
-	EXPLODE,
-	ABSORB,
+	DICE,       // adds attack and defense at the start of battle from 0 to ability strength based on enemy starting lineup
+	LUX,        // attacks an enemy based on turn number, enemy starting lineup, and number of enemies remaining
+	CRIT,       // deals bonus damage based on enemy starting lineup and turn count
+	EXPLODE,    // deals aoe damage when it kill an enemy
+	ABSORB,     // prevents and takes a percentage of damage
+	HATE,       // has extra elemental bonus, can't be treated as adapt due to order
 };
 
 enum Element {
@@ -100,16 +101,16 @@ enum HeroRarity {
     WORLDBOSS
 };
 
-// Defines Skills of Heros
+// Defines Skills of Heroes
 struct HeroSkill {
     SkillType skillType;
     Element target;
     Element sourceElement;          // Not used anywhere
-    double amount;                   // Contains various information dependend on the type
-    bool violatesFightResults;      // True if a hero invalidates the data in FightResults i9f he is added to the army
+    double amount;                   // Contains various information depending on the type
+    bool violatesFightResults;      // True if a hero invalidates the data in FightResults if he is added to the army
     bool hasAoe;
     bool hasHeal;
-    bool hasAsymmetricAoe;          // Aoe that doesnt damage the entire enemy army equally Ex.: Valkyrie
+    bool hasAsymmetricAoe;          // Aoe that doesn't damage the entire enemy army equally Ex.: Valkyrie
 
     HeroSkill(SkillType aType, Element aTarget, Element aSource, double anAmount);
     HeroSkill() {};
@@ -152,7 +153,7 @@ extern std::vector<MonsterIndex> availableHeroes; // Contains all user heroes' i
 // Storage for Game Data
 extern std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actual Objects
 void initMonsters();
-extern std::vector<Monster> baseHeroes; // Raw, unleveld Hero Data, holds actual Objects
+extern std::vector<Monster> baseHeroes; // Raw, unleveled Hero Data, holds actual Objects
 void initBaseHeroes();
 extern std::map<std::string, std::string> heroAliases; //Alternate or shorthand names for heroes
 void initHeroAliases();
@@ -167,11 +168,14 @@ void initGameData();
 // Must be called before any instance can be solved
 void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumArmyCost);
 
-// Defines the results of a fight between two armies; monstersLost and damage desribe the condition of the winning side
+// Get the index of a monster corresponding to the unique id it is given ingame
+int getRealIndex(Monster & monster);
+
+// Defines the results of a fight between two armies; monstersLost and damage describe the condition of the winning side
 // The idea behind FightResults is to save the data and be able to restore the state when the battle ended easily.
 // When solving an Instance many armies with the same 5 Monsters fight the target Army again with a different 6th Monster
 // Using FightResults you only have to calculate the fight with 5 Monsters once and then pick up where you left off with the 6th monster.
-// Ideally that would work for any battle. Unfortunately as Abilities grew more complex the amount of data needing to be saved outweight the benefit of not having to run the fight again.
+// Ideally that would work for any battle. Unfortunately as Abilities grew more complex the amount of data needing to be saved outweigh the benefit of not having to run the fight again.
 // So a few Abilities Invalidate FightResults. Like BUFF. Since the first 5 Monsters would have had more Attack with the buff, the battle might have played out differently.
 // So the data in here can't be used if f.e. a BUFF hero is added to the Army
 // Similarly some Abilities like Valkyrie produce a Fight state that can't be efficiently captured in a FightResult.
@@ -213,6 +217,7 @@ class Army {
         FollowerCount followerCost;
         MonsterIndex monsters[ARMY_MAX_SIZE];
         int8_t monsterAmount;
+        int64_t seed;
 
         Army(std::vector<MonsterIndex> someMonsters = {}) :
             followerCost(0),
@@ -228,6 +233,16 @@ class Army {
             this->monsters[monsterAmount] = m;
             this->followerCost += monsterReference[m].cost;
             this->monsterAmount++;
+
+            // Seed takes into account empty spaces with lane size 6, recalculated each time monster is added
+            // Any empty spaces are considered to be contiguous and frontmost as they are in DQ and quests
+            int64_t newSeed = 1;
+            for (int i = monsterAmount - 1; i >= 0; i--) {
+                newSeed = newSeed * abs(getRealIndex(monsterReference[monsters[i]])) + 1;
+            }
+            // Simplification of loop for empty monsters (id: -1) contiguous and frontmost
+            newSeed += 6 - monsterAmount;
+            this->seed = newSeed;
         }
         bool isEmpty() {
             return (this->monsterAmount == 0);
@@ -256,6 +271,7 @@ struct Instance {
     bool hasHeal;
     bool hasAsymmetricAoe;
 	bool hasBeer;
+	bool hasGambler;
     bool hasWorldBoss;
     int64_t lowestBossHealth;
 
@@ -280,9 +296,6 @@ MonsterIndex addLeveledHero(Monster & hero, int level);
 
 // Returns the index of a quest if the lineup is the same. Returns -1 if not a quest
 int isQuest(Army & army);
-
-// Get the index of a monster corresponding to the unique id it is given ingame
-int getRealIndex(Monster & monster);
 
 // Custom ceil function to avoid excessive casting. Hardcoded to be effective on 32bit ints
 inline int castCeil(double f) {

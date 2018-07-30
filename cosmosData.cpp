@@ -70,16 +70,20 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, double a
     this->hasAsymmetricAoe = (aType == VALKYRIE || aType == TRAMPLE);
     this->hasHeal = (aType == HEAL || aType == HEAL_L ||
                      aType == LIFESTEAL || aType == LIFESTEAL_L);
+    // hasAoe should include all things affected by dampen
     this->hasAoe = (aType == AOE || aType == AOE_L ||
                     aType == REVENGE || aType == PIERCE ||
+                    aType == EXPLODE ||
                     this->hasHeal || this->hasAsymmetricAoe);
+    // For expanding armies, if new hero added to the back would have changed fight, old result is not valid
     this->violatesFightResults = (aType == BUFF || aType == BUFF_L ||
                                   aType == PROTECT || aType == PROTECT_L ||
                                   aType == CHAMPION || aType == CHAMPION_L ||
                                   aType == AOE || aType == AOE_L ||
                                   aType == HEAL || aType == HEAL_L ||
                                   aType == LIFESTEAL || aType == LIFESTEAL_L ||
-								  aType == BEER || aType == AOEZero_L);
+								  aType == BEER || aType == AOEZero_L ||
+								  aType == ABSORB);
 }
 
 // JSON Functions to provide results in an easily readable output format. Used my Latas for example
@@ -139,6 +143,7 @@ void Instance::setTarget(Army aTarget) {
     this->hasHeal = false;
     this->hasAsymmetricAoe = false;
 	this->hasBeer = false;
+	this->hasGambler = false;
     this->hasWorldBoss = false;
     for (size_t i = 0; i < this->targetSize; i++) {
         currentSkill = monsterReference[this->target.monsters[i]].skill;
@@ -146,10 +151,11 @@ void Instance::setTarget(Army aTarget) {
         this->hasHeal |= currentSkill.hasHeal;
         this->hasAsymmetricAoe |= currentSkill.hasAsymmetricAoe;
 		this->hasBeer |= currentSkill.skillType == BEER;
+		this->hasGambler |= currentSkill.skillType == DICE || currentSkill.skillType == LUX || currentSkill.skillType == CRIT;
         this->hasWorldBoss |= monsterReference[this->target.monsters[i]].rarity == WORLDBOSS;
     }
 
-    // Check which monsters can survive a hit from the final monster on the target. This helps reduce the amoutn of potential soluitons in the last expand
+    // Check which monsters can survive a hit from the final monster on the target. This helps reduce the amount of potential solutions in the last expand
     // Heroes with global Abilities also get accepted.
     // This produces only false positives not false negatives -> no correct solutions lost
     Monster lastMonster = monsterReference[this->target.monsters[this->targetSize - 1]];
@@ -457,7 +463,7 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 40, 30, "ganah",              WATER, RARE,      {CHAMPION,      WATER, WATER, 2}));
     baseHeroes.push_back(Monster( 58, 46, "dagda",              AIR,   LEGENDARY, {ADAPT,         AIR, AIR, 2}));
 
-    baseHeroes.push_back(Monster(300,110, "bubbles",           WATER, ASCENDED,   {DAMPEN_L,      ALL, WATER, 0.0050f}));
+    baseHeroes.push_back(Monster(300,110, "bubbles",            WATER, ASCENDED,  {DAMPEN_L,      ALL, WATER, 0.0050f}));
 
     baseHeroes.push_back(Monster(150, 86, "apontus",            WATER, ASCENDED,  {ADAPT,         WATER, WATER, 3}));
     baseHeroes.push_back(Monster(162, 81, "aatzar",             FIRE,  ASCENDED,  {ADAPT,         FIRE, FIRE, 3}));
@@ -503,11 +509,16 @@ void initBaseHeroes() {
 	baseHeroes.push_back(Monster( 28, 60, "luxuriusmaximus",	FIRE,  RARE,      { LUX,          SELF, EARTH, 1 }));
 	baseHeroes.push_back(Monster( 70, 70, "pokerface",			EARTH, LEGENDARY, { CRIT,         EARTH, EARTH, 3 }));
 
-	baseHeroes.push_back(Monster( 25, 25, "taint",				AIR, COMMON,      { VALKYRIE,     ALL, AIR, 0.5f }));
+	baseHeroes.push_back(Monster( 25, 25, "taint",				AIR,   COMMON,    { VALKYRIE,     ALL, AIR, 0.5f }));
 	baseHeroes.push_back(Monster( 48, 50, "putrid",				EARTH, RARE,      { TRAINING,     SELF, EARTH, -3 }));
-	baseHeroes.push_back(Monster( 52, 48, "defile",				FIRE, LEGENDARY,  { EXPLODE,      ALL, FIRE, 50 }));
+	baseHeroes.push_back(Monster( 52, 48, "defile",				FIRE,  LEGENDARY, { EXPLODE,      ALL, FIRE, 50 }));
 
 	baseHeroes.push_back(Monster(150, 15, "neil",				WATER, LEGENDARY, { ABSORB,       SELF, WATER, 0.3 }));
+
+	baseHeroes.push_back(Monster( 78, 26, "mahatma",			AIR,   LEGENDARY, { HATE,         WATER, AIR, 0.75 }));
+	baseHeroes.push_back(Monster( 76, 30, "jade",				EARTH, LEGENDARY, { HATE,         AIR, EARTH, 0.75 }));
+	baseHeroes.push_back(Monster( 72, 36, "edana",				FIRE,  LEGENDARY, { HATE,         EARTH, FIRE, 0.75 }));
+	baseHeroes.push_back(Monster( 88, 22, "dybbuk",				WATER, LEGENDARY, { HATE,         FIRE, WATER, 0.75 }));
 }
 
 void initHeroAliases() {
@@ -653,6 +664,26 @@ void initQuests() {
     quests.push_back({"f18", "w19", "w19", "e19", "e19", "f18"});
     quests.push_back({"f19", "a19", "e19", "f20", "a20", "f19"});
     quests.push_back({"a20", "w18", "w18", "a19", "w20", "f20"}); // 100
+    quests.push_back({"a22", "e21", "f20", "w20", "f22"});
+    quests.push_back({"f23", "w21", "f20", "a20", "a21"});
+    quests.push_back({"f22", "w21", "w21", "f21", "e21"});
+    quests.push_back({"a20", "f20", "e21", "a21", "a20", "f20"});
+    quests.push_back({"f20", "e21", "f20", "w20", "e21", "f20"}); // 105
+    quests.push_back({"e21", "w22", "f23", "a23", "a22"});
+    quests.push_back({"f21", "a20", "f21", "a21", "w21", "e21"});
+    quests.push_back({"w22", "w22", "a22", "f22", "e21", "w21"});
+    quests.push_back({"e22", "f22", "a22", "w21", "e22", "w21"});
+    quests.push_back({"a22", "w22", "a22", "w21", "e22", "w22"}); // 110
+    quests.push_back({"f23", "a22", "e23", "e23", "e22", "w22"});
+    quests.push_back({"w22", "w23", "a23", "w22", "f21", "f21"});
+    quests.push_back({"w24", "a24", "e24", "f24", "f23", "f23"});
+    quests.push_back({"a24", "a25", "a24", "f25", "e23"});
+    quests.push_back({"e23", "f23", "e23", "w25", "a24", "a23"}); // 115
+    quests.push_back({"e24", "a24", "e24", "f23", "w24", "w23"});
+    quests.push_back({"e24", "e24", "a24", "w24", "f24", "w24"});
+    quests.push_back({"f24", "a23", "a24", "f24", "f24", "w24"});
+    quests.push_back({"f25", "f25", "a26", "a26", "w25"});
+    quests.push_back({"e27", "w27", "e27", "w27"}); // 120
 }
 
 // Fills all references and storages with real data.
@@ -683,7 +714,7 @@ void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumAr
     }
 }
 
-// Add a leveled hero to the databse and return its corresponding index
+// Add a leveled hero to the database and return its corresponding index
 MonsterIndex addLeveledHero(Monster & hero, int level) {
     Monster m(hero, level);
     monsterReference.emplace_back(m);
