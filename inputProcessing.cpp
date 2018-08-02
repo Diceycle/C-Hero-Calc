@@ -407,12 +407,12 @@ pair<Monster, int> parseHeroString(string heroString) {
         name = alias->second;
     }
 
-	Monster hero;
-	for (size_t i = 0; i < baseHeroes.size(); i++) {
-		if (baseHeroes[i].baseName == name) {
+    Monster hero;
+    for (size_t i = 0; i < baseHeroes.size(); i++) {
+        if (baseHeroes[i].baseName == name) {
             return pair<Monster, int>(baseHeroes[i], level);
-		}
-	}
+        }
+    }
     throw HERO_PARSE;
 }
 
@@ -513,7 +513,7 @@ string makeStringFromInstance(Instance instance, bool valid, bool showReplayStri
 
     // Aditional Statistics
     if (instance.hasWorldBoss) {
-		s << "  Boss Damage Done: " << numberWithSepartors(WORLDBOSS_HEALTH - instance.lowestBossHealth) << endl;
+        s << "  Boss Damage Done: " << numberWithSepartors(WORLDBOSS_HEALTH - instance.lowestBossHealth) << endl;
     }
     s << "  " << instance.totalFightsSimulated << " Fights simulated." << endl;
     s << "  Total Calculation Time: " << instance.calculationTime << endl;
@@ -590,7 +590,7 @@ vector<string> split(string target, string separator) {
 string toLower(string input) {
     for (size_t i = 0; i < input.length(); i++) {
         input[i] = tolower(input[i]);
-		//input[i] = tolower(input[i], locale());
+        //input[i] = tolower(input[i], locale());
     }
     return input;
 }
@@ -598,11 +598,11 @@ string toLower(string input) {
 // convert a large number into a string with thousand separators
 string numberWithSepartors(const uint64_t& largeNumber)
 {
-	auto numstr = to_string(largeNumber);
-	if (numstr.size() > 3) {
-		auto beg = (numstr.size() % 3) ? numstr.size() % 3 : 3; // first place to insert a separator
-		for (auto it = numstr.begin() + beg; it < numstr.cend(); it = it + 4)
-			numstr.insert(it, thousandSeparator);
-	}
-	return numstr;
+    auto numstr = to_string(largeNumber);
+    if (numstr.size() > 3) {
+        auto beg = (numstr.size() % 3) ? numstr.size() % 3 : 3; // first place to insert a separator
+        for (auto it = numstr.begin() + beg; it < numstr.cend(); it = it + 4)
+            numstr.insert(it, thousandSeparator);
+    }
+    return numstr;
 }

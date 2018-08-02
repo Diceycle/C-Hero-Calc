@@ -12,7 +12,7 @@
 #include <map>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.0.1.8";
+const std::string VERSION = "3.0.1.9";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -47,7 +47,7 @@ enum SkillType {
     HEAL,       // Heals the entire own army every turn
     LIFESTEAL,  // Combines the Aoe and Heal ability into one
     DAMPEN,     // Reduces the Effects of AOE percentually
-	AOEZero_L,	// AOE damage (equal to lvl, undampened) at turn 0 / healable / after leprechaun's skill
+    AOEZero_L,  // AOE damage (equal to lvl, undampened) at turn 0 / healable / after leprechaun's skill
 
     BERSERK,    // Every attack this monster makes multiplies its own damage
     FRIENDS,    // This monster receives a damage multiplicator for every NORMAL monster behind it
@@ -70,15 +70,15 @@ enum SkillType {
     LIFESTEAL_L,// Lifesteal ability that scales with level
     DAMPEN_L,   // Dampen Ability that scales with level
 
-	BEER,		// Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
-	GROW,		// Increase stats gained per lvl
-	COUNTER,    // counters % of inflicted damage
-	DICE,       // adds attack and defense at the start of battle from 0 to ability strength based on enemy starting lineup
-	LUX,        // attacks an enemy based on turn number, enemy starting lineup, and number of enemies remaining
-	CRIT,       // deals bonus damage based on enemy starting lineup and turn count
-	EXPLODE,    // deals aoe damage when it kill an enemy
-	ABSORB,     // prevents and takes a percentage of damage
-	HATE,       // has extra elemental bonus, can't be treated as adapt due to order
+    BEER,       // Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
+    GROW,       // Increase stats gained per lvl
+    COUNTER,    // counters % of inflicted damage
+    DICE,       // adds attack and defense at the start of battle from 0 to ability strength based on enemy starting lineup
+    LUX,        // attacks an enemy based on turn number, enemy starting lineup, and number of enemies remaining
+    CRIT,       // deals bonus damage based on enemy starting lineup and turn count
+    EXPLODE,    // deals aoe damage when it kill an enemy
+    ABSORB,     // prevents and takes a percentage of damage
+    HATE,       // has extra elemental bonus, can't be treated as adapt due to order
 };
 
 enum Element {
@@ -183,7 +183,7 @@ int getRealIndex(Monster & monster);
 //
 // In a FightResult it is always implied that the target won against the proposed solution.
 
-using DamageType	= long long;	// change data type here to track large damage; default = short
+using DamageType    = long long;    // change data type here to track large damage; default = short
 
 struct FightResult {
     DamageType frontHealth;     // how much health remaining to the current leading mob of the winning side
@@ -218,10 +218,12 @@ class Army {
         MonsterIndex monsters[ARMY_MAX_SIZE];
         int8_t monsterAmount;
         int64_t seed;
+        int64_t strength;
 
         Army(std::vector<MonsterIndex> someMonsters = {}) :
             followerCost(0),
-            monsterAmount(0)
+            monsterAmount(0),
+            strength(0)
         {
             for(size_t i = 0; i < someMonsters.size(); i++) {
                 this->add(someMonsters[i]);
@@ -233,6 +235,7 @@ class Army {
             this->monsters[monsterAmount] = m;
             this->followerCost += monsterReference[m].cost;
             this->monsterAmount++;
+            strength += pow(monsterReference[m].hp * monsterReference[m].damage, 1.5);
 
             // Seed takes into account empty spaces with lane size 6, recalculated each time monster is added
             // Any empty spaces are considered to be contiguous and frontmost as they are in DQ and quests
@@ -270,8 +273,8 @@ struct Instance {
     bool hasAoe;
     bool hasHeal;
     bool hasAsymmetricAoe;
-	bool hasBeer;
-	bool hasGambler;
+    bool hasBeer;
+    bool hasGambler;
     bool hasWorldBoss;
     int64_t lowestBossHealth;
 
@@ -284,6 +287,25 @@ struct Instance {
 inline bool hasFewerFollowers(const Army & a, const Army & b) {
     return ((!a.lastFightData.dominated && b.lastFightData.dominated) ||
             (a.lastFightData.dominated == b.lastFightData.dominated && a.followerCost < b.followerCost));
+}
+
+// Function for sorting armies to place better results first, then sorting by army strength for equal results
+inline bool isMoreEfficient(const Army & a, const Army & b) {
+    if (a.lastFightData.monstersLost != b.lastFightData.monstersLost) {
+        return a.lastFightData.monstersLost > b.lastFightData.monstersLost;
+    }
+    else if (a.lastFightData.frontHealth != b.lastFightData.frontHealth) {
+        return a.lastFightData.frontHealth > b.lastFightData.frontHealth;
+    }
+    else if (a.lastFightData.rightAoeDamage != b.lastFightData.rightAoeDamage) {
+        return a.lastFightData.rightAoeDamage > b.lastFightData.rightAoeDamage;
+    }
+    else if (a.lastFightData.leftAoeDamage != b.lastFightData.leftAoeDamage) {
+        return a.lastFightData.leftAoeDamage < b.lastFightData.leftAoeDamage;
+    }
+    else {
+        return a.strength < b.strength;
+    }
 }
 
 // Function for sorting Monsters by cost (ascending)

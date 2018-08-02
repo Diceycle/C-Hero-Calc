@@ -22,7 +22,7 @@ struct TurnData {
     int healing = 0;
     double dampFactor = 1;
 
-	double counter = 0;
+    double counter = 0;
     double valkyrieMult = 0;
     double valkyrieDamage = 0;
     double absorbMult = 0;
@@ -42,7 +42,7 @@ class ArmyCondition {
         int armySize;
         Monster * lineup[ARMY_MAX_SIZE];
         int64_t remainingHealths[ARMY_MAX_SIZE];
-		int64_t maxHealths[ARMY_MAX_SIZE];
+        int64_t maxHealths[ARMY_MAX_SIZE];
         SkillType skillTypes[ARMY_MAX_SIZE];
         Element skillTargets[ARMY_MAX_SIZE];
         double skillAmounts[ARMY_MAX_SIZE];
@@ -50,16 +50,16 @@ class ArmyCondition {
         bool rainbowConditions[ARMY_MAX_SIZE]; // for rainbow ability
         int pureMonsters[ARMY_MAX_SIZE]; // for friends ability
 
-		bool booze;	// for leprechaun's ability
-		int aoeZero; // for hawking's ability
+        bool booze; // for leprechaun's ability
+        int aoeZero; // for hawking's ability
 
-		int64_t seed;
+        int64_t seed;
 
         int berserkProcs; // for berserk ability
 
         int monstersLost;
 
-		bool worldboss;
+        bool worldboss;
 
         TurnData turnData;
 
@@ -84,9 +84,9 @@ inline void ArmyCondition::init(const Army & army, const int oldMonstersLost, co
     monstersLost = oldMonstersLost;
     berserkProcs = 0;
 
-	booze = false;
-	worldboss = false;
-	aoeZero = 0;
+    booze = false;
+    worldboss = false;
+    aoeZero = 0;
 
     for (i = armySize -1; i >= monstersLost; i--) {
         lineup[i] = &monsterReference[army.monsters[i]];
@@ -97,11 +97,11 @@ inline void ArmyCondition::init(const Army & army, const int oldMonstersLost, co
         skillAmounts[i] = skill->amount;
         remainingHealths[i] = lineup[i]->hp - aoeDamage;
 
-		worldboss |= lineup[i]->rarity == WORLDBOSS;
+        worldboss |= lineup[i]->rarity == WORLDBOSS;
 
-		maxHealths[i] = lineup[i]->hp;
-		if (skill->skillType == BEER) booze = true;
-		if (skill->skillType == AOEZero_L) aoeZero += skill->amount * lineup[i]->level;
+        maxHealths[i] = lineup[i]->hp;
+        if (skill->skillType == BEER) booze = true;
+        if (skill->skillType == AOEZero_L) aoeZero += skill->amount * lineup[i]->level;
 
         rainbowConditions[i] = tempRainbowCondition == VALID_RAINBOW_CONDITION;
         pureMonsters[i] = tempPureMonsters;
@@ -174,8 +174,8 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     turnData.multiplier = 1; // Not used outside this function, does it need to be stored in turnData?
     turnData.critMult = 1; // same as above
     turnData.hate = 0; // same as above
-	turnData.counter = 0;
-	turnData.target = 0;
+    turnData.counter = 0;
+    turnData.target = 0;
 
 
     switch (skillTypes[monstersLost]) {
@@ -197,11 +197,11 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
                         break;
         case TRAMPLE:   turnData.trampleTriggered = true;
                         break;
-		case COUNTER:	turnData.counter = skillAmounts[monstersLost];
+        case COUNTER:    turnData.counter = skillAmounts[monstersLost];
                         break;
-		case EXPLODE:   turnData.explodeDamage = skillAmounts[monstersLost]; // Explode damage gets added here, but still won't apply unless enemy frontliner dies
+        case EXPLODE:   turnData.explodeDamage = skillAmounts[monstersLost]; // Explode damage gets added here, but still won't apply unless enemy frontliner dies
                         break;
-		case DICE:      turnData.baseDamage += opposingCondition.seed % (int)(skillAmounts[monstersLost] + 1); // Only adds dice attack effect if dice is in front, max health is done before battle
+        case DICE:      turnData.baseDamage += opposingCondition.seed % (int)(skillAmounts[monstersLost] + 1); // Only adds dice attack effect if dice is in front, max health is done before battle
                         break;
         // Pick a target, Bubbles currently dampens lux damage if not targeting first according to game code, interaction should be added if this doesn't change
         case LUX:       turnData.target = turnSeed % (opposingCondition.armySize - opposingCondition.monstersLost);
@@ -211,7 +211,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         case HATE:      turnData.hate = skillAmounts[monstersLost];
                         break;
 
-		default:        break;
+        default:        break;
 
     }
     turnData.valkyrieDamage = (double) turnData.baseDamage * turnData.multiplier + (double) turnData.buffDamage;
@@ -231,11 +231,11 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     turnData.absorbDamage = turnData.valkyrieDamage * opposingAbsorbMult;
     turnData.valkyrieDamage = turnData.valkyrieDamage - turnData.absorbDamage;
 
-	// for compiling heavyDamage version
-	if (turnData.valkyrieDamage >= std::numeric_limits<int>::max())
-		turnData.baseDamage = static_cast<DamageType>(ceil(turnData.valkyrieDamage));
-	else
-		turnData.baseDamage = castCeil(turnData.valkyrieDamage);
+    // for compiling heavyDamage version
+    if (turnData.valkyrieDamage >= std::numeric_limits<int>::max())
+        turnData.baseDamage = static_cast<DamageType>(ceil(turnData.valkyrieDamage));
+    else
+        turnData.baseDamage = castCeil(turnData.valkyrieDamage);
 
     // Handle enemy dampen ability and reduce aoe effects
     if (opposingDampFactor < 1) {
@@ -253,10 +253,10 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     int frontliner = monstersLost; // save original frontliner
 
     // Apply normal attack damage to the frontliner
-	remainingHealths[frontliner + opposing.target] -= opposing.baseDamage;
+    remainingHealths[frontliner + opposing.target] -= opposing.baseDamage;
 
-	if (opposing.counter && (worldboss || remainingHealths[frontliner] > 0))
-		remainingHealths[frontliner] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
+    if (opposing.counter && (worldboss || remainingHealths[frontliner] > 0))
+        remainingHealths[frontliner] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
 
     if (opposing.trampleTriggered && armySize > frontliner + 1) {
         remainingHealths[frontliner + 1] -= opposing.valkyrieDamage;
@@ -274,6 +274,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
         }
 
         remainingHealths[i] -= opposing.aoeDamage;
+
         if (i > frontliner) { // Aoe that doesnt affect the frontliner
             remainingHealths[i] -= opposing.paoeDamage + castCeil(opposing.valkyrieDamage);
         }
@@ -325,9 +326,9 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
         leftCondition.init(left, 0, 0);
         rightCondition.init(right, 0, 0);
 
-		//----- turn zero -----
+        //----- turn zero -----
 
-		// Apply Dicemaster max health bonus here, attack bonus applied during battle
+        // Apply Dicemaster max health bonus here, attack bonus applied during battle
         for (int i = 0; i < leftCondition.armySize; i++) {
             if (leftCondition.skillTypes[i] == DICE) {
                 leftCondition.maxHealths[i] += rightCondition.seed % ((int)leftCondition.skillAmounts[i] + 1);
@@ -342,40 +343,40 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
             }
         }
 
-		// Apply Leprechaun's skill (Beer)
-		if (leftCondition.booze && leftCondition.armySize < rightCondition.armySize)
-			for (size_t i = 0; i < ARMY_MAX_SIZE; ++i) {
-				rightCondition.maxHealths[i] = int(rightCondition.maxHealths[i] * leftCondition.armySize / rightCondition.armySize);
-				rightCondition.remainingHealths[i] = rightCondition.maxHealths[i];
-			}
+        // Apply Leprechaun's skill (Beer)
+        if (leftCondition.booze && leftCondition.armySize < rightCondition.armySize)
+            for (size_t i = 0; i < ARMY_MAX_SIZE; ++i) {
+                rightCondition.maxHealths[i] = int(rightCondition.maxHealths[i] * leftCondition.armySize / rightCondition.armySize);
+                rightCondition.remainingHealths[i] = rightCondition.maxHealths[i];
+            }
 
-		if (rightCondition.booze && rightCondition.armySize < leftCondition.armySize)
-			for (size_t i = 0; i < ARMY_MAX_SIZE; ++i) {
-				leftCondition.maxHealths[i] = int(leftCondition.maxHealths[i] * rightCondition.armySize / leftCondition.armySize);
-				leftCondition.remainingHealths[i] = leftCondition.maxHealths[i];
-			}
+        if (rightCondition.booze && rightCondition.armySize < leftCondition.armySize)
+            for (size_t i = 0; i < ARMY_MAX_SIZE; ++i) {
+                leftCondition.maxHealths[i] = int(leftCondition.maxHealths[i] * rightCondition.armySize / leftCondition.armySize);
+                leftCondition.remainingHealths[i] = leftCondition.maxHealths[i];
+            }
 
         // Reset Potential values in fightresults
         left.lastFightData.leftAoeDamage = 0;
         left.lastFightData.rightAoeDamage = 0;
         turncounter = 0;
 
-		// Apply Hawking's AOE
-		if (leftCondition.aoeZero || rightCondition.aoeZero) {
-			TurnData turnZero;
-			if (leftCondition.aoeZero) {
-				left.lastFightData.rightAoeDamage += leftCondition.aoeZero;
-				turnZero.aoeDamage = leftCondition.aoeZero;
-				rightCondition.resolveDamage(turnZero);
-			}
-			if (rightCondition.aoeZero) {
-				left.lastFightData.leftAoeDamage += rightCondition.aoeZero;
-				turnZero.aoeDamage = rightCondition.aoeZero;
-				leftCondition.resolveDamage(turnZero);
-			}
-		}
+        // Apply Hawking's AOE
+        if (leftCondition.aoeZero || rightCondition.aoeZero) {
+            TurnData turnZero;
+            if (leftCondition.aoeZero) {
+                left.lastFightData.rightAoeDamage += leftCondition.aoeZero;
+                turnZero.aoeDamage = leftCondition.aoeZero;
+                rightCondition.resolveDamage(turnZero);
+            }
+            if (rightCondition.aoeZero) {
+                left.lastFightData.leftAoeDamage += rightCondition.aoeZero;
+                turnZero.aoeDamage = rightCondition.aoeZero;
+                leftCondition.resolveDamage(turnZero);
+            }
+        }
 
-		//----- turn zero end -----
+        //----- turn zero end -----
     }
 
     // Battle Loop. Continues until one side is out of monsters

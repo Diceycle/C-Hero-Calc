@@ -84,7 +84,7 @@ struct Configuration {
     bool individualBattles = false; //
     bool unlimitedWorldbossHealth = false; //
 
-	size_t branchwiseExpansionLimit = 100;
+    size_t branchwiseExpansionLimit = 20;
 };
 extern Configuration config;
 
