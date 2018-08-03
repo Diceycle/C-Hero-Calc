@@ -78,7 +78,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             // Add Normal Monsters. Check for Cost
             for (m = 0; m < availableMonstersSize; m++) {
                 if (monsterReference[availableMonsters[m]].cost <= remainingFollowers) {
-                    if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]]) {
+                    if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]] || instance.targetSize == oldPureArmies[i].lastFightData.monstersLost) {
                         newPureArmies.push_back(oldPureArmies[i]);
                         newPureArmies.back().add(availableMonsters[m]);
                         newPureArmies.back().lastFightData.valid = !instanceInvalid && !boozeInfluence;
@@ -87,7 +87,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             }
             // Add Hero. no check needed because it is the First Added
             for (m = 0; m < availableHeroesSize; m++) {
-                if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]]) {
+                if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]] || instance.targetSize == oldPureArmies[i].lastFightData.monstersLost) {
                     newHeroArmies.push_back(oldPureArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
                     newHeroArmies.back().lastFightData.valid = !instanceInvalid &&
@@ -122,7 +122,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             // Add Normal Monster. No checks needed except cost
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost <= remainingFollowers; m++) {
                 // In case of a draw this could cause problems if no more suitable units are available
-                if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]]) {
+                if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]] || instance.targetSize == oldHeroArmies[i].lastFightData.monstersLost) {
                     newHeroArmies.push_back(oldHeroArmies[i]);
                     newHeroArmies.back().add(availableMonsters[m]);
                     newHeroArmies.back().lastFightData.valid = !instanceInvalid &&
@@ -135,7 +135,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             // Add Hero. Check if hero was used before.
             for (m = 0; m < availableHeroesSize; m++) {
                 if (!usedHeroes[availableHeroes[m]]) {
-                    if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]]) {
+                    if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]] || instance.targetSize == oldHeroArmies[i].lastFightData.monstersLost) {
                         newHeroArmies.push_back(oldHeroArmies[i]);
                         newHeroArmies.back().add(availableHeroes[m]);
                         newHeroArmies.back().lastFightData.valid = !instanceInvalid &&
@@ -449,6 +449,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
 void outputSolution(Instance instance) {
     instance.bestSolution.lastFightData.valid = false;
     bool leftWins = simulateFight(instance.bestSolution, instance.target); // Sanity check on the solution
+
     bool sane;
     sane = !instance.hasWorldBoss && (leftWins || instance.bestSolution.isEmpty());
     sane |= instance.hasWorldBoss && instance.bestSolution.lastFightData.frontHealth == instance.lowestBossHealth;

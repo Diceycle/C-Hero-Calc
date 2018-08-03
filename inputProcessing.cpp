@@ -513,7 +513,7 @@ string makeStringFromInstance(Instance instance, bool valid, bool showReplayStri
 
     // Aditional Statistics
     if (instance.hasWorldBoss) {
-        s << "  Boss Damage Done: " << numberWithSepartors(WORLDBOSS_HEALTH - instance.lowestBossHealth) << endl;
+        s << "  Boss Damage Done: " << numberWithSeparators(WORLDBOSS_HEALTH - instance.lowestBossHealth) << endl;
     }
     s << "  " << instance.totalFightsSimulated << " Fights simulated." << endl;
     s << "  Total Calculation Time: " << instance.calculationTime << endl;
@@ -596,13 +596,22 @@ string toLower(string input) {
 }
 
 // convert a large number into a string with thousand separators
-string numberWithSepartors(const uint64_t& largeNumber)
+string numberWithSeparators(const uint64_t& largeNumber)
 {
-    auto numstr = to_string(largeNumber);
-    if (numstr.size() > 3) {
-        auto beg = (numstr.size() % 3) ? numstr.size() % 3 : 3; // first place to insert a separator
-        for (auto it = numstr.begin() + beg; it < numstr.cend(); it = it + 4)
-            numstr.insert(it, thousandSeparator);
+    string numStr = to_string(largeNumber);
+    string newStr;
+
+    if (numStr.size() > 3) {
+        int numSep = (numStr.size() - 1) / 3;
+        int beg = (numStr.size() % 3) ? numStr.size() % 3 : 3; // first place to insert a separator
+
+        newStr += numStr.substr(0, beg);
+
+        for (int i = 0; i < numSep; i++) {
+            newStr += thousandSeparator;
+            newStr += numStr.substr(beg + 3 * i, 3);
+        }
+        return newStr;
     }
-    return numstr;
+    return numStr;
 }

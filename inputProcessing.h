@@ -169,6 +169,6 @@ std::string toLower(std::string input);
 
 const char thousandSeparator = ',';
 // display a large number with thousand separators
-std::string numberWithSepartors(const uint64_t& largeNumber);
+std::string numberWithSeparators(const uint64_t& largeNumber);
 
 #endif
