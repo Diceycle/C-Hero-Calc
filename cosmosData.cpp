@@ -693,24 +693,24 @@ void initQuests() {
     quests.push_back({"e27", "w27", "e27", "w27"}); // 120
     quests.push_back({"a25", "f25", "e26", "e26", "f26"});
     quests.push_back({"a26", "a27", "w26", "w25", "e25", "e25"});
-    quests.push_back({"e27", "e27", "w26", "e26", "f27"});
+    quests.push_back({"e27", "e27", "w26", "e26", "f26"});
     quests.push_back({"w26", "w26", "w26", "w26", "w26", "w26"});
     quests.push_back({"a27", "f25", "e26", "e26", "f26"}); // 125
-    quests.push_back({"a27", "f27", "f24", "a26", "a26", "a25"});
+    quests.push_back({"a27", "f27", "a24", "a26", "a26", "a25"});
     quests.push_back({"f26", "f26", "w25", "e25", "f26", "f26"});
     quests.push_back({"a28", "e28", "e29", "w29"});
-    quests.push_back({"f29", "f28", "f27", "f26", "f25", "f24"});
+    quests.push_back({"f29", "f28", "f27", "a26", "a25", "a24"});
     quests.push_back({"w26", "a26", "w26", "e26", "f26", "w26"}); // 130
-    quests.push_back({"a27", "a27", "w27", "e25", "e26", "f26"});
+    quests.push_back({"a27", "a27", "w26", "e25", "e26", "f26"});
     quests.push_back({"e27", "e27", "f26", "w26", "w27", "a27"});
-    quests.push_back({"w30", "e30", "f30", "a30"});
+    quests.push_back({"w29", "e30", "f30", "a30"});
     quests.push_back({"e27", "a27", "a27", "e27", "e27", "f27"});
     quests.push_back({"a27", "f27", "a27", "e25", "w27", "w27"}); // 135
-    quests.push_back({"e27", "w28", "f28", "f28", "w28"});
+    quests.push_back({"e27", "w28", "f28", "w28", "f28"});
     quests.push_back({"f30", "a29", "f30", "a30"});
     quests.push_back({"w28", "e28", "w28", "e28", "w28"});
     quests.push_back({"a29", "f29", "e29", "e29", "w29"});
-    quests.push_back({"a30", "a30", "e30", "e30", "w29"}); // 140
+    quests.push_back({"a30", "a30", "e30", "e30", "w28"}); // 140
 }
 
 // Fills all references and storages with real data.
