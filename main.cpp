@@ -65,7 +65,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     size_t oldHeroArmiesSize = oldHeroArmies.size();
     size_t i, m;
 
-    bool removeUseless = currentArmySize == (instance.maxCombatants-1) && !instance.hasWorldBoss;
+    bool removeUseless = currentArmySize == (instance.maxCombatants-1) && !instance.hasWorldBoss  && !instance.hasGambler;
     bool instanceInvalid = instance.hasHeal || instance.hasAsymmetricAoe || instance.hasGambler;
 
     // enemy booze will invalidate FightResults
