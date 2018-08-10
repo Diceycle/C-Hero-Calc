@@ -25,7 +25,7 @@ Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aN
     }
 }
 
-// Contructor for normal Monsters
+// Constructor for normal Monsters
 Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aName, Element anElement) :
     Monster(someHp, someDamage, aCost, aName, anElement, NO_HERO, NO_SKILL, 0) {}
 
@@ -37,6 +37,8 @@ Monster::Monster(int someHp, int someDamage, std::string aName, Element anElemen
 Monster::Monster(const Monster & baseHero, int aLevel) :
     Monster(baseHero.hp, baseHero.damage, baseHero.cost, baseHero.baseName, baseHero.element, baseHero.rarity, baseHero.skill, aLevel)
 {
+    this->index = baseHero.index;
+
     if (baseHero.skill.skillType == BUFF_L) {
         this->skill.skillType = BUFF;
         this->skill.amount = (double) floor((double) aLevel * baseHero.skill.amount);
@@ -526,6 +528,16 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 75, 175, "aneptunius",        WATER, ASCENDED,  {PROTECT_L,     WATER, WATER, 0.1819f}));
 }
 
+void initIndices() {
+    for (auto i = monsterBaseList.begin(); i != monsterBaseList.end(); i++) {
+        i->index = getRealIndex(*i);
+    }
+
+    for (auto i = baseHeroes.begin(); i != baseHeroes.end(); i++) {
+        i->index = getRealIndex(*i);
+    }
+}
+
 void initHeroAliases() {
     heroAliases["lady"] = "ladyoftwilight";
     heroAliases["lot"] = "ladyoftwilight";
@@ -719,6 +731,7 @@ void initGameData() {
     // Initialize Monster Data
     initMonsterData();
     initBaseHeroes();
+    initIndices();
     initHeroAliases();
     initQuests();
 

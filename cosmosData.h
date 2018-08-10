@@ -12,7 +12,7 @@
 #include <map>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.0.2.0b";
+const std::string VERSION = "3.0.2.0c";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -133,6 +133,7 @@ class Monster {
         HeroRarity rarity;
         HeroSkill skill;
         int level;
+        int index; // Index used by game, indices for monsters and heroes are assigned at initIndices()
 
         std::string name; // display name
 
@@ -155,6 +156,7 @@ extern std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actu
 void initMonsters();
 extern std::vector<Monster> baseHeroes; // Raw, unleveled Hero Data, holds actual Objects
 void initBaseHeroes();
+void initIndices();
 extern std::map<std::string, std::string> heroAliases; //Alternate or shorthand names for heroes
 void initHeroAliases();
 extern std::vector<std::vector<std::string>> quests; // Quest Lineups from the game
@@ -241,7 +243,7 @@ class Army {
             // Any empty spaces are considered to be contiguous and frontmost as they are in DQ and quests
             int64_t newSeed = 1;
             for (int i = monsterAmount - 1; i >= 0; i--) {
-                newSeed = newSeed * abs(getRealIndex(monsterReference[monsters[i]])) + 1;
+                newSeed = newSeed * abs(monsterReference[monsters[i]].index) + 1;
             }
             // Simplification of loop for empty monsters (id: -1) contiguous and frontmost
             newSeed += 6 - monsterAmount;
@@ -313,7 +315,7 @@ inline bool isCheaper(const Monster & a, const Monster & b) {
     return a.cost < b.cost;
 }
 
-// Add a leveled hero to the databse and return its corresponding index
+// Add a leveled hero to the database and return its corresponding index
 MonsterIndex addLeveledHero(Monster & hero, int level);
 
 // Returns the index of a quest if the lineup is the same. Returns -1 if not a quest
