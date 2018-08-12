@@ -460,7 +460,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                             }
                         }
                         if (j < heroMonsterArmies.size()) {
-                            if (instance.bestSolution.monsterAmount <= 0 || heroBranchArmies[j].followerCost < instance.bestSolution.followerCost || instance.hasWorldBoss) {
+                            if (instance.bestSolution.monsterAmount <= 0 || heroMonsterArmies[j].followerCost < instance.bestSolution.followerCost || instance.hasWorldBoss) {
                                 heroBranchArmies.push_back(heroMonsterArmies[j++]);
                             }
                             else {
