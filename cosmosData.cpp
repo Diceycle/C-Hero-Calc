@@ -101,13 +101,13 @@ std::string Monster::toJSON() {
     return s.str();
 }
 
-std::string Army::toString() {
+std::string Army::toString(int tier) {
     std::stringstream s;
     s << "[";
     int index = isQuest(*this);
 
     if (index != -1) {
-        s << "quest" << index << " | ";
+        s << "quest" << index << "-" << tier << " | ";
     }
     s << "Followers: " << std::setw(7) << this->followerCost << " | ";
     for (int i = this->monsterAmount-1; i >= 0; i--) {

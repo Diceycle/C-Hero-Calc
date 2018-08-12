@@ -13,7 +13,7 @@
 #include <bitset>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.0.2.0e";
+const std::string VERSION = "3.0.2.0f";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -257,7 +257,7 @@ class Army {
             return (this->monsterAmount == 0);
         }
 
-        std::string toString();
+        std::string toString(int tier = 0);
         std::string toJSON();
 };
 const size_t ARMY_BUFFER_MAX_SIZE = GIGABYTE / sizeof(Army);

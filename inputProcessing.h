@@ -64,6 +64,7 @@ struct ParserTokens {
     const std::string SHOW_REPLAY_STRINGS = "show_replays";
     const std::string IGNORE_EMPTY =        "ignore_empty_lines";
     const std::string IGNORE_EXEC_HALT =    "ignore_exec_halt";
+    const std::string STOP_FIRST_SOLUTION = "stop_first_solution";
 
     const std::string T_SOLUTION_OUTPUT =   "solution";
     const std::string T_BASIC_OUTPUT =      "basic";
@@ -83,6 +84,7 @@ struct Configuration {
     bool autoAdjustOutputLevel = true;
     bool individualBattles = false; //
     bool unlimitedWorldbossHealth = false; //
+    bool stopFirstSolution = true; // false means continue to search for cheaper solution if non-0 cost solution was found
 
     size_t branchwiseExpansionLimit = 20;
 };

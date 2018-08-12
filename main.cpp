@@ -114,7 +114,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
             rainbowInfluence = false;
             invalidSkill = false;
             tempRainbowCondition = 0;
-            Element missingElement = ALL;
+            missingElement = ALL;
             // Check for influences that can invalidate fightresults and gather used heroes
             for (m = 0; m < currentArmySize; m++) {
                 if (rainbowInfluence) {
@@ -390,7 +390,7 @@ void solveInstance(Instance & instance, size_t firstDominance) {
         simulateMultipleFights(heroMonsterArmies, instance);
 
         // If we have a valid solution with 0 followers there is no need to continue
-        if (!instance.hasWorldBoss && instance.bestSolution.monsterAmount > 0 && instance.bestSolution.followerCost == 0) { break; }
+        if (!instance.hasWorldBoss && instance.bestSolution.monsterAmount > 0 && (config.stopFirstSolution || instance.bestSolution.followerCost == 0)) { break; }
 
         // Start Expansion routine if there is still room
         if (armySize < instance.maxCombatants) {
@@ -407,11 +407,12 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                     interface.outputMessage("Best Solution so far:", DETAILED_OUTPUT);
                     interface.outputMessage(instance.bestSolution.toString(), DETAILED_OUTPUT, 1);
                     if (instance.hasWorldBoss) {
-                        interface.outputMessage("Damage Done: " + to_string(WORLDBOSS_HEALTH - instance.lowestBossHealth), DETAILED_OUTPUT, 1);
+                        interface.outputMessage("Damage Done: " + numberWithSeparators(WORLDBOSS_HEALTH - instance.lowestBossHealth), DETAILED_OUTPUT, 1);
                     }
                 } else {
                     interface.outputMessage("Could not find a solution yet!", DETAILED_OUTPUT);
                 }
+                if (!instance.hasWorldBoss && instance.bestSolution.monsterAmount > 0 && (config.stopFirstSolution || instance.bestSolution.followerCost == 0)) break;
                 if (!iomanager.askYesNoQuestion("Continue calculation?", DETAILED_OUTPUT, TOKENS.YES)) {return;}
                 startTime = time(NULL);
                 interface.outputMessage("\nPreparing to work on loop for armies of size " + to_string(armySize+1), DETAILED_OUTPUT);
@@ -450,16 +451,33 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                     pureBranchArmies.reserve(config.branchwiseExpansionLimit);
                     heroBranchArmies.reserve(config.branchwiseExpansionLimit);
                     for (size_t k = 0; k < config.branchwiseExpansionLimit; ++k) {
-                        if (i < pureMonsterArmies.size()) pureBranchArmies.push_back(pureMonsterArmies[i++]);
-                        if (j < heroMonsterArmies.size()) heroBranchArmies.push_back(heroMonsterArmies[j++]);
+                        if (i < pureMonsterArmies.size()) {
+                            if (instance.bestSolution.monsterAmount <= 0 || pureMonsterArmies[i].followerCost < instance.bestSolution.followerCost || instance.hasWorldBoss) {
+                                pureBranchArmies.push_back(pureMonsterArmies[i++]);
+                            }
+                            else {
+                                i++;
+                            }
+                        }
+                        if (j < heroMonsterArmies.size()) {
+                            if (instance.bestSolution.monsterAmount <= 0 || heroBranchArmies[j].followerCost < instance.bestSolution.followerCost || instance.hasWorldBoss) {
+                                heroBranchArmies.push_back(heroMonsterArmies[j++]);
+                            }
+                            else {
+                                j++;
+                            }
+                        }
                     }
+                    if (pureBranchArmies.empty() && heroBranchArmies.empty()) continue;
                     expand(pureBranchArmies2, heroBranchArmies2, pureBranchArmies, heroBranchArmies, armySize, instance);
+                    if (pureBranchArmies2.empty() && heroBranchArmies2.empty()) continue;
                     simulateMultipleFights(pureBranchArmies2, instance);
                     simulateMultipleFights(heroBranchArmies2, instance);
-                    if (!instance.hasWorldBoss && instance.bestSolution.monsterAmount > 0 && instance.bestSolution.followerCost == 0) break;
+                    if (!instance.hasWorldBoss && instance.bestSolution.monsterAmount > 0 && (config.stopFirstSolution || instance.bestSolution.followerCost == 0)) break;
                     expand(tempArmies, tempArmies, pureBranchArmies2, heroBranchArmies2, armySize + 1, instance);
+                    if (tempArmies.empty()) continue;
                     simulateMultipleFights(tempArmies, instance);
-                    if (!instance.hasWorldBoss && instance.bestSolution.monsterAmount > 0 && instance.bestSolution.followerCost == 0) break;
+                    if (!instance.hasWorldBoss && instance.bestSolution.monsterAmount > 0 && (config.stopFirstSolution || instance.bestSolution.followerCost == 0)) break;
                 }
 
                 interface.finishTimedOutput(DETAILED_OUTPUT);
@@ -551,10 +569,10 @@ int main(int argc, char** argv) {
         userFollowerUpperBound = (FollowerCount) maxFollowerTemp; // should not overflow due to parseInt
     }
 
-    // Fill monster arrays with relevant monsters
-    filterMonsterData(minimumMonsterCost, userFollowerUpperBound);
-
     do {
+        // Fill monster arrays with relevant monsters
+        filterMonsterData(minimumMonsterCost, userFollowerUpperBound);
+
         instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
 
         interface.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", BASIC_OUTPUT);
@@ -570,6 +588,9 @@ int main(int argc, char** argv) {
             totalFightsSimulated = &(instances[i].totalFightsSimulated);
 
             instances[i].followerUpperBound = userFollowerUpperBound;
+
+            // Fill monster arrays with relevant monsters, need to repeat for each instance due to pruning
+            filterMonsterData(minimumMonsterCost, userFollowerUpperBound);
 
             solveInstance(instances[i], config.firstDominance);
             outputSolution(instances[i]);

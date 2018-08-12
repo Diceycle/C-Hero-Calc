@@ -171,6 +171,8 @@ void IOManager::getConfiguration() {
                         config.showQueries = parseBool(tokens.at(1));
                     } else if (tokens[0] == TOKENS.SHOW_REPLAY_STRINGS) {
                         config.showReplayStrings = parseBool(tokens.at(1));
+                    } else if (tokens[0] == TOKENS.STOP_FIRST_SOLUTION) {
+                        config.stopFirstSolution = parseBool(tokens.at(1));
                     } else if (tokens[0] == TOKENS.IGNORE_EXEC_HALT) {
                         config.ignoreExecutionHalt = parseBool(tokens.at(1));
                     } else if (tokens[0] != TOKENS.EMPTY) {
@@ -503,7 +505,7 @@ string makeJSONFromInstance(Instance instance, bool valid) {
 string makeStringFromInstance(Instance instance, bool valid, bool showReplayString) {
     stringstream s;
 
-    s << endl << "Solution for " << instance.target.toString() << ":" << endl;
+    s << endl << "Solution for " << instance.target.toString(ARMY_MAX_SIZE - instance.maxCombatants + 1) << ":" << endl;
     // Announce the result
     if (!instance.bestSolution.isEmpty()) {
         s << "  " << instance.bestSolution.toString() << endl;
