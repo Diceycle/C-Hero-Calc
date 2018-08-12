@@ -77,7 +77,7 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, double a
                     aType == REVENGE || aType == PIERCE ||
                     aType == EXPLODE ||
                     this->hasHeal || this->hasAsymmetricAoe);
-    // For expanding armies, if new hero added to the back would have changed fight, old result is not valid
+    // For expanding armies, if new hero added to the back might have changed the fight, old result is not valid
     this->violatesFightResults = (aType == BUFF || aType == BUFF_L ||
                                   aType == PROTECT || aType == PROTECT_L ||
                                   aType == CHAMPION || aType == CHAMPION_L ||
@@ -405,8 +405,6 @@ void initBaseHeroes() {
 
     baseHeroes.push_back(Monster( 66, 44, "veildur",            EARTH, LEGENDARY, {CHAMPION,      ALL, EARTH, 3}));
     baseHeroes.push_back(Monster( 72, 48, "brynhildr",          AIR,   LEGENDARY, {CHAMPION,      ALL, AIR, 4}));
-    baseHeroes.push_back(Monster( 78, 52, "groth",              FIRE,  LEGENDARY, {CHAMPION,      ALL, FIRE, 5}));
-
     baseHeroes.push_back(Monster( 30, 16, "ourea",              EARTH, COMMON,    {BUFF,          EARTH, EARTH, 3}));
     baseHeroes.push_back(Monster( 48, 20, "erebus",             FIRE,  RARE,      {CHAMPION,      FIRE, FIRE, 2}));
     baseHeroes.push_back(Monster( 62, 36, "pontus",             WATER, LEGENDARY, {ADAPT,         WATER, WATER, 2}));
@@ -414,6 +412,8 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 52, 20, "chroma",             AIR,   RARE,      {PROTECT,       AIR, AIR, 4}));
     baseHeroes.push_back(Monster( 26, 44, "petry",              EARTH, RARE,      {PROTECT,       EARTH, EARTH, 4}));
     baseHeroes.push_back(Monster( 58, 22, "zaytus",             FIRE,  RARE,      {PROTECT,       FIRE, FIRE, 4}));
+    baseHeroes.push_back(Monster( 78, 52, "groth",              FIRE,  LEGENDARY, {CHAMPION,      ALL, FIRE, 5}));
+
 
     baseHeroes.push_back(Monster( 75, 45, "spyke",              AIR,   LEGENDARY, {TRAINING,      SELF, AIR, 5}));
     baseHeroes.push_back(Monster( 70, 55, "aoyuki",             WATER, LEGENDARY, {RAINBOW,       SELF, WATER, 50}));
@@ -746,12 +746,27 @@ void initGameData() {
 void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumArmyCost) {
     std::vector<Monster> tempMonsterList = monsterBaseList; // Get a temporary list to sort
     sort(tempMonsterList.begin(), tempMonsterList.end(), isCheaper);
+    availableMonsters.clear();
 
     for (size_t i = 0; i < tempMonsterList.size(); i++) {
         if (minimumMonsterCost <= tempMonsterList[i].cost && maximumArmyCost >= tempMonsterList[i].cost) {
             availableMonsters.push_back(monsterMap[tempMonsterList[i].name]);
         }
     }
+}
+
+// Remove monsters from available monsters higher than the maximum cost
+void pruneAvailableMonsters(const FollowerCount maximumArmyCost) {
+    int extra = 0;
+    for (auto i = availableMonsters.rbegin(); i != availableMonsters.rend(); i++) {
+        if (monsterReference[*i].cost > maximumArmyCost) {
+            extra++;
+        }
+        else {
+            break;
+        }
+    }
+    availableMonsters.resize(availableMonsters.size()-extra);
 }
 
 // Add a leveled hero to the database and return its corresponding index

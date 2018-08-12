@@ -10,9 +10,10 @@
 #include <cmath>
 #include <algorithm>
 #include <map>
+#include <bitset>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.0.2.0c";
+const std::string VERSION = "3.0.2.0d";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -170,6 +171,9 @@ void initGameData();
 // Must be called before any instance can be solved
 void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumArmyCost);
 
+// Remove monsters from available monsters higher than the maximum cost
+void pruneAvailableMonsters(const FollowerCount maximumArmyCost);
+
 // Get the index of a monster corresponding to the unique id it is given ingame
 int getRealIndex(Monster & monster);
 
@@ -191,9 +195,9 @@ struct FightResult {
     DamageType frontHealth;     // how much health remaining to the current leading mob of the winning side
     int16_t leftAoeDamage;      // how much aoe damage left took
     int16_t rightAoeDamage;     // how much aoe damage right took
-    int8_t berserk;             // berserk multiplier, if there is a berserker in the front
     int8_t monstersLost;        // how many mobs lost on the winning side (the other side lost all)
     int8_t turncounter;         // how many turns have passed since the battle started
+    int8_t berserk;             // berserk multiplier, if there is a berserker in the front
     bool valid;                 // If the result is valid
     bool dominated;             // If the result is worse than another
 
@@ -216,16 +220,16 @@ struct FightResult {
 class Army {
     public:
         FightResult lastFightData;
+        int64_t seed;
+        int64_t strength;
         FollowerCount followerCost;
         MonsterIndex monsters[ARMY_MAX_SIZE];
         int8_t monsterAmount;
-        int64_t seed;
-        int64_t strength;
 
         Army(std::vector<MonsterIndex> someMonsters = {}) :
+            strength(0),
             followerCost(0),
-            monsterAmount(0),
-            strength(0)
+            monsterAmount(0)
         {
             for(size_t i = 0; i < someMonsters.size(); i++) {
                 this->add(someMonsters[i]);

@@ -28,6 +28,7 @@ void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
                     }
                     newFound = true;
                     instance.followerUpperBound = armies[i].followerCost;
+                    pruneAvailableMonsters(instance.followerUpperBound);
                     instance.bestSolution = armies[i];
                     interface.outputMessage(instance.bestSolution.toString(), DETAILED_OUTPUT, 2);
                 }
@@ -65,6 +66,9 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     size_t oldHeroArmiesSize = oldHeroArmies.size();
     size_t i, m;
 
+    newPureArmies.reserve(oldPureArmies.size() * availableMonstersSize);
+    newHeroArmies.reserve(oldPureArmies.size() * availableHeroesSize + oldHeroArmies.size() * (availableHeroesSize + availableMonstersSize));
+
     bool removeUseless = currentArmySize == (instance.maxCombatants-1) && !instance.hasWorldBoss  && !instance.hasGambler;
     bool instanceInvalid = instance.hasHeal || instance.hasAsymmetricAoe || instance.hasGambler;
 
@@ -76,13 +80,11 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
         if (!oldPureArmies[i].lastFightData.dominated) {
             remainingFollowers = instance.followerUpperBound - oldPureArmies[i].followerCost;
             // Add Normal Monsters. Check for Cost
-            for (m = 0; m < availableMonstersSize; m++) {
-                if (monsterReference[availableMonsters[m]].cost <= remainingFollowers) {
-                    if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]] || instance.targetSize == oldPureArmies[i].lastFightData.monstersLost) {
-                        newPureArmies.push_back(oldPureArmies[i]);
-                        newPureArmies.back().add(availableMonsters[m]);
-                        newPureArmies.back().lastFightData.valid = !instanceInvalid && !boozeInfluence;
-                    }
+            for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost <= remainingFollowers; m++) {
+                if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]] || instance.targetSize == oldPureArmies[i].lastFightData.monstersLost) {
+                    newPureArmies.push_back(oldPureArmies[i]);
+                    newPureArmies.back().add(availableMonsters[m]);
+                    newPureArmies.back().lastFightData.valid = !instanceInvalid && !boozeInfluence;
                 }
             }
             // Add Hero. no check needed because it is the First Added
@@ -103,47 +105,66 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     bool invalidSkill;
     bool friendsInfluence;
     bool rainbowInfluence;
+    int tempRainbowCondition;
+    Element missingElement;
     for (i = 0; i < oldHeroArmiesSize; i++) {
         if (!oldHeroArmies[i].lastFightData.dominated) {
             remainingFollowers = instance.followerUpperBound - oldHeroArmies[i].followerCost;
             friendsInfluence = false;
             rainbowInfluence = false;
             invalidSkill = false;
+            tempRainbowCondition = 0;
+            Element missingElement = ALL;
             // Check for influences that can invalidate fightresults and gather used heroes
             for (m = 0; m < currentArmySize; m++) {
+                if (rainbowInfluence) {
+                    tempRainbowCondition |= 1 << monsterReference[oldHeroArmies[i].monsters[m]].element;
+                }
                 currentSkill = monsterReference[oldHeroArmies[i].monsters[m]].skill;
                 invalidSkill |= currentSkill.hasHeal || currentSkill.hasAsymmetricAoe;
                 friendsInfluence |= currentSkill.skillType == FRIENDS;
-                rainbowInfluence |= currentSkill.skillType == RAINBOW && currentArmySize > m + 4; // Hardcoded number of elements required to activate rainbow
-                boozeInfluence   |= currentSkill.skillType == BEER;
+                rainbowInfluence |= currentSkill.skillType == RAINBOW && currentArmySize >= m + 4; // Hardcoded number of elements required to activate rainbow
+                boozeInfluence   |= currentSkill.skillType == BEER && currentArmySize < instance.targetSize;
                 usedHeroes[oldHeroArmies[i].monsters[m]] = true;
+            }
+            // rainbowInfluence can only invalidate if there are exactly 3 elements fulfilled before adding new unit
+            if (rainbowInfluence) {
+                switch (tempRainbowCondition) {
+                    case 7 : missingElement = FIRE; break;
+                    case 11: missingElement = WATER; break;
+                    case 13: missingElement = AIR; break;
+                    case 14: missingElement = EARTH; break;
+                    default: rainbowInfluence = false; break;
+                }
             }
 
             // Add Normal Monster. No checks needed except cost
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost <= remainingFollowers; m++) {
                 // In case of a draw this could cause problems if no more suitable units are available
-                if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]] || instance.targetSize == oldHeroArmies[i].lastFightData.monstersLost) {
+                if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]] || friendsInfluence || (rainbowInfluence && monsterReference[availableMonsters[m]].element == missingElement) || instance.targetSize == oldHeroArmies[i].lastFightData.monstersLost) {
                     newHeroArmies.push_back(oldHeroArmies[i]);
                     newHeroArmies.back().add(availableMonsters[m]);
                     newHeroArmies.back().lastFightData.valid = !instanceInvalid &&
+                                                               !invalidSkill &&
                                                                !friendsInfluence &&
-                                                               !rainbowInfluence &&
                                                                !boozeInfluence &&
-                                                               !invalidSkill;
+                                                               !(rainbowInfluence && monsterReference[availableMonsters[m]].element == missingElement);
+
                 }
             }
             // Add Hero. Check if hero was used before.
             for (m = 0; m < availableHeroesSize; m++) {
                 if (!usedHeroes[availableHeroes[m]]) {
-                    if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]] || instance.targetSize == oldHeroArmies[i].lastFightData.monstersLost) {
+                    if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]] || (rainbowInfluence && monsterReference[availableMonsters[m]].element == missingElement) || instance.targetSize == oldHeroArmies[i].lastFightData.monstersLost) {
                         newHeroArmies.push_back(oldHeroArmies[i]);
                         newHeroArmies.back().add(availableHeroes[m]);
                         newHeroArmies.back().lastFightData.valid = !instanceInvalid &&
+                                                                   !invalidSkill &&
                                                                    !monsterReference[availableHeroes[m]].skill.violatesFightResults &&
-                                                                   !rainbowInfluence &&
                                                                    !boozeInfluence &&
-                                                                   !(monsterReference[availableHeroes[m]].skill.skillType == DAMPEN && instance.hasAoe) &&
-                                                                   !invalidSkill;
+                                                                   !(rainbowInfluence && monsterReference[availableMonsters[m]].element == missingElement) &&
+                                                                   !(monsterReference[availableHeroes[m]].skill.skillType == DAMPEN && instance.hasAoe);
+
                     }
                 }
                 // Clean up for the next army
@@ -320,7 +341,9 @@ void solveInstance(Instance & instance, size_t firstDominance) {
 
     // Fill two vectors with armies each containing exactly one unique available hero or monster
     vector<Army> pureMonsterArmies;
+    pureMonsterArmies.reserve(availableMonsters.size());
     vector<Army> heroMonsterArmies;
+    heroMonsterArmies.reserve(availableHeroes.size());
     for (i = 0; i < availableMonsters.size(); i++) {
         if (monsterReference[availableMonsters[i]].cost <= instance.followerUpperBound) {
             pureMonsterArmies.push_back(Army( {availableMonsters[i]} ));
@@ -424,6 +447,8 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                 sort(heroMonsterArmies.begin(), heroMonsterArmies.end(), isMoreEfficient);
                 for (size_t i = 0, j = 0; i < pureMonsterArmies.size() || j < heroMonsterArmies.size(); ) {
                     vector<Army> tempArmies, pureBranchArmies, heroBranchArmies, pureBranchArmies2, heroBranchArmies2;
+                    pureBranchArmies.reserve(config.branchwiseExpansionLimit);
+                    heroBranchArmies.reserve(config.branchwiseExpansionLimit);
                     for (size_t k = 0; k < config.branchwiseExpansionLimit; ++k) {
                         if (i < pureMonsterArmies.size()) pureBranchArmies.push_back(pureMonsterArmies[i++]);
                         if (j < heroMonsterArmies.size()) heroBranchArmies.push_back(heroMonsterArmies[j++]);
