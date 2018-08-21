@@ -247,6 +247,7 @@ std::map<std::string, int> stringToEnum = {
     {"EXPLODE", EXPLODE},
     {"ABSORB", ABSORB},
     {"HATE", HATE},
+    {"EXPLODE_L", EXPLODE_L},
 
     {"EARTH", EARTH},
     {"AIR", AIR},
