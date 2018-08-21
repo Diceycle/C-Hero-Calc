@@ -173,6 +173,8 @@ void IOManager::getConfiguration() {
                         config.showReplayStrings = parseBool(tokens.at(1));
                     } else if (tokens[0] == TOKENS.STOP_FIRST_SOLUTION) {
                         config.stopFirstSolution = parseBool(tokens.at(1));
+                    } else if (tokens[0] == TOKENS.NUM_THREADS) {
+                        config.numThreads = (int) parseInt(tokens.at(1));
                     } else if (tokens[0] == TOKENS.IGNORE_EXEC_HALT) {
                         config.ignoreExecutionHalt = parseBool(tokens.at(1));
                     } else if (tokens[0] != TOKENS.EMPTY) {

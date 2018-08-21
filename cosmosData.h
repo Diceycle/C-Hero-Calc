@@ -11,9 +11,10 @@
 #include <algorithm>
 #include <map>
 #include <bitset>
+#include <fstream>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.0.2.0g";
+const std::string VERSION = "3.0.7.1";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -22,7 +23,6 @@ const size_t GIGABYTE = ((size_t) (1) << 30);
 using MonsterIndex = uint8_t;
 // A type used to denote FollowerCounts.
 using FollowerCount = uint32_t;
-
 
 // Constants defining the basic structure of armies
 const size_t ARMY_MAX_SIZE = 6;
@@ -48,7 +48,8 @@ enum SkillType {
     HEAL,       // Heals the entire own army every turn
     LIFESTEAL,  // Combines the Aoe and Heal ability into one
     DAMPEN,     // Reduces the Effects of AOE percentually
-    AOEZero_L,  // AOE damage (equal to lvl, undampened) at turn 0 / healable / after leprechaun's skill
+    AOEZERO,    // AOE damage (undampened) at turn 0 / healable / after leprechaun's skill
+    AOEZERO_L,  // AOEZERO skill that scales with level
 
     BERSERK,    // Every attack this monster makes multiplies its own damage
     FRIENDS,    // This monster receives a damage multiplicator for every NORMAL monster behind it
@@ -80,6 +81,7 @@ enum SkillType {
     EXPLODE,    // deals aoe damage when it kill an enemy
     ABSORB,     // prevents and takes a percentage of damage
     HATE,       // has extra elemental bonus, can't be treated as adapt due to order
+    EXPLODE_L   // explode that scales with level
 };
 
 enum Element {
@@ -163,6 +165,8 @@ void initHeroAliases();
 extern std::vector<std::vector<std::string>> quests; // Quest Lineups from the game
 void initQuests();
 
+extern std::map<std::string, int> stringToEnum;
+
 // Fills all references and storages with real data.
 // Must be called before any other operation on monsters or input
 void initGameData();
@@ -172,7 +176,7 @@ void initGameData();
 void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumArmyCost);
 
 // Remove monsters from available monsters higher than the maximum cost
-void pruneAvailableMonsters(const FollowerCount maximumArmyCost);
+void pruneAvailableMonsters(const FollowerCount maximumArmyCost, std::vector<MonsterIndex> & aMonsters = availableMonsters);
 
 // Get the index of a monster corresponding to the unique id it is given ingame
 int getRealIndex(Monster & monster);

@@ -65,6 +65,7 @@ struct ParserTokens {
     const std::string IGNORE_EMPTY =        "ignore_empty_lines";
     const std::string IGNORE_EXEC_HALT =    "ignore_exec_halt";
     const std::string STOP_FIRST_SOLUTION = "stop_first_solution";
+    const std::string NUM_THREADS =         "num_threads";
 
     const std::string T_SOLUTION_OUTPUT =   "solution";
     const std::string T_BASIC_OUTPUT =      "basic";
@@ -84,7 +85,8 @@ struct Configuration {
     bool autoAdjustOutputLevel = true;
     bool individualBattles = false; //
     bool unlimitedWorldbossHealth = false; //
-    bool stopFirstSolution = true; // false means continue to search for cheaper solution if non-0 cost solution was found
+    bool stopFirstSolution = true; // false means continue to search for cheaper solution if non-zero cost solution was found
+    int numThreads = 6;
 
     size_t branchwiseExpansionLimit = 20;
 };

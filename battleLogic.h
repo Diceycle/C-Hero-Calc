@@ -6,9 +6,6 @@
 
 #include "cosmosData.h"
 
-extern int * totalFightsSimulated;
-extern int fightsSimulatedDefault;
-
 const int VALID_RAINBOW_CONDITION = 15; // Binary 00001111 -> means all elements were added
 
 // Struct keeping track of everything that is only valid for one turn
@@ -47,7 +44,7 @@ class ArmyCondition {
         double skillAmounts[ARMY_MAX_SIZE];
 
         bool rainbowConditions[ARMY_MAX_SIZE]; // for rainbow ability
-        int pureMonsters[ARMY_MAX_SIZE]; // for friends ability
+        //int pureMonsters[ARMY_MAX_SIZE]; // for friends ability
 
         int dice;
         bool booze; // for leprechaun's ability
@@ -104,10 +101,10 @@ inline void ArmyCondition::init(const Army & army, const int oldMonstersLost, co
         maxHealths[i] = lineup[i]->hp;
         if (skill->skillType == DICE) dice = i; //assumes only 1 unit per side can have dice ability, have to change to bool and loop at turn zero if this changes
         if (skill->skillType == BEER) booze = true;
-        if (skill->skillType == AOEZero_L) aoeZero += skill->amount * lineup[i]->level;
+        if (skill->skillType == AOEZERO) aoeZero += skill->amount;
 
         rainbowConditions[i] = tempRainbowCondition == VALID_RAINBOW_CONDITION;
-        pureMonsters[i] = tempPureMonsters;
+        //pureMonsters[i] = tempPureMonsters;
 
         tempRainbowCondition |= 1 << lineup[i]->element;
         if (skill->skillType == NOTHING) {
@@ -178,9 +175,16 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     turnData.counter = 0;
     turnData.target = 0;
 
+    double friendsDamage = 0;
 
     switch (skillTypes[monstersLost]) {
-        case FRIENDS:   turnData.multiplier *= (double) pow(skillAmounts[monstersLost], pureMonsters[monstersLost]);
+        case FRIENDS:   friendsDamage = turnData.baseDamage;
+                        for (int i = monstersLost + 1; i < armySize; i++) {
+                            if (skillTypes[i] == NOTHING && remainingHealths[i] > 0)
+                                friendsDamage *= skillAmounts[monstersLost];
+                            else if ((skillTypes[i] == BUFF || skillTypes[i] == CHAMPION) && (skillTargets[i] == ALL || skillTargets[i] == lineup[monstersLost]->element))
+                                friendsDamage += skillAmounts[i];
+                        }
                         break;
         case TRAINING:  turnData.buffDamage += (int) (skillAmounts[monstersLost] * (double) turncounter);
                         break;
@@ -216,11 +220,16 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
 
     }
     turnData.valkyrieDamage = turnData.baseDamage;
-    if (turnData.multiplier > 1) {
-        turnData.valkyrieDamage *= turnData.multiplier;
+    if (friendsDamage == 0) {
+        if (turnData.multiplier > 1) {
+            turnData.valkyrieDamage *= turnData.multiplier;
+        }
+        if (turnData.buffDamage != 0) {
+            turnData.valkyrieDamage += turnData.buffDamage;
+        }
     }
-    if (turnData.buffDamage != 0) {
-        turnData.valkyrieDamage += turnData.buffDamage;
+    else {
+        turnData.valkyrieDamage = friendsDamage;
     }
 
     if (counter[opposingElement] == lineup[monstersLost]->element) {
@@ -308,13 +317,11 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     }
 }
 
-extern ArmyCondition leftCondition;
-extern ArmyCondition rightCondition;
-
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
     // left[0] and right[0] are the first monsters to fight
-    (*totalFightsSimulated)++;
+    ArmyCondition leftCondition;
+    ArmyCondition rightCondition;
 
     int turncounter;
 

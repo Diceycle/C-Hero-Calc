@@ -60,6 +60,12 @@ Monster::Monster(const Monster & baseHero, int aLevel) :
     } else if (baseHero.skill.skillType == DAMPEN_L) {
         this->skill.skillType = DAMPEN;
         this->skill.amount = 1.0f - (double) aLevel * baseHero.skill.amount;
+    } else if (baseHero.skill.skillType == AOEZERO_L) {
+        this->skill.skillType = AOEZERO;
+        this->skill.amount = (double) floor((double) aLevel * baseHero.skill.amount);
+    } else if (baseHero.skill.skillType == EXPLODE_L) {
+        this->skill.skillType = EXPLODE;
+        this->skill.amount = (double) floor((double) aLevel * baseHero.skill.amount);
     }
 }
 
@@ -84,8 +90,8 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, double a
                                   aType == AOE || aType == AOE_L ||
                                   aType == HEAL || aType == HEAL_L ||
                                   aType == LIFESTEAL || aType == LIFESTEAL_L ||
-                                  aType == BEER || aType == AOEZero_L ||
-                                  aType == ABSORB);
+                                  aType == BEER || aType == AOEZERO_L ||
+                                  aType == AOEZERO || aType == ABSORB);
 }
 
 // JSON Functions to provide results in an easily readable output format. Used my Latas for example
@@ -203,7 +209,61 @@ std::vector<Monster> baseHeroes; // Raw, unleveld Hero Data, holds actual Object
 std::map<std::string, std::string> heroAliases; //Alternate or shorthand names for heroes
 std::vector<std::vector<std::string>> quests; // Quest Lineup from the game
 
-// Fill MonsterBaseList With Monsters Order is important for ReplayStrings
+// Converts string to int, int still needs to be cast to enum
+std::map<std::string, int> stringToEnum = {
+    {"NOTHING", NOTHING},
+    {"BUFF", BUFF},
+    {"PROTECT", PROTECT},
+    {"CHAMPION", CHAMPION},
+    {"AOE", AOE},
+    {"HEAL", HEAL},
+    {"LIFESTEAL", LIFESTEAL},
+    {"DAMPEN", DAMPEN},
+    {"AOEZERO", AOEZERO},
+    {"AOEZERO_L", AOEZERO_L},
+    {"BERSERK", BERSERK},
+    {"FRIENDS", FRIENDS},
+    {"ADAPT", ADAPT},
+    {"RAINBOW", RAINBOW},
+    {"TRAINING", TRAINING},
+    {"WITHER", WITHER},
+    {"REVENGE", REVENGE},
+    {"PIERCE", PIERCE},
+    {"VALKYRIE", VALKYRIE},
+    {"TRAMPLE", TRAMPLE},
+    {"BUFF_L", BUFF_L},
+    {"PROTECT_L", PROTECT_L},
+    {"CHAMPION_L", CHAMPION_L},
+    {"AOE_L", AOE_L},
+    {"HEAL_L", HEAL_L},
+    {"LIFESTEAL_L", LIFESTEAL_L},
+    {"DAMPEN_L", DAMPEN_L},
+    {"BEER", BEER},
+    {"GROW", GROW},
+    {"COUNTER", COUNTER},
+    {"DICE", DICE},
+    {"LUX", LUX},
+    {"CRIT", CRIT},
+    {"EXPLODE", EXPLODE},
+    {"ABSORB", ABSORB},
+    {"HATE", HATE},
+
+    {"EARTH", EARTH},
+    {"AIR", AIR},
+    {"WATER", WATER},
+    {"FIRE", FIRE},
+    {"ALL", ALL},
+    {"SELF", SELF},
+
+    {"NO_HERO", NO_HERO},
+    {"COMMON", COMMON},
+    {"RARE", RARE},
+    {"LEGENDARY", LEGENDARY},
+    {"ASCENDED", ASCENDED},
+    {"WORLDBOSS", WORLDBOSS}
+};
+
+// Fill MonsterBaseList With Monsters Order is important for ReplayStrings and gambler abilities
 void initMonsterData() {
     monsterBaseList.push_back(Monster( 20,   8,      1000,  "a1", AIR));
     monsterBaseList.push_back(Monster( 44,   4,      1300,  "e1", EARTH));
@@ -497,7 +557,7 @@ void initBaseHeroes() {
 
     baseHeroes.push_back(Monster(122,122, "abavah",             WATER, ASCENDED,  {CHAMPION_L,    ALL, ALL, 0.152f}));
 
-    baseHeroes.push_back(Monster( 66, 60, "drhawking",          AIR,   LEGENDARY, {AOEZero_L,     ALL, AIR, 1}));
+    baseHeroes.push_back(Monster( 66, 60, "drhawking",          AIR,   LEGENDARY, {AOEZERO_L,     ALL, AIR, 1}));
 
     baseHeroes.push_back(Monster(150, 90, "masterlee",          AIR,   ASCENDED,  {COUNTER,       AIR, AIR, 0.5f}));
 
@@ -725,15 +785,83 @@ void initQuests() {
     quests.push_back({"a30", "a30", "e30", "e30", "w28"}); // 140
 }
 
+void readMonsterData(std::vector<std::string>::iterator it, std::vector<std::string>::iterator itEnd) {
+    while (it != itEnd) {
+        monsterBaseList.push_back(Monster(std::stoi(*(it)), std::stoi(*(it+1)), std::stoi(*(it+2)), *(it+3), (Element)stringToEnum[*(it+4)]));
+        it += 5;
+    }
+}
+
+void readBaseHeroes(std::vector<std::string>::iterator it, std::vector<std::string>::iterator itEnd) {
+    while (it != itEnd) {
+        baseHeroes.push_back(Monster(std::stoi(*(it)), std::stoi(*(it+1)), *(it+2),
+                                     (Element)stringToEnum[*(it+3)], (HeroRarity)stringToEnum[*(it+4)],
+                                     {(SkillType)stringToEnum[*(it+5)], (Element)stringToEnum[*(it+6)],
+                                     (Element)stringToEnum[*(it+7)], std::stod(*(it+8))}));
+        it += 9;
+    }
+}
+
+void readHeroAliases(std::vector<std::string>::iterator it, std::vector<std::string>::iterator itEnd) {
+    while (it != itEnd) {
+        heroAliases[*(it)] = *(it + 1);
+        it += 2;
+    }
+}
+
+void readQuests(std::vector<std::string>::iterator it, std::vector<std::string>::iterator itEnd) {
+    quests.push_back({""}); // quest 0 empty
+
+    while (it != itEnd) {
+        std::vector<std::string> newQuest;
+        while (*it != "+") {
+            newQuest.push_back(*it);
+            it++;
+        }
+        quests.push_back(newQuest);
+        it++;
+    }
+}
+
 // Fills all references and storages with real data.
 // Must be called before any other operation on monsters or input
 void initGameData() {
     // Initialize Monster Data
-    initMonsterData();
-    initBaseHeroes();
+    std::ifstream file;
+    file.open("cqdata.txt");
+    // If data file is present use it, else use hardcoded data
+    // Reading done with minimal validity checking for now
+    if (file) {
+        std::string token;
+        std::vector<std::string> tokens;
+        while (file >> token) {
+            tokens.push_back(token);
+        }
+        file.close();
+
+        std::vector<std::string>::iterator it = std::find(tokens.begin(), tokens.end(), "*") + 2;
+        std::vector<std::string>::iterator itEnd = std::find(it, tokens.end(), "*");
+        readMonsterData(it, itEnd);
+
+        it = itEnd + 2;
+        itEnd = std::find(it, tokens.end(), "*");
+        readBaseHeroes(it, itEnd);
+
+        it = itEnd + 2;
+        itEnd = std::find(it, tokens.end(), "*");
+        readHeroAliases(it, itEnd);
+
+        it = itEnd + 2;
+        itEnd = std::find(it, tokens.end(), "*");
+        readQuests(it, itEnd);
+    }
+    else {
+        initMonsterData();
+        initBaseHeroes();
+        initHeroAliases();
+        initQuests();
+    }
     initIndices();
-    initHeroAliases();
-    initQuests();
 
     for (size_t i = 0; i < monsterBaseList.size(); i++) {
         monsterReference.push_back(monsterBaseList[i]);
@@ -756,9 +884,9 @@ void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumAr
 }
 
 // Remove monsters from available monsters higher than the maximum cost
-void pruneAvailableMonsters(const FollowerCount maximumArmyCost) {
+void pruneAvailableMonsters(const FollowerCount maximumArmyCost, std::vector<MonsterIndex> & aMonsters) {
     int extra = 0;
-    for (auto i = availableMonsters.rbegin(); i != availableMonsters.rend(); i++) {
+    for (auto i = aMonsters.rbegin(); i != aMonsters.rend(); i++) {
         if (monsterReference[*i].cost > maximumArmyCost) {
             extra++;
         }
@@ -766,7 +894,7 @@ void pruneAvailableMonsters(const FollowerCount maximumArmyCost) {
             break;
         }
     }
-    availableMonsters.resize(availableMonsters.size()-extra);
+    aMonsters.resize(aMonsters.size()-extra);
 }
 
 // Add a leveled hero to the database and return its corresponding index
