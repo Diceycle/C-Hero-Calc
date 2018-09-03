@@ -764,11 +764,11 @@ void initQuests() {
     quests.push_back({"f24", "a23", "a24", "f24", "f24", "w24"});
     quests.push_back({"f25", "f25", "a26", "a26", "w25"});
     quests.push_back({"e27", "w27", "e27", "w27"}); // 120
-    quests.push_back({"a25", "f25", "e26", "e26", "f26"});
-    quests.push_back({"a26", "a27", "w26", "w25", "e25", "e25"});
-    quests.push_back({"e27", "e27", "w26", "e26", "f26"});
-    quests.push_back({"w26", "w26", "w26", "w26", "w26", "w26"});
-    quests.push_back({"a27", "f25", "e26", "e26", "f26"}); // 125
+    quests.push_back({"w27", "f27", "f27", "w27"});
+    quests.push_back({"a27", "e27", "f27", "w27"});
+    quests.push_back({"e27", "e27", "w27", "f27"});
+    quests.push_back({"a28", "f27", "w27", "f27"});
+    quests.push_back({"a28", "a27", "w27", "w28"}); // 125
     quests.push_back({"a27", "f27", "a24", "a26", "a26", "a25"});
     quests.push_back({"f26", "f26", "w25", "e25", "f26", "f26"});
     quests.push_back({"a28", "e28", "e29", "w29"});
