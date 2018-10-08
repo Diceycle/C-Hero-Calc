@@ -242,6 +242,11 @@
 180 70 athert EARTH ASCENDED PROTECT_L EARTH EARTH 0.1819
 80 160 alordkirk FIRE ASCENDED PROTECT_L FIRE FIRE 0.1819
 75 175 aneptunius WATER ASCENDED PROTECT_L WATER WATER 0.1819
+106 124 ahosokawa AIR ASCENDED BUFF_L AIR AIR 0.1819
+82 164 atakeda EARTH ASCENDED BUFF_L EARTH EARTH 0.1819
+96 144 ahirate FIRE ASCENDED BUFF_L FIRE FIRE 0.1819
+114 126 ahattori WATER ASCENDED BUFF_L WATER WATER 0.1819
+0 110 doyenne WATER WORLDBOSS BUFF WATER WATER 0
 * ALIASES
 lady ladyoftwilight
 lot ladyoftwilight
@@ -281,6 +286,8 @@ moak motherofallkodamas
 eboss motherofallkodamas
 aboss kryton
 luxurious luxuriusmaximus
+wboss doyenne
+doy doyenne
 * QUESTS
 w5 +
 f1 a1 f1 a1 f1 a1 +
@@ -412,13 +419,33 @@ e26 w27 w27 w28 +
 f27 w28 w29 w29 +
 a27 w27 w29 w29 +
 e27 w28 w29 w29 +
-a27 a27 w26 e25 e26 f26 +
-e27 e27 f26 w26 w27 a27 +
-w29 e30 f30 a30 +
-e27 a27 a27 e27 e27 f27 +
-a27 f27 a27 e25 w27 w27 +
-e27 w28 f28 w28 f28 +
-f30 a29 f30 a30 +
-w28 e28 w28 e28 w28 +
-a29 f29 e29 e29 w29 +
-a30 a30 e30 e30 w28 +
+a26 e26 w29 e29 f27 +
+w29 f29 a27 a26 a28 +
+w29 e29 a29 a28 +
+a27 w29 a27 f28 a27 +
+w29 w30 a26 a27 a30 +
+f26 a30 f27 e30 w28 +
+a30 a27 a30 a27 e30 +
+a27 w30 f28 w30 a27 a27 +
+w27 w29 a30 a27 e30 a27 +
+f27 e30 f28 a30 w28 f28 +
+w29 a30 a30 nicte:1000 +
+a30 w29 e29 ladyodelith:1000 +
+e30 w29 w30 f25 ignitor:1000 +
+f27 w28 a30 a27 petry:1000 +
+e26 e30 w29 e29 ignitor:1000 +
+f26 e30 f25 a30 w29 undine:1000 +
+w29 a30 undine:1000 petry:1000 +
+a28 w30 ignitor:1000 chroma:1000 +
+a28 a28 w28 undine:1000 zaytus:1000 +
+w28 w28 w29 undine:1000 ladyodelith:1000 +
+e30 e30 w30 w30 undine:1000 chroma:1000 +
+f30 f30 e30 a30 ignitor:1000 zaytus:1000 +
+e30 w30 chroma:1000 nicte:1000 forestdruid:1000 +
+w30 a30 undine:1000 zaytus:1000 ignitor:1000 +
+f30 zaytus:1000 chroma:1000 nicte:1000 forestdruid:1000 +
+f30 f30 undine:1000 ladyodelith:1000 forestdruid:1000 petry:1000 +
+e30 e30 ignitor:1000 zaytus:1000 nicte:1000 undine:1000 +
+w30 ladyodelith:1000 ignitor:1000 zaytus:1000 chroma:1000 forestdruid:1000 +
+ignitor:1000 forestdruid:1000 petry:1000 chroma:1000 ladyodelith:1000 undine:1000 +
+f30 ignitor:1000 undine:1000 neptunius:1000 +

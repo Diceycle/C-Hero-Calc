@@ -14,7 +14,7 @@
 #include <fstream>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.0.8.5a";
+const std::string VERSION = "3.0.9.1a";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -81,7 +81,8 @@ enum SkillType {
     EXPLODE,    // deals aoe damage when it kill an enemy
     ABSORB,     // prevents and takes a percentage of damage
     HATE,       // has extra elemental bonus, can't be treated as adapt due to order
-    EXPLODE_L   // explode that scales with level
+    EXPLODE_L,  // explode that scales with level
+	DODGE       // Dodges attacks completely over a certain amount of damage
 };
 
 enum Element {

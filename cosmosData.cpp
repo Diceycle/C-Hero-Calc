@@ -248,6 +248,7 @@ std::map<std::string, int> stringToEnum = {
     {"ABSORB", ABSORB},
     {"HATE", HATE},
     {"EXPLODE_L", EXPLODE_L},
+	{"DODGE", DODGE},
 
     {"EARTH", EARTH},
     {"AIR", AIR},
@@ -255,7 +256,7 @@ std::map<std::string, int> stringToEnum = {
     {"FIRE", FIRE},
     {"ALL", ALL},
     {"SELF", SELF},
-
+	
     {"NO_HERO", NO_HERO},
     {"COMMON", COMMON},
     {"RARE", RARE},
@@ -566,7 +567,7 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 78, 42, "liucheng",           WATER, LEGENDARY, {COUNTER,       WATER, WATER, 0.25f}));
     baseHeroes.push_back(Monster( 86, 44, "hidoka",             EARTH, LEGENDARY, {COUNTER,       EARTH, EARTH, 0.3f}));
 
-    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 11, "kryton", AIR, WORLDBOSS, { TRAINING,      SELF, AIR, 10}));
+    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 11, "kryton", AIR,  WORLDBOSS, {TRAINING,      SELF, AIR, 10}));
 
     baseHeroes.push_back(Monster( 25, 26, "dicemaster",         WATER, COMMON,    {DICE,          SELF, SELF, 20}));
     baseHeroes.push_back(Monster( 28, 60, "luxuriusmaximus",    FIRE,  RARE,      {LUX,           SELF, EARTH, 1}));
@@ -587,6 +588,14 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 180, 70, "athert",            EARTH, ASCENDED,  {PROTECT_L,     EARTH, EARTH, 0.1819f}));
     baseHeroes.push_back(Monster( 80, 160, "alordkirk",         FIRE,  ASCENDED,  {PROTECT_L,     FIRE, FIRE, 0.1819f}));
     baseHeroes.push_back(Monster( 75, 175, "aneptunius",        WATER, ASCENDED,  {PROTECT_L,     WATER, WATER, 0.1819f}));
+	
+	baseHeroes.push_back(Monster( 106,124, "ahosokawa",         AIR,   ASCENDED,  {BUFF_L,        AIR, AIR, 0.1819f}));
+    baseHeroes.push_back(Monster( 82, 164, "atakeda",           EARTH, ASCENDED,  {BUFF_L,        EARTH, EARTH, 0.1819f}));
+    baseHeroes.push_back(Monster( 96, 144, "ahirate",           FIRE,  ASCENDED,  {BUFF_L,        FIRE, FIRE, 0.1819f}));
+    baseHeroes.push_back(Monster( 114,126, "ahattori",          WATER, ASCENDED,  {BUFF_L,        WATER, WATER, 0.1819f}));
+	
+	baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 110, "doyenne", WATER, WORLDBOSS, {DODGE,      ALL, ALL, 5000}));
+		
 }
 
 void initIndices() {
@@ -637,7 +646,10 @@ void initHeroAliases() {
     heroAliases["fboss"] = "lordofchaos";
     heroAliases["moak"] = "motherofallkodamas";
     heroAliases["eboss"] = "motherofallkodamas";
+	heroAliases["kry"] = "kryton";
     heroAliases["aboss"] = "kryton";
+	heroAliases["doy"] = "doyenne";
+	heroAliases["wboss"] = "doyenne";
 
     heroAliases["luxurious"] = "luxuriusmaximus";
 }
@@ -774,16 +786,36 @@ void initQuests() {
     quests.push_back({"f27", "w28", "w29", "w29"});
     quests.push_back({"a27", "w27", "w29", "w29"});
     quests.push_back({"e27", "w28", "w29", "w29"}); // 130
-    quests.push_back({"a27", "a27", "w26", "e25", "e26", "f26"});
-    quests.push_back({"e27", "e27", "f26", "w26", "w27", "a27"});
-    quests.push_back({"w29", "e30", "f30", "a30"});
-    quests.push_back({"e27", "a27", "a27", "e27", "e27", "f27"});
-    quests.push_back({"a27", "f27", "a27", "e25", "w27", "w27"}); // 135
-    quests.push_back({"e27", "w28", "f28", "w28", "f28"});
-    quests.push_back({"f30", "a29", "f30", "a30"});
-    quests.push_back({"w28", "e28", "w28", "e28", "w28"});
-    quests.push_back({"a29", "f29", "e29", "e29", "w29"});
-    quests.push_back({"a30", "a30", "e30", "e30", "w28"}); // 140
+    quests.push_back({"a26", "e26", "w29", "e29", "f27"});
+    quests.push_back({"w29", "f29", "a27", "a26", "a28"});
+    quests.push_back({"w29", "e29", "a29", "a28"});
+    quests.push_back({"a27", "w29", "a27", "f28", "a27"});
+    quests.push_back({"w29", "w30", "a26", "a27", "a30"}); // 135
+    quests.push_back({"f26", "a30", "f27", "e30", "w28"});
+    quests.push_back({"a30", "a27", "a30", "a27", "e30"});
+    quests.push_back({"a27", "w30", "f28", "w30", "a27", "a27"});
+    quests.push_back({"w27", "w29", "a30", "a27", "e30", "a27"});
+    quests.push_back({"f27", "e30", "f28", "a30", "w28", "f28"}); // 140
+	quests.push_back({"w29", "a30", "a30", "nicte:1000"});
+	quests.push_back({"a30", "w29", "e29", "ladyodelith:1000"});
+    quests.push_back({"e30", "w29", "w30", "f25", "ignitor:1000"});
+    quests.push_back({"f27", "w28", "a30", "a27", "petry:1000"});
+    quests.push_back({"e26", "e30", "w29", "e29", "ignitor:1000"});
+    quests.push_back({"f26", "e30", "f25", "a30", "w29", "undine:1000"});
+    quests.push_back({"w29", "a30", "undine:1000", "petry:1000"});
+    quests.push_back({"a28", "w30", "ignitor:1000", "chroma:1000"});
+    quests.push_back({"a28", "a28", "w28", "undine:1000", "zaytus:1000"});
+    quests.push_back({"w28", "w28", "w29", "undine:1000", "ladyodelith:1000"});
+    quests.push_back({"e30", "e30", "w30", "w30", "undine:1000", "chroma:1000"});
+    quests.push_back({"f30", "f30", "e30", "a30", "ignitor:1000", "zaytus:1000"});
+    quests.push_back({"e30", "w30", "chroma:1000", "nicte:1000", "forestdruid:1000"});
+    quests.push_back({"w30", "a30", "undine:1000", "zaytus:1000", "ignitor:1000"});
+    quests.push_back({"f30", "zaytus:1000", "chroma:1000", "nicte:1000", "forestdruid:1000"});
+    quests.push_back({"f30", "f30", "undine:1000", "ladyodelith:1000", "forestdruid:1000", "petry:1000"});
+    quests.push_back({"e30", "e30", "ignitor:1000", "zaytus:1000", "nicte:1000", "undine:1000"});
+    quests.push_back({"w30", "ladyodelith:1000", "ignitor:1000", "zaytus:1000", "chroma:1000", "forestdruid:1000"});
+    quests.push_back({"ignitor:1000", "forestdruid:1000", "petry:1000", "chroma:1000", "ladyodelith:1000", "undine:1000"});
+    quests.push_back({"f30", "ignitor:1000", "undine:1000", "neptunius:1000"});
 }
 
 void readMonsterData(std::vector<std::string>::iterator it, std::vector<std::string>::iterator itEnd) {
