@@ -246,7 +246,7 @@
 82 164 atakeda EARTH ASCENDED BUFF_L EARTH EARTH 0.1819
 96 144 ahirate FIRE ASCENDED BUFF_L FIRE FIRE 0.1819
 114 126 ahattori WATER ASCENDED BUFF_L WATER WATER 0.1819
-0 110 doyenne WATER WORLDBOSS BUFF WATER WATER 0
+0 110 doyenne WATER WORLDBOSS DODGE ALL WATER 5000
 * ALIASES
 lady ladyoftwilight
 lot ladyoftwilight
@@ -284,10 +284,12 @@ loc lordofchaos
 fboss lordofchaos
 moak motherofallkodamas
 eboss motherofallkodamas
+kry kryton
 aboss kryton
-luxurious luxuriusmaximus
-wboss doyenne
 doy doyenne
+wboss doyenne
+luxurious luxuriusmaximus
+
 * QUESTS
 w5 +
 f1 a1 f1 a1 f1 a1 +

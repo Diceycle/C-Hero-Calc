@@ -30,7 +30,7 @@ struct TurnData {
     int target = 0;
     double critMult = 1;
     double hate = 0;
-	bool immunity5K = false ;
+    bool immunity5K = false ;
 };
 
 // Keep track of an army's condition during a fight and save some convenience data
@@ -126,14 +126,14 @@ inline void ArmyCondition::startNewTurn() {
     turnData.absorbMult = 0;
     turnData.absorbDamage = 0;
     
-	if( skillTypes[monstersLost] == DODGE )
-	{
+    if( skillTypes[monstersLost] == DODGE )
+    {
         turnData.immunity5K = true ;
     }
     else        
-	{
-		turnData.immunity5K = false ;
-	}
+    {
+        turnData.immunity5K = false ;
+    }
 
     // Gather all skills that trigger globally
     for (i = monstersLost; i < armySize; i++) {
@@ -173,8 +173,8 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     const int opposingProtection = opposingCondition.turnData.protection;
     const double opposingDampFactor = opposingCondition.turnData.dampFactor;
     const double opposingAbsorbMult = opposingCondition.turnData.absorbMult;
-	const bool opposingImmunityDamage = opposingCondition.turnData.immunity5K;
-	
+    const bool opposingImmunityDamage = opposingCondition.turnData.immunity5K;
+    
 
     // Handle Monsters with skills that only activate on attack.
     turnData.paoeDamage = 0;
@@ -278,9 +278,10 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         turnData.paoeDamage = castCeil((double) turnData.paoeDamage * opposingDampFactor);
     }
 
-    if( opposingImmunityDamage && turnData.valkyrieDamage >= 5000 )
+    if( opposingImmunityDamage && (turnData.valkyrieDamage >= 5000 || turnData.baseDamage >= 5000 ) )
     {
           turnData.valkyrieDamage = 0 ;
+          turnData.baseDamage = 0 ;
     }
 }
 
