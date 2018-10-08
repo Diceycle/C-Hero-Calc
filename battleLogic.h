@@ -126,6 +126,9 @@ inline void ArmyCondition::startNewTurn() {
     turnData.absorbMult = 0;
     turnData.absorbDamage = 0;
 	if( skillTypes[monstersLost] == DODGE )
+		{
+        turnData.immunity5K = true ;
+        )
 {
 turnData.immunity5K = true ;
 }
@@ -169,10 +172,18 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     const double opposingDampFactor = opposingCondition.turnData.dampFactor;
     const double opposingAbsorbMult = opposingCondition.turnData.absorbMult;
 	const bool opposingImmunityDamage = opposingCondition.turnData.immunity5K;
-	if( opposingImmunityDamage && turnData.valkyrieDamage > 5000 )
-{
-turnData.baseDamage = 0 ;
-}
+	if (opposingDampFactor < 1) {
+        turnData.valkyrieDamage *= opposingDampFactor;
+        turnData.explodeDamage = castCeil((double) turnData.explodeDamage * opposingDampFactor);
+        turnData.aoeDamage = castCeil((double) turnData.aoeDamage * opposingDampFactor);
+        turnData.healing = castCeil((double) turnData.healing * opposingDampFactor);
+        turnData.paoeDamage = castCeil((double) turnData.paoeDamage * opposingDampFactor);
+    }
+
+    if( opposingImmunityDamage && turnData.valkyrieDamage > 5000 )
+    {
+          turnData.valkyrieDamage = 0 ;
+    }
 
     // Handle Monsters with skills that only activate on attack.
     turnData.paoeDamage = 0;
