@@ -14,7 +14,7 @@
 #include <fstream>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.0.9.1d";
+const std::string VERSION = "3.0.9.1e";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -75,9 +75,11 @@ enum SkillType {
     BEER,       // Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
     GROW,       // Increase stats gained per lvl
     COUNTER,    // counters % of inflicted damage
+
     DICE,       // adds attack and defense at the start of battle from 0 to ability strength based on enemy starting lineup
     LUX,        // attacks an enemy based on turn number, enemy starting lineup, and number of enemies remaining
     CRIT,       // deals bonus damage based on enemy starting lineup and turn count
+
     EXPLODE,    // deals aoe damage when it kill an enemy
     ABSORB,     // prevents and takes a percentage of damage
     HATE,       // has extra elemental bonus, can't be treated as adapt due to order
@@ -110,7 +112,7 @@ struct HeroSkill {
     SkillType skillType;
     Element target;
     Element sourceElement;          // Not used anywhere
-    double amount;                   // Contains various information depending on the type
+    double amount;                  // Contains various information depending on the type
     bool violatesFightResults;      // True if a hero invalidates the data in FightResults if he is added to the army
     bool hasAoe;
     bool hasHeal;

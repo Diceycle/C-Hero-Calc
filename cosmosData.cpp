@@ -588,14 +588,13 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 180, 70, "athert",            EARTH, ASCENDED,  {PROTECT_L,     EARTH, EARTH, 0.1819f}));
     baseHeroes.push_back(Monster( 80, 160, "alordkirk",         FIRE,  ASCENDED,  {PROTECT_L,     FIRE, FIRE, 0.1819f}));
     baseHeroes.push_back(Monster( 75, 175, "aneptunius",        WATER, ASCENDED,  {PROTECT_L,     WATER, WATER, 0.1819f}));
-	
+
     baseHeroes.push_back(Monster( 106,124, "ahosokawa",         AIR,   ASCENDED,  {BUFF_L,        AIR, AIR, 0.1819f}));
     baseHeroes.push_back(Monster( 82, 164, "atakeda",           EARTH, ASCENDED,  {BUFF_L,        EARTH, EARTH, 0.1819f}));
     baseHeroes.push_back(Monster( 96, 144, "ahirate",           FIRE,  ASCENDED,  {BUFF_L,        FIRE, FIRE, 0.1819f}));
     baseHeroes.push_back(Monster( 114,126, "ahattori",          WATER, ASCENDED,  {BUFF_L,        WATER, WATER, 0.1819f}));
-	
+
     baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 110, "doyenne", WATER, WORLDBOSS, {DODGE,      ALL, ALL, 5000}));
-		
 }
 
 void initIndices() {
@@ -638,6 +637,7 @@ void initHeroAliases() {
     heroAliases["hawking"] = "drhawking";
     heroAliases["dice"] = "dicemaster";
     heroAliases["lux"] = "luxuriusmaximus";
+    heroAliases["luxurious"] = "luxuriusmaximus";
     heroAliases["poker"] = "pokerface";
     heroAliases["akirk"] = "alordkirk";
     heroAliases["anep"] = "aneptunius";
@@ -650,8 +650,6 @@ void initHeroAliases() {
     heroAliases["aboss"] = "kryton";
     heroAliases["doy"] = "doyenne";
     heroAliases["wboss"] = "doyenne";
-
-    heroAliases["luxurious"] = "luxuriusmaximus";
 }
 
 void initQuests() {
@@ -796,8 +794,8 @@ void initQuests() {
     quests.push_back({"a27", "w30", "f28", "w30", "a27", "a27"});
     quests.push_back({"w27", "w29", "a30", "a27", "e30", "a27"});
     quests.push_back({"f27", "e30", "f28", "a30", "w28", "f28"}); // 140
-	quests.push_back({"w29", "a30", "a30", "nicte:1000"});
-	quests.push_back({"a30", "w29", "e29", "ladyodelith:1000"});
+    quests.push_back({"w29", "a30", "a30", "nicte:1000"});
+    quests.push_back({"a30", "w29", "e29", "ladyodelith:1000"});
     quests.push_back({"e30", "w29", "w30", "f25", "ignitor:1000"});
     quests.push_back({"f27", "w28", "a30", "a27", "petry:1000"});
     quests.push_back({"e26", "e30", "w29", "e29", "ignitor:1000"}); // 145

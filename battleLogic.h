@@ -174,7 +174,6 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     const double opposingDampFactor = opposingCondition.turnData.dampFactor;
     const double opposingAbsorbMult = opposingCondition.turnData.absorbMult;
     const bool opposingImmunityDamage = opposingCondition.turnData.immunity5K;
-    
 
     // Handle Monsters with skills that only activate on attack.
     turnData.paoeDamage = 0;
@@ -278,10 +277,9 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         turnData.paoeDamage = castCeil((double) turnData.paoeDamage * opposingDampFactor);
     }
 
-    if( opposingImmunityDamage && (turnData.valkyrieDamage >= 5000 || turnData.baseDamage >= 5000 ) )
-    {
-          turnData.valkyrieDamage = 0 ;
-          turnData.baseDamage = 0 ;
+    if( opposingImmunityDamage && (turnData.valkyrieDamage >= 5000 || turnData.baseDamage >= 5000 ) ) {
+        turnData.valkyrieDamage = 0 ;
+        turnData.baseDamage = 0 ;
     }
 }
 
@@ -310,7 +308,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
             remainingHealths[i] -= castCeil(opposing.absorbDamage);
         }
 
-        remainingHealths[i] -= opposing.aoeDamage;
+            remainingHealths[i] -= opposing.aoeDamage;
 
         if (i > frontliner) { // Aoe that doesnt affect the frontliner
             remainingHealths[i] -= opposing.paoeDamage + castCeil(opposing.valkyrieDamage);
