@@ -594,7 +594,7 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 96, 144, "ahirate",           FIRE,  ASCENDED,  {BUFF_L,        FIRE, FIRE, 0.1819f}));
     baseHeroes.push_back(Monster( 114,126, "ahattori",          WATER, ASCENDED,  {BUFF_L,        WATER, WATER, 0.1819f}));
 
-    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 110, "doyenne", WATER, WORLDBOSS, {DODGE,      ALL, ALL, 5000}));
+    baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 111, "doyenne", WATER, WORLDBOSS, {DODGE,      ALL, ALL, 5000}));
 }
 
 void initIndices() {
