@@ -477,9 +477,9 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 26, 44, "petry",              EARTH, RARE,      {PROTECT,       EARTH, EARTH, 4}));
     baseHeroes.push_back(Monster( 58, 22, "zaytus",             FIRE,  RARE,      {PROTECT,       FIRE, FIRE, 4}));
 
-    baseHeroes.push_back(Monster( 75, 45, "spyke",              AIR,   LEGENDARY, {TRAINING,      SELF, AIR, 5}));
-    baseHeroes.push_back(Monster( 70, 55, "aoyuki",             WATER, LEGENDARY, {RAINBOW,       SELF, WATER, 50}));
-    baseHeroes.push_back(Monster( 50,100, "gaiabyte",           EARTH, LEGENDARY, {WITHER,        SELF, EARTH, 0.5f}));
+    baseHeroes.push_back(Monster( 75, 45, "spyke",              AIR,   LEGENDARY, {TRAINING,      SELF, AIR, 10}));
+    baseHeroes.push_back(Monster( 70, 55, "aoyuki",             WATER, LEGENDARY, {RAINBOW,       SELF, WATER, 100}));
+    baseHeroes.push_back(Monster( 75,150, "gaiabyte",           EARTH, LEGENDARY, {WITHER,        SELF, EARTH, 0.5f}));
 
     baseHeroes.push_back(Monster( 36, 14, "oymos",              AIR,   COMMON,    {BUFF,          AIR, AIR, 4}));
     baseHeroes.push_back(Monster( 32, 32, "xarth",              EARTH, RARE,      {CHAMPION,      EARTH, EARTH, 2}));
