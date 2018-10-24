@@ -430,7 +430,7 @@ f26 a30 f27 e30 w28 +
 a30 a27 a30 a27 e30 +
 a27 w30 f28 w30 a27 a27 +
 w27 w29 a30 a27 e30 a27 +
-f27 e30 f28 a30 w28 f28 +
+f27 e30 f28 a30 e27 a27 +
 w29 a30 a30 nicte:1000 +
 a30 w29 e29 ladyodelith:1000 +
 e30 w29 w30 f25 ignitor:1000 +

@@ -793,7 +793,7 @@ void initQuests() {
     quests.push_back({"a30", "a27", "a30", "a27", "e30"});
     quests.push_back({"a27", "w30", "f28", "w30", "a27", "a27"});
     quests.push_back({"w27", "w29", "a30", "a27", "e30", "a27"});
-    quests.push_back({"f27", "e30", "f28", "a30", "w28", "f28"}); // 140
+    quests.push_back({"f27", "e30", "f28", "a30", "e27", "a27"}); // 140
     quests.push_back({"w29", "a30", "a30", "nicte:1000"});
     quests.push_back({"a30", "w29", "e29", "ladyodelith:1000"});
     quests.push_back({"e30", "w29", "w30", "f25", "ignitor:1000"});
