@@ -30,6 +30,7 @@ struct TurnData {
     int target = 0;
     double critMult = 1;
     double hate = 0;
+    double leech = 0;
     bool immunity5K = false ;
 };
 
@@ -54,6 +55,7 @@ class ArmyCondition {
         int64_t seed;
 
         int berserkProcs; // for berserk ability
+        double evolveTotal; //for evolve ability
 
         int monstersLost;
 
@@ -82,6 +84,7 @@ inline void ArmyCondition::init(const Army & army, const int oldMonstersLost, co
     armySize = army.monsterAmount;
     monstersLost = oldMonstersLost;
     berserkProcs = 0;
+    evolveTotal = 0;
 
     dice = -1;
     booze = false;
@@ -174,6 +177,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     const double opposingDampFactor = opposingCondition.turnData.dampFactor;
     const double opposingAbsorbMult = opposingCondition.turnData.absorbMult;
     const bool opposingImmunityDamage = opposingCondition.turnData.immunity5K;
+    const double opposingDamage = opposingCondition.lineup[opposingCondition.monstersLost]->damage;
 
     // Handle Monsters with skills that only activate on attack.
     turnData.paoeDamage = 0;
@@ -185,6 +189,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     turnData.hate = 0; // same as above
     turnData.counter = 0;
     turnData.target = 0;
+    turnData.leech = 0;
 
     double friendsDamage = 0;
 
@@ -226,7 +231,11 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
                         break;
         case HATE:      turnData.hate = skillAmounts[monstersLost];
                         break;
-
+        case LEECH:     turnData.leech = skillAmounts[monstersLost];
+                        break;
+        case EVOLVE:    turnData.buffDamage += evolveTotal;
+                        evolveTotal += opposingDamage * skillAmounts[monstersLost];
+                        break;
         default:        break;
 
     }
@@ -261,6 +270,9 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         turnData.absorbDamage = turnData.valkyrieDamage * opposingAbsorbMult;
         turnData.valkyrieDamage = turnData.valkyrieDamage - turnData.absorbDamage;
     }
+    //leech healing based on damage dealt
+    if (turnData.leech != 0)
+        turnData.leech *= turnData.valkyrieDamage;
 
     // for compiling heavyDamage version
     if (turnData.valkyrieDamage >= std::numeric_limits<int>::max())
@@ -286,7 +298,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
 // Add damage to the opposing side and check for deaths
 inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     int frontliner = monstersLost; // save original frontliner
-
+        
     // Apply normal attack damage to the frontliner
     remainingHealths[frontliner + opposing.target] -= opposing.baseDamage;
 
@@ -317,10 +329,13 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
             if (i == monstersLost) {
                 monstersLost++;
                 berserkProcs = 0;
+                evolveTotal = 0;
             }
             skillTypes[i] = NOTHING; // disable dead hero's ability
         } else {
             remainingHealths[i] += turnData.healing;
+            if (skillTypes[i] == LEECH)
+                remainingHealths[i] += turnData.leech;
             if (remainingHealths[i] > maxHealths[i]) { // Avoid overhealing
                 remainingHealths[i] = maxHealths[i];
             }
@@ -426,6 +441,15 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
         if (rightCondition.skillTypes[rightCondition.monstersLost] == REVENGE &&
             rightCondition.remainingHealths[rightCondition.monstersLost] <= leftCondition.turnData.baseDamage) {
             rightCondition.turnData.aoeDamage += (int) round((double) rightCondition.lineup[rightCondition.monstersLost]->damage * rightCondition.skillAmounts[rightCondition.monstersLost]);
+        }
+        // Handle Deathstrike Damage before anything else. Deathstrike Damage caused through aoe is ignored
+        if (leftCondition.skillTypes[leftCondition.monstersLost] == DEATHSTRIKE &&
+            leftCondition.remainingHealths[leftCondition.monstersLost] <= rightCondition.turnData.baseDamage) {
+            leftCondition.turnData.baseDamage += leftCondition.skillAmounts[leftCondition.monstersLost];
+        }
+        if (rightCondition.skillTypes[rightCondition.monstersLost] == DEATHSTRIKE &&
+            rightCondition.remainingHealths[rightCondition.monstersLost] <= leftCondition.turnData.baseDamage) {
+            rightCondition.turnData.baseDamage += rightCondition.skillAmounts[rightCondition.monstersLost];
         }
 
         left.lastFightData.leftAoeDamage += (rightCondition.turnData.aoeDamage + rightCondition.turnData.paoeDamage);

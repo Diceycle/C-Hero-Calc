@@ -247,6 +247,9 @@
 96 144 ahirate FIRE ASCENDED BUFF_L FIRE FIRE 0.1819
 114 126 ahattori WATER ASCENDED BUFF_L WATER WATER 0.1819
 0 110 doyenne WATER WORLDBOSS DODGE ALL WATER 5000
+30 40 billy EARTH COMMON DEATHSTRIKE ALL EARTH 100
+88 22 sanqueen WATER RARE LEECH SELF WATER 0.8
+150 60 cliodhna AIR LEGENDARY EVOLVE SELF AIR 1
 * ALIASES
 lady ladyoftwilight
 lot ladyoftwilight
@@ -267,6 +270,7 @@ dulla dullahan
 odelith ladyodelith
 kirk lordkirk
 nep neptunius
+tak takeda
 hall hallinskidi
 atronix atr0n1x
 elf christmaself
@@ -277,9 +281,14 @@ lep leprechaun
 hawking drhawking
 dice dicemaster
 lux luxuriusmaximus
+luxurious luxuriusmaximus
 poker pokerface
 akirk alordkirk
 anep aneptunius
+atak atakeda
+san sanqueen
+squenn sanqueen
+clio cliodhna
 loc lordofchaos
 fboss lordofchaos
 moak motherofallkodamas
@@ -288,7 +297,6 @@ kry kryton
 aboss kryton
 doy doyenne
 wboss doyenne
-luxurious luxuriusmaximus
 
 * QUESTS
 w5 +
