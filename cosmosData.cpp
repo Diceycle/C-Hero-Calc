@@ -653,6 +653,7 @@ void initHeroAliases() {
     heroAliases["san"] = "sanqueen";
     heroAliases["squeen"] = "sanqueen";
     heroAliases["clio"] = "cliodhna";
+    heroAliases["cloddy"] = "cliodhna";
 
     heroAliases["loc"] = "lordofchaos";
     heroAliases["fboss"] = "lordofchaos";

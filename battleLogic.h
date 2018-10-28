@@ -298,7 +298,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
 // Add damage to the opposing side and check for deaths
 inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     int frontliner = monstersLost; // save original frontliner
-        
+
     // Apply normal attack damage to the frontliner
     remainingHealths[frontliner + opposing.target] -= opposing.baseDamage;
 
