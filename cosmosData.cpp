@@ -205,7 +205,7 @@ std::vector<MonsterIndex> availableHeroes; // Contains all user heroes' indices
 
 // Storage for Game Data
 std::vector<Monster> monsterBaseList; // Raw Monster Data, holds the actual Objects
-std::vector<Monster> baseHeroes; // Raw, unleveld Hero Data, holds actual Objects
+std::vector<Monster> baseHeroes; // Raw, unleveled Hero Data, holds actual Objects
 std::map<std::string, std::string> heroAliases; //Alternate or shorthand names for heroes
 std::vector<std::vector<std::string>> quests; // Quest Lineup from the game
 

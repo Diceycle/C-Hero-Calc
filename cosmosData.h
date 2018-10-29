@@ -14,7 +14,7 @@
 #include <fstream>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.1.1.1b";
+const std::string VERSION = "3.1.1.1c";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -38,31 +38,31 @@ const int64_t WORLDBOSS_HEALTH = 0;
 
 // Define types of HeroSkills, Elements and Rarities
 enum SkillType {
-    NOTHING,    // Base Skill used by normal monsters
+    NOTHING,    // Base Skill used by monsters
 
-    BUFF,       // Increases Damage of own army
-    PROTECT,    // Reduces incoming damage vs the own army
-    CHAMPION,   // This monster has the buff and protect ability at the same time
+    BUFF,       // Increases the attack of allies in front of this hero by the stated value
+    PROTECT,    // Reduces the attack damage taken by allies in front of this hero by the stated value
+    CHAMPION,   // This hero has both the BUFF and PROTECT abilities
 
-    AOE,        // Damages the entire opposing army every turn
-    HEAL,       // Heals the entire own army every turn
-    LIFESTEAL,  // Combines the Aoe and Heal ability into one
-    DAMPEN,     // Reduces the Effects of AOE percentually
-    AOEZERO,    // AOE damage (undampened) at turn 0 / healable / after leprechaun's skill
-    AOEZERO_L,  // AOEZERO skill that scales with level
+    AOE,        // Damages all enemies after each turn by the stated value
+    HEAL,       // Heals all allies after each turn by the stated value
+    LIFESTEAL,  // Damages all enemies and heals all allies after each turn by the stated value
+    DAMPEN,     // Reduces all enemy AOE damage by a percentage amount 
+    AOEZERO,    // AOE damage (undampened) at turn 0 / heal-able / after leprechaun's skill
+    AOEZERO_L,  // AOEZERO skill that scales with level 
 
-    BERSERK,    // Every attack this monster makes multiplies its own damage
-    FRIENDS,    // This monster receives a damage multiplicator for every NORMAL monster behind it
-    ADAPT,      // This monster deals more damage vs certain elements
-    RAINBOW,    // This monster receives a damage buff if monsters of every element are behind it
-    TRAINING,   // This monster receives a damage buff for every turn that passed
+    BERSERK,    // Receives an attack multiplier each time it attacks 
+    FRIENDS,    // Receives an attack multiplier for every monster behind it 
+    ADAPT,      // Deals increased damage against enemies of certain elements
 
-    WITHER,     // This monster's hp decrease after every attack it survives
+    RAINBOW,    // Receives an attack buff if at least one ally of every element is behind it
+    TRAINING,   // Receives an attack buff after each turn 
+    WITHER,     // This hero's hp decreases after each turn 
 
-    REVENGE,    // After this monster dies it damages the entire opposing army
+    REVENGE,    // When this hero dies it deals a percentage of its base attack to all enemies
     PIERCE,     // If this monster attacks it also damages every monster behind the attacked
     VALKYRIE,   // This monsters damage is done to all monsters, the value being reduced for each monster it hits.
-    TRAMPLE,    // This monsters attack damages n units from the front
+    TRAMPLE,    // This hero's attack targets the two frontmost enemies
 
     BUFF_L,     // Buff ability that scales with level
     PROTECT_L,  // Protect ability that scales with level
@@ -73,8 +73,8 @@ enum SkillType {
     DAMPEN_L,   // Dampen Ability that scales with level
 
     BEER,       // Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
-    GROW,       // Increase stats gained per lvl
-    COUNTER,    // counters % of inflicted damage
+    GROW,       // Increase stats gained when this hero levels up 
+    COUNTER,    // Enemies that attack this hero are damaged by a percentage amount of the damage taken
 
     DICE,       // adds attack and defense at the start of battle from 0 to ability strength based on enemy starting lineup
     LUX,        // attacks an enemy based on turn number, enemy starting lineup, and number of enemies remaining
@@ -88,7 +88,7 @@ enum SkillType {
 
     DEATHSTRIKE,// Deals damage after death
     LEECH,      // Heals based on damage dealt
-    EVOLVE      // Gains attack from taken damage
+    EVOLVE      // Gains attack from damage taken
 };
 
 enum Element {
