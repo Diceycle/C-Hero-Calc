@@ -27,7 +27,8 @@ struct TurnData {
     int explodeDamage = 0;
     bool trampleTriggered = false;
     int paoeDamage = 0;
-    int target = 0;
+    int direct_target = 0;
+    int counter_target = 0;
     double critMult = 1;
     double hate = 0;
     double leech = 0;
@@ -71,6 +72,7 @@ class ArmyCondition {
         inline int64_t getTurnSeed(int64_t seed, int turncounter) {
             return (seed + (101 - turncounter)*(101 - turncounter)*(101 - turncounter)) % (int64_t)round((double)seed / (101 - turncounter) + (101 - turncounter)*(101 - turncounter));
         }
+        inline int findMaxHP();
 };
 
 // extract and extrapolate all necessary data from an army
@@ -170,6 +172,7 @@ inline void ArmyCondition::startNewTurn() {
 // Handle all self-centered abilities and other multipliers on damage
 // Protection needs to be calculated at this point.
 inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition & opposingCondition) {
+
     turnData.baseDamage = lineup[monstersLost]->damage; // Get Base damage
 
     const Element opposingElement = opposingCondition.lineup[opposingCondition.monstersLost]->element;
@@ -178,6 +181,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     const double opposingAbsorbMult = opposingCondition.turnData.absorbMult;
     const bool opposingImmunityDamage = opposingCondition.turnData.immunity5K;
     const double opposingDamage = opposingCondition.lineup[opposingCondition.monstersLost]->damage;
+    ArmyCondition tempArmy;
 
     // Handle Monsters with skills that only activate on attack.
     turnData.paoeDamage = 0;
@@ -188,7 +192,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     turnData.critMult = 1; // same as above
     turnData.hate = 0; // same as above
     turnData.counter = 0;
-    turnData.target = 0;
+    turnData.direct_target = 0;
     turnData.leech = 0;
 
     double friendsDamage = 0;
@@ -225,7 +229,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         case DICE:      turnData.baseDamage += opposingCondition.seed % (int)(skillAmounts[monstersLost] + 1); // Only adds dice attack effect if dice is in front, max health is done before battle
                         break;
         // Pick a target, Bubbles currently dampens lux damage if not targeting first according to game code, interaction should be added if this doesn't change
-        case LUX:       turnData.target = getTurnSeed(opposingCondition.seed, turncounter) % (opposingCondition.armySize - opposingCondition.monstersLost);
+        case LUX:       turnData.direct_target = getTurnSeed(opposingCondition.seed, turncounter) % (opposingCondition.armySize - opposingCondition.monstersLost);
                         break;
         case CRIT:      turnData.critMult *= getTurnSeed(opposingCondition.seed, turncounter) % 2 == 1 ? skillAmounts[monstersLost] : 1;
                         break;
@@ -235,6 +239,10 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
                         break;
         case EVOLVE:    turnData.buffDamage += evolveTotal;
                         evolveTotal += opposingDamage * skillAmounts[monstersLost];
+                        break;
+        case COUNTER_MAX_HP: turnData.counter = skillAmounts[monstersLost];
+                        tempArmy = opposingCondition;
+                        turnData.counter_target = tempArmy.findMaxHP();
                         break;
         default:        break;
 
@@ -300,10 +308,12 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     int frontliner = monstersLost; // save original frontliner
 
     // Apply normal attack damage to the frontliner
-    remainingHealths[frontliner + opposing.target] -= opposing.baseDamage;
+    // If direct_target is non-zero that means Lux is hitting something not the front liner
+        remainingHealths[frontliner + opposing.direct_target] -= opposing.baseDamage;
 
+    // Add opposing.counter_target to handle fawkes not targetting the frontliner
     if (opposing.counter && (worldboss || remainingHealths[frontliner] > 0))
-        remainingHealths[frontliner] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
+        remainingHealths[frontliner + opposing.counter_target] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
 
     if (opposing.trampleTriggered && armySize > frontliner + 1) {
         remainingHealths[frontliner + 1] -= opposing.valkyrieDamage;
@@ -334,7 +344,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
             skillTypes[i] = NOTHING; // disable dead hero's ability
         } else {
             remainingHealths[i] += turnData.healing;
-            if (skillTypes[i] == LEECH)
+            if (i == frontliner)
                 remainingHealths[i] += turnData.leech;
             if (remainingHealths[i] > maxHealths[i]) { // Avoid overhealing
                 remainingHealths[i] = maxHealths[i];
@@ -348,6 +358,20 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     }
 }
 
+inline int ArmyCondition::findMaxHP() {
+    // go through alive monsters to determine most hp
+    // If there is a tie...
+    // Use the same loop as in ResolveDamage
+    int max_hp = 0;
+    int index_max_hp = 0;
+    for (int i = monstersLost; i < armySize; i++) {
+        if(remainingHealths[i] > max_hp) {
+            max_hp = remainingHealths[i];
+            index_max_hp = i;
+        }
+    }
+    return index_max_hp;
+}
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
     // left[0] and right[0] are the first monsters to fight

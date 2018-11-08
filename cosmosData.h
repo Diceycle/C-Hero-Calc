@@ -14,7 +14,7 @@
 #include <fstream>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.1.1.1c";
+const std::string VERSION = "3.2.0.3a";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -38,57 +38,59 @@ const int64_t WORLDBOSS_HEALTH = 0;
 
 // Define types of HeroSkills, Elements and Rarities
 enum SkillType {
-    NOTHING,    // Base Skill used by monsters
+    NOTHING,       // Base Skill used by monsters
 
-    BUFF,       // Increases the attack of allies in front of this hero by the stated value
-    PROTECT,    // Reduces the attack damage taken by allies in front of this hero by the stated value
-    CHAMPION,   // This hero has both the BUFF and PROTECT abilities
+    BUFF,          // Increases the attack of allies in front of this hero by the stated value
+    PROTECT,       // Reduces the attack damage taken by allies in front of this hero by the stated value
+    CHAMPION,      // This hero has both the BUFF and PROTECT abilities
 
-    AOE,        // Damages all enemies after each turn by the stated value
-    HEAL,       // Heals all allies after each turn by the stated value
-    LIFESTEAL,  // Damages all enemies and heals all allies after each turn by the stated value
-    DAMPEN,     // Reduces all enemy AOE damage by a percentage amount 
-    AOEZERO,    // AOE damage (undampened) at turn 0 / heal-able / after leprechaun's skill
-    AOEZERO_L,  // AOEZERO skill that scales with level 
+    AOE,           // Damages all enemies after each turn by the stated value
+    HEAL,          // Heals all allies after each turn by the stated value
+    LIFESTEAL,     // Damages all enemies and heals all allies after each turn by the stated value
+    DAMPEN,        // Reduces all enemy AOE damage by a percentage amount 
+    AOEZERO,       // AOE damage (undampened) at turn 0 / heal-able / after leprechaun's skill
+    AOEZERO_L,     // AOEZERO skill that scales with level 
 
-    BERSERK,    // Receives an attack multiplier each time it attacks 
-    FRIENDS,    // Receives an attack multiplier for every monster behind it 
-    ADAPT,      // Deals increased damage against enemies of certain elements
+    BERSERK,       // Receives an attack multiplier each time it attacks 
+    FRIENDS,       // Receives an attack multiplier for every monster behind it 
+    ADAPT,         // Deals increased damage against enemies of certain elements
 
-    RAINBOW,    // Receives an attack buff if at least one ally of every element is behind it
-    TRAINING,   // Receives an attack buff after each turn 
-    WITHER,     // This hero's hp decreases after each turn 
+    RAINBOW,       // Receives an attack buff if at least one ally of every element is behind it
+    TRAINING,      // Receives an attack buff after each turn 
+    WITHER,        // This hero's hp decreases after each turn 
 
-    REVENGE,    // When this hero dies it deals a percentage of its base attack to all enemies
-    PIERCE,     // If this monster attacks it also damages every monster behind the attacked
-    VALKYRIE,   // This monsters damage is done to all monsters, the value being reduced for each monster it hits.
-    TRAMPLE,    // This hero's attack targets the two frontmost enemies
+    REVENGE,       // When this hero dies it deals a percentage of its base attack to all enemies
+    PIERCE,        // If this monster attacks it also damages every monster behind the attacked
+    VALKYRIE,      // This monsters damage is done to all monsters, the value being reduced for each monster it hits.
+    TRAMPLE,       // This hero's attack targets the two frontmost enemies
 
-    BUFF_L,     // Buff ability that scales with level
-    PROTECT_L,  // Protect ability that scales with level
-    CHAMPION_L, // Champion ability that scales with level
-    AOE_L,      // AOE ability that scales with level
-    HEAL_L,     // Heal ability that scales with level
-    LIFESTEAL_L,// Lifesteal ability that scales with level
-    DAMPEN_L,   // Dampen Ability that scales with level
+    BUFF_L,        // Buff ability that scales with level
+    PROTECT_L,     // Protect ability that scales with level
+    CHAMPION_L,    // Champion ability that scales with level
+    AOE_L,         // AOE ability that scales with level
+    HEAL_L,        // Heal ability that scales with level
+    LIFESTEAL_L,   // Lifesteal ability that scales with level
+    DAMPEN_L,      // Dampen Ability that scales with level
 
-    BEER,       // Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
-    GROW,       // Increase stats gained when this hero levels up 
-    COUNTER,    // Enemies that attack this hero are damaged by a percentage amount of the damage taken
+    BEER,          // Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
+    GROW,          // Increase stats gained when this hero levels up 
+    COUNTER,       // Enemies that attack this hero are damaged by a percentage amount of the damage taken
 
-    DICE,       // adds attack and defense at the start of battle from 0 to ability strength based on enemy starting lineup
-    LUX,        // attacks an enemy based on turn number, enemy starting lineup, and number of enemies remaining
-    CRIT,       // deals bonus damage based on enemy starting lineup and turn count
+    DICE,          // adds attack and defense at the start of battle from 0 to ability strength based on enemy starting lineup
+    LUX,           // attacks an enemy based on turn number, enemy starting lineup, and number of enemies remaining
+    CRIT,          // deals bonus damage based on enemy starting lineup and turn count
 
-    EXPLODE,    // deals aoe damage when it kill an enemy
-    ABSORB,     // prevents and takes a percentage of damage
-    HATE,       // has extra elemental bonus, can't be treated as adapt due to order
-    EXPLODE_L,  // explode that scales with level
-    DODGE,      // Dodges attacks completely over a certain amount of damage
+    EXPLODE,       // deals aoe damage when it kill an enemy
+    ABSORB,        // prevents and takes a percentage of damage
+    HATE,          // has extra elemental bonus, can't be treated as adapt due to order
+    EXPLODE_L,     // explode that scales with level
+    DODGE,         // Dodges attacks completely over a certain amount of damage
 
-    DEATHSTRIKE,// Deals damage after death
-    LEECH,      // Heals based on damage dealt
-    EVOLVE      // Gains attack from damage taken
+    DEATHSTRIKE,   // Deals damage after death
+    LEECH,         // Heals based on damage dealt
+    EVOLVE,        // Gains attack from damage taken
+
+    COUNTER_MAX_HP // Reflects damage to the enemy with most HP
 };
 
 enum Element {

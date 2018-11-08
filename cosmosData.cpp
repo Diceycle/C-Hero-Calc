@@ -1,4 +1,5 @@
 #include "cosmosData.h"
+#include "inputProcessing.h"
 
 // Private constructor that is called by all public ones. Fully initializes all attributes
 Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aName, Element anElement, HeroRarity aRarity, HeroSkill aSkill, int aLevel) :
@@ -115,7 +116,7 @@ std::string Army::toString(int tier) {
     if (index != -1) {
         s << "quest" << index << "-" << tier << " | ";
     }
-    s << "Followers: " << std::setw(7) << this->followerCost << " | ";
+    s << "Followers: " << std::setw(7) << numberWithSeparators(this->followerCost) << " | ";
     for (int i = this->monsterAmount-1; i >= 0; i--) {
         s << monsterReference[this->monsters[i]].name << " "; // Print in reversed Order
     } s << "<==]";
@@ -252,6 +253,7 @@ std::map<std::string, int> stringToEnum = {
     {"DEATHSTRIKE", DEATHSTRIKE},
     {"LEECH", LEECH},
     {"EVOLVE", EVOLVE},
+    {"COUNTER_MAX_HP", COUNTER_MAX_HP},
 
     {"EARTH", EARTH},
     {"AIR", AIR},
@@ -602,6 +604,9 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 30, 40, "billy",              EARTH, COMMON,    {DEATHSTRIKE,   ALL, EARTH, 100}));
     baseHeroes.push_back(Monster( 88, 22, "sanqueen",           WATER, RARE,      {LEECH,         SELF, WATER, 0.8}));
     baseHeroes.push_back(Monster(150, 60, "cliodhna",           AIR,   LEGENDARY, {EVOLVE,        SELF, AIR, 1}));
+
+    baseHeroes.push_back(Monster( 340, 64, "guy",               FIRE,  ASCENDED,  {COUNTER_MAX_HP, FIRE, FIRE, 1}));
+    baseHeroes.push_back(Monster( 126,114, "adefile",           FIRE,  ASCENDED,  {EXPLODE,       ALL, FIRE, 150}));
 }
 
 void initIndices() {
@@ -654,6 +659,8 @@ void initHeroAliases() {
     heroAliases["squeen"] = "sanqueen";
     heroAliases["clio"] = "cliodhna";
     heroAliases["cloddy"] = "cliodhna";
+    heroAliases["fawkes"] = "guy";
+    heroAliases["guyfawkes"] = "guy";
 
     heroAliases["loc"] = "lordofchaos";
     heroAliases["fboss"] = "lordofchaos";
