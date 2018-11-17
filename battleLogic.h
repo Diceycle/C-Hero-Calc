@@ -320,35 +320,48 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
 
     // Handle aoe Damage for all combatants
     for (int i = frontliner; i < armySize; i++) {
-        // Only apply AOE damage if the unit is alive
-        if(remainingHealths[i] > 0 ) {
-          // handle absorbed damage
-          if (skillTypes[i] == ABSORB && i > frontliner) {
-            remainingHealths[i] -= castCeil(opposing.absorbDamage);
-          }
+      int aliveAtBeginning = 0;
+      if(remainingHealths[i] > 0) {
+        aliveAtBeginning = 1;
+      }
+      // handle absorbed damage
+      if (skillTypes[i] == ABSORB && i > frontliner) {
+        remainingHealths[i] -= castCeil(opposing.absorbDamage);
+      }
 
-          remainingHealths[i] -= opposing.aoeDamage;
+      remainingHealths[i] -= opposing.aoeDamage;
 
-          if (i > frontliner) { // Aoe that doesnt affect the frontliner
-            remainingHealths[i] -= castCeil(opposing.valkyrieDamage);
-          }
-          if (remainingHealths[i] <= 0 && !worldboss) {
-            if (i == monstersLost) {
-              monstersLost++;
-              berserkProcs = 0;
-              evolveTotal = 0;
-            }
-            skillTypes[i] = NOTHING; // disable dead hero's ability
-          } else {
-            remainingHealths[i] += turnData.healing;
-            if (i == frontliner)
-            remainingHealths[i] += turnData.leech;
-            if (remainingHealths[i] > maxHealths[i]) { // Avoid overhealing
-              remainingHealths[i] = maxHealths[i];
-            }
-          }
+      if (i > frontliner) { // Aoe that doesnt affect the frontliner
+        remainingHealths[i] -= castCeil(opposing.valkyrieDamage);
+      }
+      if (remainingHealths[i] <= 0 && !worldboss) {
+        if (i == monstersLost) {
+          monstersLost++;
+          berserkProcs = 0;
+          evolveTotal = 0;
+        }
+        skillTypes[i] = NOTHING; // disable dead hero's ability
+      } else {
+        remainingHealths[i] += turnData.healing;
+        if (i == frontliner)
+        remainingHealths[i] += turnData.leech;
+        if (remainingHealths[i] > maxHealths[i]) { // Avoid overhealing
+          remainingHealths[i] = maxHealths[i];
+        }
+
+      }
+
+      // Always apply the valkyrieMult if it is zero. Otherwise, given the way
+      // that riochet is implemented it will cause melee attacks to turn into
+      // ricochet
+      if(opposing.valkyrieMult > 0) {
+        // Only reduce the damage if it hit an alive unit
+        if(aliveAtBeginning) {
           opposing.valkyrieDamage *= opposing.valkyrieMult;
         }
+      }  else {
+        opposing.valkyrieDamage *= opposing.valkyrieMult;
+      }
     }
     // Handle wither ability
     if (skillTypes[monstersLost] == WITHER && monstersLost == frontliner) {
