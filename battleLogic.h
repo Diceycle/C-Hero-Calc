@@ -26,7 +26,6 @@ struct TurnData {
     double absorbDamage = 0;
     int explodeDamage = 0;
     bool trampleTriggered = false;
-    int paoeDamage = 0;
     int direct_target = 0;
     int counter_target = 0;
     double critMult = 1;
@@ -184,7 +183,6 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     ArmyCondition tempArmy;
 
     // Handle Monsters with skills that only activate on attack.
-    turnData.paoeDamage = 0;
     turnData.trampleTriggered = false;
     turnData.explodeDamage = 0;
     turnData.valkyrieMult = 0;
@@ -215,8 +213,6 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
                             turnData.multiplier *= skillAmounts[monstersLost];
                         } break;
         case BERSERK:   turnData.multiplier *= (double) pow(skillAmounts[monstersLost], berserkProcs); berserkProcs++;
-                        break;
-        case PIERCE:    turnData.paoeDamage = (int) ((double) lineup[monstersLost]->damage * skillAmounts[monstersLost]);
                         break;
         case VALKYRIE:  turnData.valkyrieMult = skillAmounts[monstersLost];
                         break;
@@ -294,7 +290,6 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         turnData.explodeDamage = castCeil((double) turnData.explodeDamage * opposingDampFactor);
         turnData.aoeDamage = castCeil((double) turnData.aoeDamage * opposingDampFactor);
         turnData.healing = castCeil((double) turnData.healing * opposingDampFactor);
-        turnData.paoeDamage = castCeil((double) turnData.paoeDamage * opposingDampFactor);
     }
 
     if( opposingImmunityDamage && (turnData.valkyrieDamage >= 5000 || turnData.baseDamage >= 5000 ) ) {
@@ -333,7 +328,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
             remainingHealths[i] -= opposing.aoeDamage;
 
         if (i > frontliner) { // Aoe that doesnt affect the frontliner
-            remainingHealths[i] -= opposing.paoeDamage + castCeil(opposing.valkyrieDamage);
+            remainingHealths[i] -= castCeil(opposing.valkyrieDamage);
         }
         if (remainingHealths[i] <= 0 && !worldboss) {
             if (i == monstersLost) {
@@ -476,8 +471,8 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
             rightCondition.turnData.baseDamage += rightCondition.skillAmounts[rightCondition.monstersLost];
         }
 
-        left.lastFightData.leftAoeDamage += (rightCondition.turnData.aoeDamage + rightCondition.turnData.paoeDamage);
-        left.lastFightData.rightAoeDamage += (leftCondition.turnData.aoeDamage + leftCondition.turnData.paoeDamage);
+        left.lastFightData.leftAoeDamage += rightCondition.turnData.aoeDamage;
+        left.lastFightData.rightAoeDamage += leftCondition.turnData.aoeDamage;
 
         // Check if anything died as a result
         leftCondition.resolveDamage(rightCondition.turnData);

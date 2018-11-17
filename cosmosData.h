@@ -60,7 +60,6 @@ enum SkillType {
     WITHER,        // This hero's hp decreases after each turn 
 
     REVENGE,       // When this hero dies it deals a percentage of its base attack to all enemies
-    PIERCE,        // If this monster attacks it also damages every monster behind the attacked
     VALKYRIE,      // This monsters damage is done to all monsters, the value being reduced for each monster it hits.
     TRAMPLE,       // This hero's attack targets the two frontmost enemies
 

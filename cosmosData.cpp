@@ -81,7 +81,7 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, double a
                      aType == LIFESTEAL || aType == LIFESTEAL_L);
     // hasAoe should include all things affected by dampen
     this->hasAoe = (aType == AOE || aType == AOE_L ||
-                    aType == REVENGE || aType == PIERCE ||
+                    aType == REVENGE ||
                     aType == EXPLODE ||
                     this->hasHeal || this->hasAsymmetricAoe);
     // For expanding armies, if new hero added to the back might have changed the fight, old result is not valid
@@ -229,7 +229,6 @@ std::map<std::string, int> stringToEnum = {
     {"TRAINING", TRAINING},
     {"WITHER", WITHER},
     {"REVENGE", REVENGE},
-    {"PIERCE", PIERCE},
     {"VALKYRIE", VALKYRIE},
     {"TRAMPLE", TRAMPLE},
     {"BUFF_L", BUFF_L},
