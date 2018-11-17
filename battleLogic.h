@@ -129,12 +129,12 @@ inline void ArmyCondition::startNewTurn() {
     turnData.dampFactor = 1;
     turnData.absorbMult = 0;
     turnData.absorbDamage = 0;
-    
+
     if( skillTypes[monstersLost] == DODGE )
     {
         turnData.immunity5K = true ;
     }
-    else        
+    else
     {
         turnData.immunity5K = false ;
     }
@@ -320,32 +320,35 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
 
     // Handle aoe Damage for all combatants
     for (int i = frontliner; i < armySize; i++) {
-        // handle absorbed damage
-        if (skillTypes[i] == ABSORB && i > frontliner) {
+        // Only apply AOE damage if the unit is alive
+        if(remainingHealths[i] > 0 ) {
+          // handle absorbed damage
+          if (skillTypes[i] == ABSORB && i > frontliner) {
             remainingHealths[i] -= castCeil(opposing.absorbDamage);
-        }
+          }
 
-            remainingHealths[i] -= opposing.aoeDamage;
+          remainingHealths[i] -= opposing.aoeDamage;
 
-        if (i > frontliner) { // Aoe that doesnt affect the frontliner
+          if (i > frontliner) { // Aoe that doesnt affect the frontliner
             remainingHealths[i] -= castCeil(opposing.valkyrieDamage);
-        }
-        if (remainingHealths[i] <= 0 && !worldboss) {
+          }
+          if (remainingHealths[i] <= 0 && !worldboss) {
             if (i == monstersLost) {
-                monstersLost++;
-                berserkProcs = 0;
-                evolveTotal = 0;
+              monstersLost++;
+              berserkProcs = 0;
+              evolveTotal = 0;
             }
             skillTypes[i] = NOTHING; // disable dead hero's ability
-        } else {
+          } else {
             remainingHealths[i] += turnData.healing;
             if (i == frontliner)
-                remainingHealths[i] += turnData.leech;
+            remainingHealths[i] += turnData.leech;
             if (remainingHealths[i] > maxHealths[i]) { // Avoid overhealing
-                remainingHealths[i] = maxHealths[i];
+              remainingHealths[i] = maxHealths[i];
             }
+          }
+          opposing.valkyrieDamage *= opposing.valkyrieMult;
         }
-        opposing.valkyrieDamage *= opposing.valkyrieMult;
     }
     // Handle wither ability
     if (skillTypes[monstersLost] == WITHER && monstersLost == frontliner) {
