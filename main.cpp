@@ -610,6 +610,11 @@ int main(int argc, char** argv) {
             bool leftWins = simulateFight(left, right, true);
             interface.outputMessage(to_string(leftWins) + " " + to_string(left.followerCost) + " " + to_string(right.followerCost), SOLUTION_OUTPUT);
 
+            if(config.showReplayStrings) {
+              interface.outputMessage("\nReplay:\n", SOLUTION_OUTPUT);
+              interface.outputMessage(makeBattleReplay(left, right), SOLUTION_OUTPUT);
+            }
+
             if (!iomanager.askYesNoQuestion("Simulate another Fight?", NOTIFICATION_OUTPUT, TOKENS.NO)) {
                 break;
             }
