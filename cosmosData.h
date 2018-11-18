@@ -14,7 +14,7 @@
 #include <fstream>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "3.2.0.3a";
+const std::string VERSION = "3.2.0.4a";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -47,17 +47,17 @@ enum SkillType {
     AOE,           // Damages all enemies after each turn by the stated value
     HEAL,          // Heals all allies after each turn by the stated value
     LIFESTEAL,     // Damages all enemies and heals all allies after each turn by the stated value
-    DAMPEN,        // Reduces all enemy AOE damage by a percentage amount 
+    DAMPEN,        // Reduces all enemy AOE damage by a percentage amount
     AOEZERO,       // AOE damage (undampened) at turn 0 / heal-able / after leprechaun's skill
-    AOEZERO_L,     // AOEZERO skill that scales with level 
+    AOEZERO_L,     // AOEZERO skill that scales with level
 
-    BERSERK,       // Receives an attack multiplier each time it attacks 
-    FRIENDS,       // Receives an attack multiplier for every monster behind it 
+    BERSERK,       // Receives an attack multiplier each time it attacks
+    FRIENDS,       // Receives an attack multiplier for every monster behind it
     ADAPT,         // Deals increased damage against enemies of certain elements
 
     RAINBOW,       // Receives an attack buff if at least one ally of every element is behind it
-    TRAINING,      // Receives an attack buff after each turn 
-    WITHER,        // This hero's hp decreases after each turn 
+    TRAINING,      // Receives an attack buff after each turn
+    WITHER,        // This hero's hp decreases after each turn
 
     REVENGE,       // When this hero dies it deals a percentage of its base attack to all enemies
     VALKYRIE,      // This monsters damage is done to all monsters, the value being reduced for each monster it hits.
@@ -72,7 +72,7 @@ enum SkillType {
     DAMPEN_L,      // Dampen Ability that scales with level
 
     BEER,          // Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
-    GROW,          // Increase stats gained when this hero levels up 
+    GROW,          // Increase stats gained when this hero levels up
     COUNTER,       // Enemies that attack this hero are damaged by a percentage amount of the damage taken
 
     DICE,          // adds attack and defense at the start of battle from 0 to ability strength based on enemy starting lineup
