@@ -321,7 +321,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     // Handle aoe Damage for all combatants
     for (int i = frontliner; i < armySize; i++) {
       int aliveAtBeginning = 0;
-      if(remainingHealths[i] > 0) {
+      if(remainingHealths[i] > 0 || i == frontliner) {
         aliveAtBeginning = 1;
       }
       // handle absorbed damage
@@ -357,6 +357,7 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
       if(opposing.valkyrieMult > 0) {
         // Only reduce the damage if it hit an alive unit
         if(aliveAtBeginning) {
+          std::cout << i << ". Applying mult of " << opposing.valkyrieMult << std::endl;
           opposing.valkyrieDamage *= opposing.valkyrieMult;
         }
       }  else {
