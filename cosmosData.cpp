@@ -172,7 +172,8 @@ void Instance::setTarget(Army aTarget) {
         Monster currentMonster = monsterReference[i];
         int attack = lastMonster.damage;
         if (counter[currentMonster.element] == lastMonster.element) {
-            attack = castCeil((double) attack * elementalBoost);
+            // attack = castCeil((double) attack * elementalBoost);
+            attack = round((double) attack * elementalBoost);
         }
         this->monsterUsefulLast.push_back(currentMonster.hp > attack || currentMonster.skill.violatesFightResults);
     }

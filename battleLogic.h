@@ -282,14 +282,18 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     if (turnData.valkyrieDamage >= std::numeric_limits<int>::max())
         turnData.baseDamage = static_cast<DamageType>(ceil(turnData.valkyrieDamage));
     else
-        turnData.baseDamage = castCeil(turnData.valkyrieDamage);
+        // turnData.baseDamage = castCeil(turnData.valkyrieDamage);
+        turnData.baseDamage = round(turnData.valkyrieDamage);
 
     // Handle enemy dampen ability and reduce aoe effects
     if (opposingDampFactor < 1) {
         turnData.valkyrieDamage *= opposingDampFactor;
-        turnData.explodeDamage = castCeil((double) turnData.explodeDamage * opposingDampFactor);
-        turnData.aoeDamage = castCeil((double) turnData.aoeDamage * opposingDampFactor);
-        turnData.healing = castCeil((double) turnData.healing * opposingDampFactor);
+        // turnData.explodeDamage = castCeil((double) turnData.explodeDamage * opposingDampFactor);
+        // turnData.aoeDamage = castCeil((double) turnData.aoeDamage * opposingDampFactor);
+        // turnData.healing = castCeil((double) turnData.healing * opposingDampFactor);
+        turnData.explodeDamage = round((double) turnData.explodeDamage * opposingDampFactor);
+        turnData.aoeDamage = round((double) turnData.aoeDamage * opposingDampFactor);
+        turnData.healing = round((double) turnData.healing * opposingDampFactor);
     }
 
     if( opposingImmunityDamage && (turnData.valkyrieDamage >= 5000 || turnData.baseDamage >= 5000 ) ) {
@@ -326,13 +330,15 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
       }
       // handle absorbed damage
       if (skillTypes[i] == ABSORB && i > frontliner) {
-        remainingHealths[i] -= castCeil(opposing.absorbDamage);
+        // remainingHealths[i] -= castCeil(opposing.absorbDamage);
+        remainingHealths[i] -= round(opposing.absorbDamage);
       }
 
       remainingHealths[i] -= opposing.aoeDamage;
 
       if (i > frontliner) { // Aoe that doesnt affect the frontliner
-        remainingHealths[i] -= castCeil(opposing.valkyrieDamage);
+        // remainingHealths[i] -= castCeil(opposing.valkyrieDamage);
+        remainingHealths[i] -= round(opposing.valkyrieDamage);
       }
       if (remainingHealths[i] <= 0 && !worldboss) {
         if (i == monstersLost) {
@@ -342,13 +348,12 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
         }
         skillTypes[i] = NOTHING; // disable dead hero's ability
       } else {
-        remainingHealths[i] += turnData.healing;
+          remainingHealths[i] += turnData.healing;
         if (i == frontliner)
-        remainingHealths[i] += turnData.leech;
+          remainingHealths[i] += turnData.leech;
         if (remainingHealths[i] > maxHealths[i]) { // Avoid overhealing
           remainingHealths[i] = maxHealths[i];
         }
-
       }
 
       // Always apply the valkyrieMult if it is zero. Otherwise, given the way
@@ -357,7 +362,6 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
       if(opposing.valkyrieMult > 0) {
         // Only reduce the damage if it hit an alive unit
         if(aliveAtBeginning) {
-          std::cout << i << ". Applying mult of " << opposing.valkyrieMult << std::endl;
           opposing.valkyrieDamage *= opposing.valkyrieMult;
         }
       }  else {
@@ -366,7 +370,8 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     }
     // Handle wither ability
     if (skillTypes[monstersLost] == WITHER && monstersLost == frontliner) {
-        remainingHealths[monstersLost] = castCeil((double) remainingHealths[monstersLost] * skillAmounts[monstersLost]);
+        // remainingHealths[monstersLost] = castCeil((double) remainingHealths[monstersLost] * skillAmounts[monstersLost]);
+        remainingHealths[monstersLost] = round((double) remainingHealths[monstersLost] * skillAmounts[monstersLost]);
     }
 }
 
