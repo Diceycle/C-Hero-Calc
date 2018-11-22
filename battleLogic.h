@@ -191,6 +191,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     turnData.hate = 0; // same as above
     turnData.counter = 0;
     turnData.direct_target = 0;
+    turnData.counter_target = 0;
     turnData.leech = 0;
 
     double friendsDamage = 0;
@@ -308,17 +309,22 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
 
     // Apply normal attack damage to the frontliner
     // If direct_target is non-zero that means Lux is hitting something not the front liner
-        remainingHealths[frontliner + opposing.direct_target] -= opposing.baseDamage;
+    // std::cout << " BASE " << opposing.baseDamage << " to " << frontliner + opposing.direct_target << std::endl;
+    remainingHealths[frontliner + opposing.direct_target] -= opposing.baseDamage;
 
     // Add opposing.counter_target to handle fawkes not targetting the frontliner
-    if (opposing.counter && (worldboss || remainingHealths[frontliner] > 0))
-        remainingHealths[frontliner + opposing.counter_target] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
+    if (opposing.counter && (worldboss || remainingHealths[frontliner] > 0)) {
+      // std::cout << "COUNTER " << static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter)) << " damage " << " to " << frontliner + opposing.counter_target << std::endl;
+      remainingHealths[frontliner + opposing.counter_target] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
+    }
 
     if (opposing.trampleTriggered && armySize > frontliner + 1) {
+        // std::cout << "TRAMPLE" << std::endl;
         remainingHealths[frontliner + 1] -= opposing.valkyrieDamage;
     }
 
     if (opposing.explodeDamage != 0 && remainingHealths[frontliner] <= 0 && !worldboss) {
+        // std::cout << "EXPLODE" << std::endl;
         opposing.aoeDamage += opposing.explodeDamage;
     }
 
@@ -387,7 +393,10 @@ inline int ArmyCondition::findMaxHP() {
             index_max_hp = i;
         }
     }
-    return index_max_hp;
+    // This is an absolute index, the rest of the code expects a relative index
+    // so return it relative to the starting point
+    // std::cout << std::endl << "Choosing " << index_max_hp << " with " << remainingHealths[index_max_hp] << std::endl;
+    return index_max_hp - monstersLost;
 }
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
@@ -503,7 +512,7 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
         turncounter++;
 
         if (verbose) {
-            std::cout << "After Turn " << turncounter << ":" << std::endl;
+            std::cout << std::endl << "After Turn " << turncounter << ":" << std::endl;
 
             std::cout << "Left:" << std::endl;
             std::cout << "  Damage: " << std::setw(4) << leftCondition.turnData.baseDamage << std::endl;
