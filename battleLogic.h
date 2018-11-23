@@ -234,6 +234,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
                         break;
         // Pick a target, Bubbles currently dampens lux damage if not targeting first according to game code, interaction should be added if this doesn't change
         case LUX:       // turnData.direct_target = getLuxTarget(opposingCondition, getNewTurnSeed(opposingCondition, turncounter + 1));
+                        // Lux targetting still busted if it gets multiple hits, deducts from dead unit
                         turnData.direct_target = getLuxTarget(opposingCondition, getTurnSeed(opposingCondition.seed, 99 -turncounter));
                         // turncounter is number of turns completed, game calculates on current turn
                         // turnData.direct_target = getTurnSeed(opposingCondition.seed, turncounter) % (opposingCondition.armySize - opposingCondition.monstersLost);
