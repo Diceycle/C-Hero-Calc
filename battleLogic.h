@@ -72,6 +72,8 @@ class ArmyCondition {
             return (seed + (101 - turncounter)*(101 - turncounter)*(101 - turncounter)) % (int64_t)round((double)seed / (101 - turncounter) + (101 - turncounter)*(101 - turncounter));
         }
         inline int findMaxHP();
+        inline int64_t getNewTurnSeed(int turncounter);
+        inline int getLuxTarget(const ArmyCondition & opposingCondition, int64_t seed);
 };
 
 // extract and extrapolate all necessary data from an army
@@ -226,7 +228,8 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         case DICE:      turnData.baseDamage += opposingCondition.seed % (int)(skillAmounts[monstersLost] + 1); // Only adds dice attack effect if dice is in front, max health is done before battle
                         break;
         // Pick a target, Bubbles currently dampens lux damage if not targeting first according to game code, interaction should be added if this doesn't change
-        case LUX:       turnData.direct_target = getTurnSeed(opposingCondition.seed, turncounter) % (opposingCondition.armySize - opposingCondition.monstersLost);
+        case LUX:       turnData.direct_target = getLuxTarget(opposingCondition, getNewTurnSeed(turncounter));
+                        // turnData.direct_target = getTurnSeed(opposingCondition.seed, turncounter) % (opposingCondition.armySize - opposingCondition.monstersLost);
                         break;
         case CRIT:      turnData.critMult *= getTurnSeed(opposingCondition.seed, turncounter) % 2 == 1 ? skillAmounts[monstersLost] : 1;
                         break;
@@ -397,6 +400,132 @@ inline int ArmyCondition::findMaxHP() {
     // so return it relative to the starting point
     // std::cout << std::endl << "Choosing " << index_max_hp << " with " << remainingHealths[index_max_hp] << std::endl;
     return index_max_hp - monstersLost;
+}
+
+inline int64_t ArmyCondition::getNewTurnSeed(int turncounter) {
+  /* Javascript code from version 3.2.0.4
+  function calcSeed(A, times) {
+    for (var seed = 1, i = 0; i < A.length; ++i) seed = (seed * Math.abs(A[i]) + 1) % 2147483647;
+    for (i = 0; i < times; ++i) seed = 16807 * seed % 2147483647;
+    return seed
+  }
+  */
+  // std::cout << "\nEntering getNewTurnSeed with turn " << turncounter << std::endl;
+  int64_t seed = 1;
+  for(int i = 0; i < armySize; i++) {
+    // std::cout << "Index " << i << std::endl;
+    // New CQ code removes dead units, so simulate that here by checking for health
+    if(remainingHealths[i] > 0) {
+      // std::cout << "\tIn if\n";
+      // std::cout << "Lineup is " << lineup[i]->index << std::endl;
+      seed = (seed * abs(lineup[i]->index) + 1) % 2147483647;
+      // std::cout << "\tSeed is " << seed << std::endl;
+    }
+  }
+
+  // std::cout << "Out of loop with seed value " << seed << std::endl;
+
+  for (int i = 0; i < 100 - turncounter; i++) {
+    seed = 16807 * seed % 2147483647;
+  }
+  // std::cout << "Returning from getNewTurnSeed " << seed << std::endl << std::endl;
+  return seed;
+}
+
+inline int ArmyCondition::getLuxTarget(const ArmyCondition & opposingCondition, int64_t seed) {
+  /* Javascript code from 3.2.0.4
+  function shuffleBySeed(arr, seed) {
+    for (var size = arr.length, mapa = new Array(size), x = 0; x < size; x++) mapa[x] = (seed = (9301 * seed + 49297) % 233280) / 233280 * size | 0;
+    for (var i = size - 1; i > 0; i--) arr[i] = arr.splice(mapa[size - 1 - i], 1, arr[i])[0]
+}
+  called like `else if ("rtrg" == skill.type) shuffleBySeed(turn.atk.damageFactor, seed);`
+  damageFactor appears to be initialized to an array of one element consisting of [1]
+  function getTurnData(AL, BL) {
+    var df = [1];
+    ...
+    damageFactor: df,
+    ...
+  So looking at things that probably means that we need an array of size the of number alive monsters
+  with the first element initialized to 1
+  815500433
+  */
+
+  // Count the number of alive monsters;
+  int alive_count = 0;
+  for(int i = 0; i < opposingCondition.armySize; i++) {
+    // New CQ code removes dead units, so simulate that here by checking for health
+    // std::cout << i << ". Remaining health is " << opposingCondition.remainingHealths[i] << std::endl;
+    if(opposingCondition.remainingHealths[i] > 0) {
+      alive_count++;
+    }
+  }
+  // std::cout << "Alive count is " << alive_count << std::endl;
+
+  // Initialize the arr equivalent
+  int arr[alive_count];
+  arr[0] = 1;
+  for(int i = 1; i < alive_count; i++) {
+    arr[i] = 0;
+  }
+
+  // Initialize mapa
+  int mapa[alive_count];
+  for(int x = 0; x < alive_count; x++) {
+    // mapa[x] = (seed = (9301 * seed + 49297) % 233280) / 233280 * alive_count | 0;
+    seed = (9301 * seed + 49297) % 233280;
+    // std::cout << "Seed is " << seed << std::endl;
+    // From debugging the JS code the in between operation being a double is important
+    double temp = seed;
+    temp = temp/ 233280;
+    //std::cout << "Temp is " << temp << std::endl;
+    temp = temp * alive_count;
+    //std::cout << "Temp is " << temp << std::endl;
+    temp = int64_t(temp) | 0;
+    //std::cout << "Temp is " << temp << std::endl;
+    mapa[x] = temp;
+    // std::cout << x << " => " << mapa[x] << std::endl << std::endl;
+  }
+
+  /* std::cout << "IN:";
+  for(int j = 0; j < alive_count ; j++) {
+    std::cout << arr[j] << ",";
+  }
+  std::cout << std::endl;
+*/
+  // Shuffle
+  for(int i = alive_count - 1; i > 0; i--) {
+    // arr[i] = arr.splice(mapa[size - 1 - i], 1, arr[i])[0]
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice
+    // array.splice(start[, deleteCount[, item1[, item2[, ...]]]])
+    // so at the value contained in mapa[size -1 -i] in arr, remove one element, put the value
+    // at arr[i] in its place and set arr[i] to the deleted value
+
+    int mapa_index  = alive_count - 1 - i;
+    int index_to_remove = mapa[mapa_index];
+    int removed_value = arr[index_to_remove];
+    // overwrite the removed value
+    // std::cout << "Mapa index: " << mapa_index << std::endl;
+    arr[index_to_remove] = arr[i];
+    arr[i] = removed_value;
+
+    /*
+    for(int j = 0; j < alive_count ; j++) {
+      std::cout << arr[j] << ",";
+    }
+    std::cout << std::endl;
+    */
+  }
+
+  // now figure out which target to return
+  int return_value;
+  for(int i = 0; i < alive_count; i++) {
+    // std::cout << "Index " << i << " has value " << arr[i] << std::endl;
+    if(arr[i] > 0) {
+      // std::cout << "Setting return_value to " << i << std::endl;
+      return_value = i;
+    }
+  }
+  return return_value;
 }
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
