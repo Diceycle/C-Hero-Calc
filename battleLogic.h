@@ -26,6 +26,7 @@ struct TurnData {
     double absorbDamage = 0;
     int explodeDamage = 0;
     bool trampleTriggered = false;
+    bool guyActive = false;
     int direct_target = 0;
     int counter_target = 0;
     double critMult = 1;
@@ -252,6 +253,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         case COUNTER_MAX_HP: turnData.counter = skillAmounts[monstersLost];
                         tempArmy = opposingCondition;
                         turnData.counter_target = tempArmy.findMaxHP();
+                        turnData.guyActive = true;
                         break;
         default:        break;
 
@@ -325,9 +327,29 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
     remainingHealths[frontliner + opposing.direct_target] -= opposing.baseDamage;
 
     // Add opposing.counter_target to handle fawkes not targetting the frontliner
-    if (opposing.counter && (worldboss || remainingHealths[frontliner] > 0)) {
+    if (opposing.counter && (worldboss || remainingHealths[frontliner] > 0 || opposing.guyActive)) {
       // std::cout << "COUNTER " << static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter)) << " damage " << " to " << frontliner + opposing.counter_target << std::endl;
-      remainingHealths[frontliner + opposing.counter_target] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
+      // Game has been updated to remove units once dead but remainingHealths still has all units
+      // So, if the counter target is not the frontliner, find the real one
+      // So, counter_target has to skip over dead units
+      if(opposing.counter_target <= 0){
+        remainingHealths[frontliner] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
+      } else {
+        // Find the (counter_target)th alive monster in remainingHealths
+        int actual_target = opposing.counter_target;
+        int alive = 0;
+        for(int i = frontliner + 1; i < ARMY_MAX_SIZE; i++) {
+          if(remainingHealths[i] > 0) {
+            alive++;
+          }
+          if(alive >= opposing.counter_target) {
+            actual_target = i;
+            break;
+          }
+        }
+        remainingHealths[actual_target] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
+      }
+
     }
 
     if (opposing.trampleTriggered && armySize > frontliner + 1) {
