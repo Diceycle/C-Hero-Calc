@@ -67,6 +67,7 @@ struct ParserTokens {
     const std::string STOP_FIRST_SOLUTION = "stop_first_solution";
     const std::string NUM_THREADS =         "num_threads";
     const std::string INDIVIDUAL_BATTLES =  "individual_battles";
+    const std::string SKIP_CONTINUE = "skip_continue";
 
     const std::string T_SOLUTION_OUTPUT =   "solution";
     const std::string T_BASIC_OUTPUT =      "basic";
@@ -80,6 +81,7 @@ struct Configuration {
     bool ignoreEmptyLines = false;
     bool ignoreQuestions = false; //
     bool ignoreExecutionHalt = false;
+    bool skipContinue = false;
     bool JSONOutput = false; //
     int firstDominance = ARMY_MAX_BRUTEFORCEABLE_SIZE;
     OutputLevel outputLevel = BASIC_OUTPUT;

@@ -663,7 +663,11 @@ int main(int argc, char** argv) {
             solveInstance(instances[i], config.firstDominance);
             outputSolution(instances[i]);
         }
-        userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", NOTIFICATION_OUTPUT, TOKENS.NO);
+        if(config.skipContinue) {
+          userWantsContinue = true;
+        } else {
+          userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", NOTIFICATION_OUTPUT, TOKENS.NO);
+        }
     } while (userWantsContinue);
 
     interface.outputMessage("", NOTIFICATION_OUTPUT);
