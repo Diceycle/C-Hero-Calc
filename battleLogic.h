@@ -490,7 +490,9 @@ inline int ArmyCondition::getLuxTarget(const ArmyCondition & opposingCondition, 
     if(opposingCondition.remainingHealths[i] > 0) {
       alive_count++;
     } else {
-      dead_count++;
+      if(i > opposingCondition.monstersLost) {
+        dead_count++;
+      }
     }
   }
   // std::cout << "Alive count is " << alive_count << std::endl;
