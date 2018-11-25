@@ -468,6 +468,12 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 32, 66, "takeda",             EARTH, LEGENDARY, {BUFF_L,        EARTH, EARTH, 0.112f}));
     baseHeroes.push_back(Monster( 38, 56, "hirate",             FIRE,  LEGENDARY, {BUFF_L,        FIRE, FIRE, 0.112f}));
     baseHeroes.push_back(Monster( 44, 48, "hattori",            WATER, LEGENDARY, {BUFF_L,        WATER, WATER, 0.112f}));
+	
+    baseHeroes.push_back(Monster( 30, 20, "bylar",              EARTH, COMMON,    {BUFF,          EARTH, EARTH, 4}));
+    baseHeroes.push_back(Monster( 36, 36, "boor",              FIRE,   RARE, {TRAINING,      SELF, FIRE, 3}));
+    baseHeroes.push_back(Monster( 52, 52, "bavah",              WATER, LEGENDARY,      {CHAMPION,      ALL, WATER, 2}));
+
+	baseHeroes.push_back(Monster(135, 107, "adagda",              AIR, ASCENDED,  {ADAPT,         AIR, AIR, 3}));	
 }
 
 void initQuests() {

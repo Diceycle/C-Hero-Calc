@@ -1,7 +1,11 @@
 hunter:1                // Example Hero input
 ladyoftwilight:1        // Hero 2
 valor:99                // Hero 3
+boor:1
+bavah:1
+adagda:1
+bylar:1
 done                    // End Hero input
-0                       // Lower Follower Limit
+1500000       // Lower Follower Limit
 -1                      // Upper Follower Limit
-a1,a2,a3,a4,a5,a6       // Enemy Lineup goes here
+a15,w15,f15,e15       // Enemy Lineup goes here
