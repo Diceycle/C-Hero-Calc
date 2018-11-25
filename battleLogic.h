@@ -323,30 +323,64 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
 
     // Apply normal attack damage to the frontliner
     // If direct_target is non-zero that means Lux is hitting something not the front liner
-    // std::cout << " BASE " << opposing.baseDamage << " to " << frontliner + opposing.direct_target << std::endl;
-    remainingHealths[frontliner + opposing.direct_target] -= opposing.baseDamage;
+    // Also, needed to handle here is the case where there are dead units behind the frontliner
+    if(opposing.direct_target > 0) {
+      int actual_target = frontliner;
+      int alive = 0;
+      for(int i = frontliner + 1; i < ARMY_MAX_SIZE; i++) {
+        // std::cout << "I is " << i << std::endl;
+        if(remainingHealths[i] > 0) {
+          alive++;
+          // std::cout << "Alive incremented to " << alive << std::endl;
+        }
+        if(alive >= opposing.direct_target) {
+          actual_target = i;
+          // std::cout << "Setting actual target to " << i << std::endl;
+          break;
+        }
+      }
+      // std::cout << " BASE " << opposing.baseDamage << " to " << actual_target << std::endl;
+      remainingHealths[actual_target] -= opposing.baseDamage;
+    } else {
+      // std::cout << " BASE " << opposing.baseDamage << " to " << frontliner + opposing.direct_target << std::endl;
+      remainingHealths[frontliner + opposing.direct_target] -= opposing.baseDamage;
+    }
+
+    // Lee and Fawkes can only counter if they are hit directly, so if they are opposing Lux and Lux
+    // hits another units, they do not counter
+    int counter_eligible = 1;
+    if(skillTypes[monstersLost] == LUX && turnData.direct_target > 0) {
+      counter_eligible = 0;
+      // std::cout << "LUX DID NOT HIT FRONTLINER" << std::endl;
+    }
 
     // Add opposing.counter_target to handle fawkes not targetting the frontliner
-    if (opposing.counter && (worldboss || remainingHealths[frontliner] > 0 || opposing.guyActive)) {
+    if (opposing.counter && counter_eligible && (worldboss || remainingHealths[frontliner] > 0 || opposing.guyActive)) {
       // std::cout << "COUNTER " << static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter)) << " damage " << " to " << frontliner + opposing.counter_target << std::endl;
       // Game has been updated to remove units once dead but remainingHealths still has all units
       // So, if the counter target is not the frontliner, find the real one
       // So, counter_target has to skip over dead units
       if(opposing.counter_target <= 0){
+        // std::cout << "COUNTER " << static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter)) << " damage " << " to " << frontliner << std::endl;
         remainingHealths[frontliner] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
       } else {
         // Find the (counter_target)th alive monster in remainingHealths
         int actual_target = opposing.counter_target;
+        // std::cout << "Counter target is " << opposing.counter_target << std::endl;
         int alive = 0;
         for(int i = frontliner + 1; i < ARMY_MAX_SIZE; i++) {
+          // std::cout << "I is " << i << std::endl;
           if(remainingHealths[i] > 0) {
             alive++;
+            // std::cout << "Alive incremented to " << alive << std::endl;
           }
           if(alive >= opposing.counter_target) {
             actual_target = i;
+            // std::cout << "Setting actual target to " << i << std::endl;
             break;
           }
         }
+        // std::cout << "COUNTER " << static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter)) << " damage " << " to " << actual_target << std::endl;
         remainingHealths[actual_target] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
       }
 
@@ -483,16 +517,11 @@ inline int ArmyCondition::getLuxTarget(const ArmyCondition & opposingCondition, 
 
   // Count the number of alive monsters;
   int alive_count = 0;
-  int dead_count = 0;
   for(int i = 0; i < opposingCondition.armySize; i++) {
     // New CQ code removes dead units, so simulate that here by checking for health
     // std::cout << i << ". Remaining health is " << opposingCondition.remainingHealths[i] << std::endl;
     if(opposingCondition.remainingHealths[i] > 0) {
       alive_count++;
-    } else {
-      if(i > opposingCondition.monstersLost) {
-        dead_count++;
-      }
     }
   }
   // std::cout << "Alive count is " << alive_count << std::endl;
@@ -561,9 +590,7 @@ inline int ArmyCondition::getLuxTarget(const ArmyCondition & opposingCondition, 
       return_value = i;
     }
   }
-  // since remainingHealths does not remove units, add the number of dead units
-  // so that the index is correct
-  return return_value + dead_count;
+  return return_value;
 }
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
