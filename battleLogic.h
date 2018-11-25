@@ -483,11 +483,14 @@ inline int ArmyCondition::getLuxTarget(const ArmyCondition & opposingCondition, 
 
   // Count the number of alive monsters;
   int alive_count = 0;
+  int dead_count = 0;
   for(int i = 0; i < opposingCondition.armySize; i++) {
     // New CQ code removes dead units, so simulate that here by checking for health
     // std::cout << i << ". Remaining health is " << opposingCondition.remainingHealths[i] << std::endl;
     if(opposingCondition.remainingHealths[i] > 0) {
       alive_count++;
+    } else {
+      dead_count++;
     }
   }
   // std::cout << "Alive count is " << alive_count << std::endl;
@@ -556,7 +559,9 @@ inline int ArmyCondition::getLuxTarget(const ArmyCondition & opposingCondition, 
       return_value = i;
     }
   }
-  return return_value;
+  // since remainingHealths does not remove units, add the number of dead units
+  // so that the index is correct
+  return return_value + dead_count;
 }
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
