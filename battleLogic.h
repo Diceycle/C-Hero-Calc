@@ -78,7 +78,6 @@ class ArmyCondition {
             //return (seed + (101 - turncounter)*(101 - turncounter)*(101 - turncounter)) % (int64_t)round((double)seed / (101 - turncounter) + (101 - turncounter)*(101 - turncounter));
         }
         inline int findMaxHP();
-        inline int64_t getNewTurnSeed(const ArmyCondition & opposingCondition, int turncounter);
         inline int getLuxTarget(const ArmyCondition & opposingCondition, int64_t seed);
 };
 
@@ -234,11 +233,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         case DICE:      turnData.baseDamage += opposingCondition.seed % (int)(skillAmounts[monstersLost] + 1); // Only adds dice attack effect if dice is in front, max health is done before battle
                         break;
         // Pick a target, Bubbles currently dampens lux damage if not targeting first according to game code, interaction should be added if this doesn't change
-        case LUX:       // turnData.direct_target = getLuxTarget(opposingCondition, getNewTurnSeed(opposingCondition, turncounter + 1));
-                        // Lux targetting still busted if it gets multiple hits, deducts from dead unit
-                        turnData.direct_target = getLuxTarget(opposingCondition, getTurnSeed(opposingCondition.seed, 99 -turncounter));
-                        // turncounter is number of turns completed, game calculates on current turn
-                        // turnData.direct_target = getTurnSeed(opposingCondition.seed, turncounter) % (opposingCondition.armySize - opposingCondition.monstersLost);
+        case LUX:       turnData.direct_target = getLuxTarget(opposingCondition, getTurnSeed(opposingCondition.seed, 99 -turncounter));
                         break;
         case CRIT:      // turnData.critMult *= getTurnSeed(opposingCondition.seed, turncounter) % 2 == 1 ? skillAmounts[monstersLost] : 1;
                         turnData.critMult *= getTurnSeed(opposingCondition.seed, 99 - turncounter) % 2 == 0 ? skillAmounts[monstersLost] : 1;
@@ -465,36 +460,6 @@ inline int ArmyCondition::findMaxHP() {
     // so return it relative to the starting point
     // std::cout << std::endl << "Choosing " << index_max_hp << " with " << remainingHealths[index_max_hp] << std::endl;
     return index_max_hp - monstersLost;
-}
-
-inline int64_t ArmyCondition::getNewTurnSeed(const ArmyCondition & opposingCondition, int turncounter) {
-  /* Javascript code from version 3.2.0.4
-  function calcSeed(A, times) {
-    for (var seed = 1, i = 0; i < A.length; ++i) seed = (seed * Math.abs(A[i]) + 1) % 2147483647;
-    for (i = 0; i < times; ++i) seed = 16807 * seed % 2147483647;
-    return seed
-  }
-  */
-  //std::cout << "\nEntering getNewTurnSeed with turn " << turncounter << std::endl;
-  int64_t seed = 1;
-  for(int i = 0; i < opposingCondition.armySize; i++) {
-    // std::cout << "Index " << i << std::endl;
-    // New CQ code removes dead units, so simulate that here by checking for health
-    if(opposingCondition.remainingHealths[i] > 0) {
-      // std::cout << "\tIn if\n";
-      //std::cout << "Lineup is " << opposingCondition.lineup[i]->index << std::endl;
-      seed = (seed * abs(opposingCondition.lineup[i]->index) + 1) % 2147483647;
-      // std::cout << "\tSeed is " << seed << std::endl;
-    }
-  }
-
-  // std::cout << "Out of loop with seed value " << seed << std::endl;
-
-  for (int i = 0; i < 100 - turncounter; i++) {
-    seed = 16807 * seed % 2147483647;
-  }
-  std::cout << "Returning from getNewTurnSeed " << seed << std::endl << std::endl;
-  return seed;
 }
 
 inline int ArmyCondition::getLuxTarget(const ArmyCondition & opposingCondition, int64_t seed) {
