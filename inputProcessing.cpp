@@ -177,6 +177,10 @@ void IOManager::getConfiguration() {
                         config.numThreads = (int) parseInt(tokens.at(1));
                     } else if (tokens[0] == TOKENS.IGNORE_EXEC_HALT) {
                         config.ignoreExecutionHalt = parseBool(tokens.at(1));
+                    } else if (tokens[0] == TOKENS.INDIVIDUAL_BATTLES) {
+                        config.individualBattles = parseBool(tokens.at(1));
+                    } else if (tokens[0] == TOKENS.SKIP_CONTINUE) {
+                        config.skipContinue = parseBool(tokens.at(1));
                     } else if (tokens[0] != TOKENS.EMPTY) {
                         interface.outputMessage("Unrecognized option '" + tokens[0] + "'", NOTIFICATION_OUTPUT);
                     }

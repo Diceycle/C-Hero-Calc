@@ -26,7 +26,7 @@ struct TurnData {
     double absorbDamage = 0;
     int explodeDamage = 0;
     bool trampleTriggered = false;
-    int paoeDamage = 0;
+    bool guyActive = false;
     int direct_target = 0;
     int counter_target = 0;
     double critMult = 1;
@@ -70,9 +70,15 @@ class ArmyCondition {
         inline void getDamage(const int turncounter, const ArmyCondition & opposingCondition);
         inline void resolveDamage(TurnData & opposing);
         inline int64_t getTurnSeed(int64_t seed, int turncounter) {
-            return (seed + (101 - turncounter)*(101 - turncounter)*(101 - turncounter)) % (int64_t)round((double)seed / (101 - turncounter) + (101 - turncounter)*(101 - turncounter));
+            // From Alya
+            for (int i = 0; i < turncounter; ++i) {
+              seed = (16807 * seed) % 2147483647;
+            }
+            return seed;
+            //return (seed + (101 - turncounter)*(101 - turncounter)*(101 - turncounter)) % (int64_t)round((double)seed / (101 - turncounter) + (101 - turncounter)*(101 - turncounter));
         }
         inline int findMaxHP();
+        inline int getLuxTarget(const ArmyCondition & opposingCondition, int64_t seed);
 };
 
 // extract and extrapolate all necessary data from an army
@@ -130,12 +136,12 @@ inline void ArmyCondition::startNewTurn() {
     turnData.dampFactor = 1;
     turnData.absorbMult = 0;
     turnData.absorbDamage = 0;
-    
+
     if( skillTypes[monstersLost] == DODGE )
     {
         turnData.immunity5K = true ;
     }
-    else        
+    else
     {
         turnData.immunity5K = false ;
     }
@@ -184,7 +190,6 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     ArmyCondition tempArmy;
 
     // Handle Monsters with skills that only activate on attack.
-    turnData.paoeDamage = 0;
     turnData.trampleTriggered = false;
     turnData.explodeDamage = 0;
     turnData.valkyrieMult = 0;
@@ -193,6 +198,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     turnData.hate = 0; // same as above
     turnData.counter = 0;
     turnData.direct_target = 0;
+    turnData.counter_target = 0;
     turnData.leech = 0;
 
     double friendsDamage = 0;
@@ -216,8 +222,6 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
                         } break;
         case BERSERK:   turnData.multiplier *= (double) pow(skillAmounts[monstersLost], berserkProcs); berserkProcs++;
                         break;
-        case PIERCE:    turnData.paoeDamage = (int) ((double) lineup[monstersLost]->damage * skillAmounts[monstersLost]);
-                        break;
         case VALKYRIE:  turnData.valkyrieMult = skillAmounts[monstersLost];
                         break;
         case TRAMPLE:   turnData.trampleTriggered = true;
@@ -229,9 +233,10 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         case DICE:      turnData.baseDamage += opposingCondition.seed % (int)(skillAmounts[monstersLost] + 1); // Only adds dice attack effect if dice is in front, max health is done before battle
                         break;
         // Pick a target, Bubbles currently dampens lux damage if not targeting first according to game code, interaction should be added if this doesn't change
-        case LUX:       turnData.direct_target = getTurnSeed(opposingCondition.seed, turncounter) % (opposingCondition.armySize - opposingCondition.monstersLost);
+        case LUX:       turnData.direct_target = getLuxTarget(opposingCondition, getTurnSeed(opposingCondition.seed, 99 -turncounter));
                         break;
-        case CRIT:      turnData.critMult *= getTurnSeed(opposingCondition.seed, turncounter) % 2 == 1 ? skillAmounts[monstersLost] : 1;
+        case CRIT:      // turnData.critMult *= getTurnSeed(opposingCondition.seed, turncounter) % 2 == 1 ? skillAmounts[monstersLost] : 1;
+                        turnData.critMult *= getTurnSeed(opposingCondition.seed, 99 - turncounter) % 2 == 0 ? skillAmounts[monstersLost] : 1;
                         break;
         case HATE:      turnData.hate = skillAmounts[monstersLost];
                         break;
@@ -243,6 +248,7 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
         case COUNTER_MAX_HP: turnData.counter = skillAmounts[monstersLost];
                         tempArmy = opposingCondition;
                         turnData.counter_target = tempArmy.findMaxHP();
+                        turnData.guyActive = true;
                         break;
         default:        break;
 
@@ -286,15 +292,18 @@ inline void ArmyCondition::getDamage(const int turncounter, const ArmyCondition 
     if (turnData.valkyrieDamage >= std::numeric_limits<int>::max())
         turnData.baseDamage = static_cast<DamageType>(ceil(turnData.valkyrieDamage));
     else
-        turnData.baseDamage = castCeil(turnData.valkyrieDamage);
+        // turnData.baseDamage = castCeil(turnData.valkyrieDamage);
+        turnData.baseDamage = round(turnData.valkyrieDamage);
 
     // Handle enemy dampen ability and reduce aoe effects
     if (opposingDampFactor < 1) {
         turnData.valkyrieDamage *= opposingDampFactor;
-        turnData.explodeDamage = castCeil((double) turnData.explodeDamage * opposingDampFactor);
-        turnData.aoeDamage = castCeil((double) turnData.aoeDamage * opposingDampFactor);
-        turnData.healing = castCeil((double) turnData.healing * opposingDampFactor);
-        turnData.paoeDamage = castCeil((double) turnData.paoeDamage * opposingDampFactor);
+        // turnData.explodeDamage = castCeil((double) turnData.explodeDamage * opposingDampFactor);
+        // turnData.aoeDamage = castCeil((double) turnData.aoeDamage * opposingDampFactor);
+        // turnData.healing = castCeil((double) turnData.healing * opposingDampFactor);
+        turnData.explodeDamage = round((double) turnData.explodeDamage * opposingDampFactor);
+        turnData.aoeDamage = round((double) turnData.aoeDamage * opposingDampFactor);
+        turnData.healing = round((double) turnData.healing * opposingDampFactor);
     }
 
     if( opposingImmunityDamage && (turnData.valkyrieDamage >= 5000 || turnData.baseDamage >= 5000 ) ) {
@@ -309,52 +318,129 @@ inline void ArmyCondition::resolveDamage(TurnData & opposing) {
 
     // Apply normal attack damage to the frontliner
     // If direct_target is non-zero that means Lux is hitting something not the front liner
-        remainingHealths[frontliner + opposing.direct_target] -= opposing.baseDamage;
+    // Also, needed to handle here is the case where there are dead units behind the frontliner
+    if(opposing.direct_target > 0) {
+      int actual_target = frontliner;
+      int alive = 0;
+      for(int i = frontliner + 1; i < ARMY_MAX_SIZE; i++) {
+        // std::cout << "I is " << i << std::endl;
+        if(remainingHealths[i] > 0) {
+          alive++;
+          // std::cout << "Alive incremented to " << alive << std::endl;
+        }
+        if(alive >= opposing.direct_target) {
+          actual_target = i;
+          // std::cout << "Setting actual target to " << i << std::endl;
+          break;
+        }
+      }
+      // std::cout << " BASE " << opposing.baseDamage << " to " << actual_target << std::endl;
+      remainingHealths[actual_target] -= opposing.baseDamage;
+    } else {
+      // std::cout << " BASE " << opposing.baseDamage << " to " << frontliner + opposing.direct_target << std::endl;
+      remainingHealths[frontliner + opposing.direct_target] -= opposing.baseDamage;
+    }
+
+    // Lee and Fawkes can only counter if they are hit directly, so if they are opposing Lux and Lux
+    // hits another units, they do not counter
+    int counter_eligible = 1;
+    if(skillTypes[monstersLost] == LUX && turnData.direct_target > 0) {
+      counter_eligible = 0;
+      // std::cout << "LUX DID NOT HIT FRONTLINER" << std::endl;
+    }
 
     // Add opposing.counter_target to handle fawkes not targetting the frontliner
-    if (opposing.counter && (worldboss || remainingHealths[frontliner] > 0))
-        remainingHealths[frontliner + opposing.counter_target] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
+    if (opposing.counter && counter_eligible && (worldboss || remainingHealths[frontliner] > 0 || opposing.guyActive)) {
+      // std::cout << "COUNTER " << static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter)) << " damage " << " to " << frontliner + opposing.counter_target << std::endl;
+      // Game has been updated to remove units once dead but remainingHealths still has all units
+      // So, if the counter target is not the frontliner, find the real one
+      // So, counter_target has to skip over dead units
+      if(opposing.counter_target <= 0){
+        // std::cout << "COUNTER " << static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter)) << " damage " << " to " << frontliner << std::endl;
+        remainingHealths[frontliner] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
+      } else {
+        // Find the (counter_target)th alive monster in remainingHealths
+        int actual_target = opposing.counter_target;
+        // std::cout << "Counter target is " << opposing.counter_target << std::endl;
+        int alive = 0;
+        for(int i = frontliner + 1; i < ARMY_MAX_SIZE; i++) {
+          // std::cout << "I is " << i << std::endl;
+          if(remainingHealths[i] > 0) {
+            alive++;
+            // std::cout << "Alive incremented to " << alive << std::endl;
+          }
+          if(alive >= opposing.counter_target) {
+            actual_target = i;
+            // std::cout << "Setting actual target to " << i << std::endl;
+            break;
+          }
+        }
+        // std::cout << "COUNTER " << static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter)) << " damage " << " to " << actual_target << std::endl;
+        remainingHealths[actual_target] -= static_cast<int64_t>(ceil(turnData.baseDamage * opposing.counter));
+      }
+
+    }
 
     if (opposing.trampleTriggered && armySize > frontliner + 1) {
+        // std::cout << "TRAMPLE" << std::endl;
         remainingHealths[frontliner + 1] -= opposing.valkyrieDamage;
     }
 
     if (opposing.explodeDamage != 0 && remainingHealths[frontliner] <= 0 && !worldboss) {
+        // std::cout << "EXPLODE" << std::endl;
         opposing.aoeDamage += opposing.explodeDamage;
     }
 
     // Handle aoe Damage for all combatants
     for (int i = frontliner; i < armySize; i++) {
-        // handle absorbed damage
-        if (skillTypes[i] == ABSORB && i > frontliner) {
-            remainingHealths[i] -= castCeil(opposing.absorbDamage);
-        }
+      int aliveAtBeginning = 0;
+      if(remainingHealths[i] > 0 || i == frontliner) {
+        aliveAtBeginning = 1;
+      }
+      // handle absorbed damage
+      if (skillTypes[i] == ABSORB && i > frontliner) {
+        // remainingHealths[i] -= castCeil(opposing.absorbDamage);
+        remainingHealths[i] -= round(opposing.absorbDamage);
+      }
 
-            remainingHealths[i] -= opposing.aoeDamage;
+      remainingHealths[i] -= opposing.aoeDamage;
 
-        if (i > frontliner) { // Aoe that doesnt affect the frontliner
-            remainingHealths[i] -= opposing.paoeDamage + castCeil(opposing.valkyrieDamage);
+      if (i > frontliner) { // Aoe that doesnt affect the frontliner
+        // remainingHealths[i] -= castCeil(opposing.valkyrieDamage);
+        remainingHealths[i] -= round(opposing.valkyrieDamage);
+      }
+      if (remainingHealths[i] <= 0 && !worldboss) {
+        if (i == monstersLost) {
+          monstersLost++;
+          berserkProcs = 0;
+          evolveTotal = 0;
         }
-        if (remainingHealths[i] <= 0 && !worldboss) {
-            if (i == monstersLost) {
-                monstersLost++;
-                berserkProcs = 0;
-                evolveTotal = 0;
-            }
-            skillTypes[i] = NOTHING; // disable dead hero's ability
-        } else {
-            remainingHealths[i] += turnData.healing;
-            if (i == frontliner)
-                remainingHealths[i] += turnData.leech;
-            if (remainingHealths[i] > maxHealths[i]) { // Avoid overhealing
-                remainingHealths[i] = maxHealths[i];
-            }
+        skillTypes[i] = NOTHING; // disable dead hero's ability
+      } else {
+          remainingHealths[i] += turnData.healing;
+        if (i == frontliner)
+          remainingHealths[i] += turnData.leech;
+        if (remainingHealths[i] > maxHealths[i]) { // Avoid overhealing
+          remainingHealths[i] = maxHealths[i];
         }
+      }
+
+      // Always apply the valkyrieMult if it is zero. Otherwise, given the way
+      // that riochet is implemented it will cause melee attacks to turn into
+      // ricochet
+      if(opposing.valkyrieMult > 0) {
+        // Only reduce the damage if it hit an alive unit
+        if(aliveAtBeginning) {
+          opposing.valkyrieDamage *= opposing.valkyrieMult;
+        }
+      }  else {
         opposing.valkyrieDamage *= opposing.valkyrieMult;
+      }
     }
     // Handle wither ability
     if (skillTypes[monstersLost] == WITHER && monstersLost == frontliner) {
-        remainingHealths[monstersLost] = castCeil((double) remainingHealths[monstersLost] * skillAmounts[monstersLost]);
+        // remainingHealths[monstersLost] = castCeil((double) remainingHealths[monstersLost] * skillAmounts[monstersLost]);
+        remainingHealths[monstersLost] = round((double) remainingHealths[monstersLost] * skillAmounts[monstersLost]);
     }
 }
 
@@ -370,7 +456,106 @@ inline int ArmyCondition::findMaxHP() {
             index_max_hp = i;
         }
     }
-    return index_max_hp;
+    // This is an absolute index, the rest of the code expects a relative index
+    // so return it relative to the starting point
+    // std::cout << std::endl << "Choosing " << index_max_hp << " with " << remainingHealths[index_max_hp] << std::endl;
+    return index_max_hp - monstersLost;
+}
+
+inline int ArmyCondition::getLuxTarget(const ArmyCondition & opposingCondition, int64_t seed) {
+  /* Javascript code from 3.2.0.4
+  function shuffleBySeed(arr, seed) {
+    for (var size = arr.length, mapa = new Array(size), x = 0; x < size; x++) mapa[x] = (seed = (9301 * seed + 49297) % 233280) / 233280 * size | 0;
+    for (var i = size - 1; i > 0; i--) arr[i] = arr.splice(mapa[size - 1 - i], 1, arr[i])[0]
+}
+  called like `else if ("rtrg" == skill.type) shuffleBySeed(turn.atk.damageFactor, seed);`
+  damageFactor appears to be initialized to an array of one element consisting of [1]
+  function getTurnData(AL, BL) {
+    var df = [1];
+    ...
+    damageFactor: df,
+    ...
+  So looking at things that probably means that we need an array of size the of number alive monsters
+  with the first element initialized to 1
+  815500433
+  */
+
+  // Count the number of alive monsters;
+  int alive_count = 0;
+  for(int i = 0; i < opposingCondition.armySize; i++) {
+    // New CQ code removes dead units, so simulate that here by checking for health
+    // std::cout << i << ". Remaining health is " << opposingCondition.remainingHealths[i] << std::endl;
+    if(opposingCondition.remainingHealths[i] > 0) {
+      alive_count++;
+    }
+  }
+  // std::cout << "Alive count is " << alive_count << std::endl;
+
+  // Initialize the arr equivalent
+  int arr[alive_count];
+  arr[0] = 1;
+  for(int i = 1; i < alive_count; i++) {
+    arr[i] = 0;
+  }
+
+  // Initialize mapa
+  int mapa[alive_count];
+  for(int x = 0; x < alive_count; x++) {
+    // mapa[x] = (seed = (9301 * seed + 49297) % 233280) / 233280 * alive_count | 0;
+    seed = (9301 * seed + 49297) % 233280;
+    // std::cout << "Seed is " << seed << std::endl;
+    // From debugging the JS code the in between operation being a double is important
+    double temp = seed;
+    temp = temp/ 233280;
+    //std::cout << "Temp is " << temp << std::endl;
+    temp = temp * alive_count;
+    //std::cout << "Temp is " << temp << std::endl;
+    temp = int64_t(temp) | 0;
+    //std::cout << "Temp is " << temp << std::endl;
+    mapa[x] = temp;
+    // std::cout << x << " => " << mapa[x] << std::endl << std::endl;
+  }
+
+  /* std::cout << "IN:";
+  for(int j = 0; j < alive_count ; j++) {
+    std::cout << arr[j] << ",";
+  }
+  std::cout << std::endl;
+*/
+  // Shuffle
+  for(int i = alive_count - 1; i > 0; i--) {
+    // arr[i] = arr.splice(mapa[size - 1 - i], 1, arr[i])[0]
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice
+    // array.splice(start[, deleteCount[, item1[, item2[, ...]]]])
+    // so at the value contained in mapa[size -1 -i] in arr, remove one element, put the value
+    // at arr[i] in its place and set arr[i] to the deleted value
+
+    int mapa_index  = alive_count - 1 - i;
+    int index_to_remove = mapa[mapa_index];
+    int removed_value = arr[index_to_remove];
+    // overwrite the removed value
+    // std::cout << "Mapa index: " << mapa_index << std::endl;
+    arr[index_to_remove] = arr[i];
+    arr[i] = removed_value;
+
+    /*
+    for(int j = 0; j < alive_count ; j++) {
+      std::cout << arr[j] << ",";
+    }
+    std::cout << std::endl;
+    */
+  }
+
+  // now figure out which target to return
+  int return_value;
+  for(int i = 0; i < alive_count; i++) {
+    // std::cout << "Index " << i << " has value " << arr[i] << std::endl;
+    if(arr[i] > 0) {
+      // std::cout << "Setting return_value to " << i << std::endl;
+      return_value = i;
+    }
+  }
+  return return_value;
 }
 // Simulates One fight between 2 Armies and writes results into left's LastFightData
 inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
@@ -476,8 +661,8 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
             rightCondition.turnData.baseDamage += rightCondition.skillAmounts[rightCondition.monstersLost];
         }
 
-        left.lastFightData.leftAoeDamage += (rightCondition.turnData.aoeDamage + rightCondition.turnData.paoeDamage);
-        left.lastFightData.rightAoeDamage += (leftCondition.turnData.aoeDamage + leftCondition.turnData.paoeDamage);
+        left.lastFightData.leftAoeDamage += rightCondition.turnData.aoeDamage;
+        left.lastFightData.rightAoeDamage += leftCondition.turnData.aoeDamage;
 
         // Check if anything died as a result
         leftCondition.resolveDamage(rightCondition.turnData);
@@ -486,7 +671,7 @@ inline bool simulateFight(Army & left, Army & right, bool verbose = false) {
         turncounter++;
 
         if (verbose) {
-            std::cout << "After Turn " << turncounter << ":" << std::endl;
+            std::cout << std::endl << "After Turn " << turncounter << ":" << std::endl;
 
             std::cout << "Left:" << std::endl;
             std::cout << "  Damage: " << std::setw(4) << leftCondition.turnData.baseDamage << std::endl;
