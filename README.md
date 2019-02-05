@@ -1,132 +1,45 @@
 # Cosmos Quest PvE Instance Solver
 
-## Summary
-I took over the developement out of interest and educational purposes. Well, I also needed a good calculator and David's approach was a good place to start. My goal is to provide a Calculator that is usable even on difficult problems in respect to memory usage and calculation time.
+### More information
+The old readme is available by clicking OLDREADME.md above. In this one, I'll only list changes, so you may want to read the old one after this one if you're not familiar with the program.
 
-Game forum and disscusuion thread [here](https://www.kongregate.com/forums/910715-cosmos-quest/topics/988381-version-2-9-1-merry-worldbosses).
+### Looking at forked versions and other resources
+This is the final version I'm releasing. For help finding most updated forks, you can try [here](https://github.com/nls0/C-Hero-Calc/network).
 
-Other Repos and Places you might find interesting:
+Last discussion thread I made [here](http://www.kongregate.com/forums/910715-cosmos-quest/topics/1683470-calculator-v3-0-2-0g). You might be able to find a more updated thread for a newer fork at some point.
+
 * [Alternative Input throgh Latas' Graphical User Interface](https://github.com/Wiedmolol/CQMacroCreator)
-* [Web-Based Macro File Creator](https://allions.net/macrocreator/)
-* [Malizia's version of the Calc](https://github.com/Maliziacat/C-Hero-Calc)
-* [Battle Specification and Hero Skill Explanations](https://www.kongregate.com/forums/910715-cosmos-quest/topics/959359-detailed-explanations-of-the-hero-abilities)
+* [Battle Specification and Hero Skill Explanations](https://www.kongregate.com/forums/910715-cosmos-quest/topics/959359-detailed-explanations-of-the-hero-abilities) (somewhat out-of-date, imperfect)
 
-### Features
-* C++ based Calcultor for solving PvE instances
-* Heroes are implemented, levelable and skills are fully functional
-* Completely controllable via Command Line or through external Macro Files
-* All Quests predefined and accessable
-* Worldboss Mode for maximising damage
-* Specify multiple quests and let it work on them uninterupted
-* Outputs a battle string that can be used to view the battle ingame from the Tournament Page
-* Precompiled exe included (Built on Windows 8.1 (64Bit), no guarantee for other operating systems)
+### Files you may want to use (or just download everything)
+CosmosQuest.exe  
+default.cqconfig  
+cqdata.txt
 
-### What's New?
-Bunch of Updates happend quietly in the background. 
-* Calc will now display its version to make it easier for me to determine if faulty interactions happend because of buggy code or due to a deprecated version being used
-* I started to reintroduce some caching for fights to speed up the battles but generally the new code is still quite slow
-* -1 as a lower limit no properly works and disables ALL normal Monsters
-* **Worldbosses are added**. Having a worldboss in the enemy lineup (same input scheme as heroes) will make the calc enter worldboss mode and make it try to find the maximum damage
-* **Ascended Heroes are added.** Names are a + original name. Example: Ascended Geror -> ageror:1
-* **Christmas Heroes are added** including a Hero that will be available soon through the advent calendar
+### Important changes/notes
+The goal of the calculator is to provide accurate calculations, but the game code currently has several [disparities](https://www.kongregate.com/forums/910715-cosmos-quest/topics/1678312-battle-oddities) where one side is treated differently than the other. The calculator currently assumes both sides are treated the same and like the left side. It would be difficult to make two sets of rules for the calculator.
 
-## Usage
+The game replays currently show different damage scores compared to what it internally calculates. For example, hitting a fire enemy with a water unit of 79 attack will result in 119 damage, but only 118.5 damage score. Other things to look at are ricochet damage and aoe damage. It is possible to fix this by looking at the game code, but I won't be doing it.
 
-For most people, just downloading the exe and running it will be enough. For those who are not on Windows they will need to download all files and compile for themselves.
+When using CQMacroCreator with send checked, your cqconfig file will not be used. It will still be used if you use the macrocreator to open up a console window. (at time of writing)
 
-### Input 
-**Inputting your heroes**:  
-Enter all of your heroes that you want the Calc to consider for a solution.  
+Multithreading has been added. Default number of threads is 6. You can change this in default.cqconfig.
 
-To enter a Hero type its name and a `:` followed by its level. Press enter to submit. (Example: `geror:23`)  
-Note: Hero names are always typed as one word, ignoring any special characters. (`Sîgrun` -> `sigrun`, `Jack'o Knight` -> `jackoknight`), Ascended Heroes are marked by an `a` in front of their name. (`Ascended Geror` -> `ageror`)
+The calculator now stops on first solution found by default. You have to change the default.cqconfig option STOP\_FIRST\_SOLUTION to false if you want to use the calculator to find the cheapest solution (e.g. when looking for how many more followers you need to complete a quest).
 
-Once you have entered all your desired heroes you can either type `done` or press enter twice to finish.
+Gambler heroes (Dicemaster, Luxurius Maximus, Pokerface) are working. The way they work is by considering enemy lineup and order including empty space. For the enemy, calc assumes empty space is in very front. If you get a solution with fewer than 6 units against a lineup with an enemy gambler, you should also put any empty space in the very front. Theoretically it would be possible to look for solutions with alternate empty space placements, but the calc doesn't currently do it.
 
-**Entering a lower Follower Limit**:  
-This determines how expensive a monster needs to be in order for the calculator to consider it for a solution.  
-This feature is intended for users with a lot of followers or good heroes to ignore weak monsters.  
-Example: Entering `215000` will exclude `e8` and cheaper monsters in the solution.
+The calculator begins depth first searching at max size - 2. This significantly reduces runtime (when a solution exists) and memory usage. You should be able to use more units now, but you should still avoid using bad units, particularly very cheap monsters.
 
-Special Values are: `0` for ALL monsters considered and `-1` for NO monsters considered.
+Dominance checks have been removed. This was necessary as this was resulting in a possibility of failing to find a solution where it existed. It was somewhat arbitrarily pruning possibilities providing a false speed-up.
 
-**Entering an upper Follower Limit**:  
-This determines how expensive the entire solution is allowed to be.  
-I only reluctantly put this option in because a lot of people asked for it. Note that as soon as calculation starts an upper bound is automatically generated by the Calc.  
-You can enter your followers here if you think that it speeds up calculation but then you won't be able to know how many followers you are missing to beat the lineup. Your choice.
-
-Special Values are: `-1` for unlimited followers.
-
-**Entering an enemy Lineup**:  
-Lineups are what you will modify most often. Input here the Fight against which you want to win. 
-
-You can enter normal monsters by combining their element (Fire -> f, Earth -> e, Air -> a, Water -> w) with their tier number. 
-Example: `Kodama` -> `a1`, `Kraken` -> `w7`
-
-You can enter Heroes like you would your own.  
-You can enter Worldbosses just like Heroes.  
-If Units belong to the same Lineup they are separated with a `,`.  
-Full Example: `a13,geror:12,jackoknight:23,f2,groth:1,ladyoftwilight:1`
-
-Alternatively you can enter quests by tying `quest`, the questnumber, a `-` and the difficulty in a range from `1` to `3`.  
-Example: `quest34-1` will make the Calc look for a solution to quest 34 with 6 monsters, `quest55-3` will make the Calc look for a solution for quest 55 with 4 monsters.
-
-If you want to calculate a lot of lineups with the same settings you can do so by entering multiple lineups here and separating them with a space(` `). The Calc will then solve every lineup without stopping inbetween.
+Monsters, heroes, hero aliases, and quests can be added and changed by modifying the cqdata.txt file. Adding new heroes in the data file is only possible if they use an existing ability. For the data file, don't use any empty lines, place new entries at the bottom of the section (order is important). For quests, make sure there is a space followed by a + at the end. If the file is not present, hardcoded data will be used.
 
 ### Compiling
-Personally I get it to compile by running:
-`g++ -std=c++11 -Ofast -o CosmosQuest main.cpp inputProcessing.cpp cosmosData.cpp battleLogic.cpp base64.cpp` from the command line.
+You can build it in one command with:  
+g++ -Ofast -std=c++11 -o CosmosQuest main.cpp inputProcessing.cpp cosmosData.cpp battleLogic.cpp base64.cpp -s -static -static-libstdc++ -static-libgcc -pthread
 
-**Makefile**: Base Makefile provided by BugsyLansky.
+The .exe included was built on Windows 10 (64Bit) using [MingW-W64-builds](http://mingw-w64.org/doku.php/download) x86\_64-8.1.0-posix-seh-rt_v6-rev0.
 
-### Macro Files
-
-What are they?  
-Macro files are the future!
-* Macro files are nothing else than your input in text file form.
-* Whenever the Calc needs input it just grabs the next line from the macro file.
-* When the last line of the marco file is used, the Calc switches back to manual input.
-* A `//` makes the Calc ignore everything in the same line that comes after it.
-
-If this is too much for you please refer to Latas' UI or the Web Editor that will automatically generate macro files.
-If you do want to learn but still feel lost, here is a [Imgur Album](https://imgur.com/a/CXy4A) explaning how to make your own macro files.
-
-How to use them? Multiple Options:
-1. Start the program normally. It will take the `default.cqinput`-file as input
-2. Start the program via command line like: `CosmosQuest.exe macroFile` instead of just `CosmosQuest.exe` and the program will read everything from the file you specified. 
-3. Compile yourself and add your own default macro file name. This will stop you having to start the program via command line.
-
-### Input via command line
-Input via command line is now mostly unavailable. Compiling yourself or removing `default.cqinput` from the folder will still give you access to it though.
-
-### Control Variables  
-**If you want to use change any of those values you have to compile the program yourself!**
-* `firstDominace` This controls at which army length the calc should start removing suboptimal solutions. Setting this higher _might_ improve the solution. But treat this with extreme caution as it can cause your PC run out of RAM rather quickly.
-* `macroFileName` Path to your default macro file
-* `useDefaultMacroFile` Whether you want to always use the specified macro file or not
-* `showMacroFileInput` If enabled will hide any input promts that are answered by a macro file 
-* `showBattleReplayString` If disabled will hide the replay strings after every solution
-
-## Bugs, Warnings and other problems
-
-### Regarding non-optimal solutions
-I feel like i need to put this up here because as many of you noticed, there are some situation where this calculator does in fact not give the optimal solution.  
-The reason for this is that old optimization code back from when this program was designed for only normal monsters is still in there and has bugs related to hero abilities. However this code is **absolutely vital** to keep the runtime of the program in managable regions. 
-
-On the user end, changing what heroes are enabled, what level they have, etc. can all affect the outcome of the calculation. 
-Even small changes that I make in the code can be the reason why on one day it might suddenly give a worse or better solution than before. 
-This is undesirable but will require heavy improvements on other ends or a completely new approach to fix. 
-
-### Regarding RAM usage
-The RAM usage as well as computation time heavily scales with available Heroes and Monsters, so I reccomend disabling as many Heroes as possible and setting an appropriate lower limit on Monster Cost.  
-If you calculate a high DQ-Level you probably wont need those Lv.1 Commons or anything cheaper than monster tier 5 after all.   
-Having only 15 or 20 Heroes is totally fine but if you enable all of them, your machine will probably run out of RAM.
-
-### Bugs that I'm aware of
-No currently known unintended behaviours. Let me know if you find anything.
-
-### Potential Errors:
-**bad_alloc**: You get this error when the program tries to use more RAM than your computer has available. 
-There is no fix available for this, but I work hard to try and keep the general RAM usage to a minimum.
-
-**The programm outputs: "FATAL ERROR"**: If this happens you should leave a comment in the forums because this is not normal behaviour. 
+### Hero aliases
+Open up cqdata.txt to see them. You can also add your own.
