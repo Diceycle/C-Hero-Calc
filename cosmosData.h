@@ -12,7 +12,7 @@
 #include <map>
 
 // Version number not used anywhere except in output to know immediately which version the user is running
-const std::string VERSION = "2.9.5.0";
+const std::string VERSION = "3.0.1.4";
 
 const size_t GIGABYTE = ((size_t) (1) << 30);
 
@@ -33,7 +33,7 @@ const size_t TOURNAMENT_LINES = 5;
 const int INDEX_NO_MONSTER = -1;
 
 // Worldboss Health maximum larger values get lost because FightResults only accept int16_t too
-const int16_t WORLDBOSS_HEALTH = 32000;
+const int16_t WORLDBOSS_HEALTH = 0; //32000;
 
 // Define types of HeroSkills, Elements and Rarities
 enum SkillType {
@@ -47,7 +47,8 @@ enum SkillType {
     HEAL,       // Heals the entire own army every turn
     LIFESTEAL,  // Combines the Aoe and Heal ability into one
     DAMPEN,     // Reduces the Effects of AOE percentually
-    
+	AOEZero_L,	// AOE damage (equal to lvl, undampened) at turn 0 / healable / after leprechaun's skill
+
     BERSERK,    // Every attack this monster makes multiplies its own damage 
     FRIENDS,    // This monster receives a damage multiplicator for every NORMAL monster behind it
     ADAPT,      // This monster deals more damage vs certain elements
@@ -68,6 +69,10 @@ enum SkillType {
     HEAL_L,     // Heal ability that scales with level
     LIFESTEAL_L,// Lifesteal ability that scales with level
     DAMPEN_L,   // Dampen Ability that scales with level
+
+	BEER,		// Scales opponent unit health as well as max health by (no. unit in your lane / no. unit in enemy lane)
+	GROW,		// Increase stats gained per lvl
+	COUNTER,    // counters % of inflicted damage 
 };
 
 enum Element {
@@ -166,8 +171,11 @@ void filterMonsterData(FollowerCount minimumMonsterCost, FollowerCount maximumAr
 // If one of those heroes is in an Army its FightResult is always invalid
 //
 // In a FightResult it is always implied that the target won against the proposed solution. 
+
+using DamageType	= short;	// change data type here to track large damage; default = short
+
 struct FightResult {
-    int16_t frontHealth;        // how much health remaining to the current leading mob of the winning side
+    DamageType frontHealth;        // how much health remaining to the current leading mob of the winning side
     int16_t leftAoeDamage;      // how much aoe damage left took
     int16_t rightAoeDamage;     // how much aoe damage right took
     int8_t berserk;             // berserk multiplier, if there is a berserker in the front
@@ -240,8 +248,9 @@ struct Instance {
     bool hasAoe;
     bool hasHeal;
     bool hasAsymmetricAoe;
+	bool hasBeer;
     bool hasWorldBoss;
-    int lowestBossHealth;
+    int64_t lowestBossHealth;
     
     std::vector<bool> monsterUsefulLast;
     

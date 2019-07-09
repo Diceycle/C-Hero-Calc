@@ -39,10 +39,15 @@ void simulateMultipleFights(vector<Army> & armies, Instance & instance) {
     } else {
         for (size_t i = 0; i < armyAmount; i++) {
             simulateFight(armies[i], instance.target);
-            if (instance.lowestBossHealth == -1 || armies[i].lastFightData.frontHealth < instance.lowestBossHealth) {
+            if ( //instance.lowestBossHealth == -1 || 
+				armies[i].lastFightData.frontHealth < instance.lowestBossHealth) {
                 instance.bestSolution = armies[i];
                 instance.lowestBossHealth = armies[i].lastFightData.frontHealth;
             }
+			else if (armies[i].lastFightData.frontHealth > 0) { // reached the limit
+				instance.bestSolution = armies[i];
+				instance.lowestBossHealth = numeric_limits<DamageType>::min();
+			}
         }
     }
 }
@@ -63,6 +68,9 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
     bool removeUseless = currentArmySize == (instance.maxCombatants-1) && !instance.hasWorldBoss;
     bool instanceInvalid = instance.hasHeal || instance.hasAsymmetricAoe;
     
+	// enemy booze will invalidate Fightresults
+	bool boozeInfluence = instance.hasBeer && currentArmySize >= instance.targetSize;
+	
     // Expansion for non-Hero Armies
     for (i = 0; i < oldPureArmiesSize; i++) {
         if (instance.followerUpperBound >= oldPureArmies[i].followerCost && !oldPureArmies[i].lastFightData.dominated) {
@@ -73,7 +81,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                     if (!removeUseless || instance.monsterUsefulLast[availableMonsters[m]]) {
                         newPureArmies.push_back(oldPureArmies[i]);
                         newPureArmies.back().add(availableMonsters[m]);
-                        newPureArmies.back().lastFightData.valid = !instanceInvalid;
+                        newPureArmies.back().lastFightData.valid = !instanceInvalid && !boozeInfluence;
                     }
                 }
             }
@@ -82,7 +90,9 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 if (!removeUseless || instance.monsterUsefulLast[availableHeroes[m]]) {
                     newHeroArmies.push_back(oldPureArmies[i]);
                     newHeroArmies.back().add(availableHeroes[m]);
-                    newHeroArmies.back().lastFightData.valid = !instanceInvalid && !monsterReference[availableHeroes[m]].skill.violatesFightResults;
+                    newHeroArmies.back().lastFightData.valid = !instanceInvalid && 
+															   !boozeInfluence &&
+															   !monsterReference[availableHeroes[m]].skill.violatesFightResults;
                 }
             }
         }
@@ -105,8 +115,10 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                 invalidSkill |= currentSkill.hasHeal || currentSkill.hasAsymmetricAoe;
                 friendsInfluence |= currentSkill.skillType == FRIENDS;
                 rainbowInfluence |= currentSkill.skillType == RAINBOW && currentArmySize > m + 4; // Hardcoded number of elements required to activate rainbow
+				boozeInfluence   |= currentSkill.skillType == BEER;
                 usedHeroes[oldHeroArmies[i].monsters[m]] = true;
             }
+
             // Add Normal Monster. No checks needed except cost
             for (m = 0; m < availableMonstersSize && monsterReference[availableMonsters[m]].cost < remainingFollowers; m++) {
                 // In case of a draw this could casue problems if no more suitable units are available
@@ -115,7 +127,8 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                     newHeroArmies.back().add(availableMonsters[m]);
                     newHeroArmies.back().lastFightData.valid = !instanceInvalid && 
                                                                !friendsInfluence && 
-                                                               !rainbowInfluence && 
+                                                               !rainbowInfluence &&
+															   !boozeInfluence &&
                                                                !invalidSkill;
                 }
             }
@@ -128,6 +141,7 @@ void expand(vector<Army> & newPureArmies, vector<Army> & newHeroArmies,
                         newHeroArmies.back().lastFightData.valid = !instanceInvalid && 
                                                                    !monsterReference[availableHeroes[m]].skill.violatesFightResults && 
                                                                    !rainbowInfluence && 
+																   !boozeInfluence &&
                                                                    !(monsterReference[availableHeroes[m]].skill.skillType == DAMPEN && instance.hasAoe) &&
                                                                    !invalidSkill;
                     }
@@ -385,15 +399,36 @@ void solveInstance(Instance & instance, size_t firstDominance) {
                 calculateDominance(instance, optimizable, pureMonsterArmies, heroMonsterArmies, armySize, firstDominance);
             }
                 
-            // now we expand to add the next monster to all non-dominated armies
-            interface.timedOutput("Expanding Lineups by one... ", DETAILED_OUTPUT, 1);
-            vector<Army> nextPureArmies;
-            vector<Army> nextHeroArmies;
-            expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies, armySize, instance);
+			if (armySize < instance.maxCombatants - 1) {
+				// now we expand to add the next monster to all non-dominated armies
+				interface.timedOutput("Expanding Lineups by one... ", DETAILED_OUTPUT, 1);
+				vector<Army> nextPureArmies;
+				vector<Army> nextHeroArmies;
+				expand(nextPureArmies, nextHeroArmies, pureMonsterArmies, heroMonsterArmies, armySize, instance);
 
-            interface.timedOutput("Moving Data... ", DETAILED_OUTPUT, 1);
-            pureMonsterArmies = move(nextPureArmies);
-            heroMonsterArmies = move(nextHeroArmies);
+				interface.timedOutput("Moving Data... ", DETAILED_OUTPUT, 1);
+				pureMonsterArmies = move(nextPureArmies);
+				heroMonsterArmies = move(nextHeroArmies);
+			}
+			else {
+				// for the last expansion, expand and fight each lineups individually (or in small packets) to keep memory usage low
+				interface.finishTimedOutput(DETAILED_OUTPUT);
+				interface.outputMessage("Starting loop for armies of size " + to_string(armySize + 1), BASIC_OUTPUT);
+				interface.timedOutput("Simulating fights by expanding Lineups one by one ...", DETAILED_OUTPUT, 1, true);
+				
+				for (size_t i = 0, j = 0; i < pureMonsterArmies.size() || j < heroMonsterArmies.size(); ) {
+					vector<Army> tempArmies, pureBranchArmies, heroBranchArmies;
+					for (size_t k = 0; k < config.branchwiseExpansionLimit; ++k) {
+						if (i < pureMonsterArmies.size()) pureBranchArmies.push_back(pureMonsterArmies[i++]);
+						if (j < heroMonsterArmies.size()) heroBranchArmies.push_back(heroMonsterArmies[j++]);
+					}
+					expand(tempArmies, tempArmies, pureBranchArmies, heroBranchArmies, armySize, instance);
+					simulateMultipleFights(tempArmies, instance);
+				}
+
+				interface.finishTimedOutput(DETAILED_OUTPUT);
+				break;
+			}
         }
         interface.finishTimedOutput(DETAILED_OUTPUT);
     }
@@ -480,28 +515,28 @@ int main(int argc, char** argv) {
     // Fill monster arrays with relevant monsters
     filterMonsterData(minimumMonsterCost, userFollowerUpperBound);
     
-    do {
-        instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
-    
-        interface.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", BASIC_OUTPUT);
-        
-        if (config.outputLevel == DETAILED_OUTPUT && config.autoAdjustOutputLevel) {
-            config.outputLevel = BASIC_OUTPUT;
-        }
-        if (config.outputLevel == BASIC_OUTPUT && instances.size() > 1 && config.autoAdjustOutputLevel) {
-            config.outputLevel = SOLUTION_OUTPUT;
-        }
-        
-        for (size_t i = 0; i < instances.size(); i++) {
-            totalFightsSimulated = &(instances[i].totalFightsSimulated);
-            
-            instances[i].followerUpperBound = userFollowerUpperBound;
-            
-            solveInstance(instances[i], config.firstDominance);
-            outputSolution(instances[i]);
-        }
-        userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", NOTIFICATION_OUTPUT, TOKENS.NO);
-    } while (userWantsContinue);
+	do {
+		instances = iomanager.takeInstanceInput("Enter Enemy Lineup(s): ");
+
+		interface.outputMessage("\nCalculating with " + to_string(availableMonsters.size()) + " available Monsters and " + to_string(availableHeroes.size()) + " enabled Heroes.", BASIC_OUTPUT);
+
+		if (config.outputLevel == DETAILED_OUTPUT && config.autoAdjustOutputLevel) {
+			config.outputLevel = BASIC_OUTPUT;
+		}
+		if (config.outputLevel == BASIC_OUTPUT && instances.size() > 1 && config.autoAdjustOutputLevel) {
+			config.outputLevel = SOLUTION_OUTPUT;
+		}
+
+		for (size_t i = 0; i < instances.size(); i++) {
+			totalFightsSimulated = &(instances[i].totalFightsSimulated);
+
+			instances[i].followerUpperBound = userFollowerUpperBound;
+
+			solveInstance(instances[i], config.firstDominance);
+			outputSolution(instances[i]);
+		}
+		userWantsContinue = iomanager.askYesNoQuestion("Do you want to calculate more lineups?", NOTIFICATION_OUTPUT, TOKENS.NO);
+	} while (userWantsContinue);
     
     interface.outputMessage("", NOTIFICATION_OUTPUT);
     interface.haltExecution();

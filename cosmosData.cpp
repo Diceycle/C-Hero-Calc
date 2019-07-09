@@ -17,8 +17,10 @@ Monster::Monster(int someHp, int someDamage, FollowerCount aCost, std::string aN
         if (this->rarity != WORLDBOSS) {
             int points = this->rarity * (this->level-1);
             int value = this->hp + this->damage;
-            this->hp = this->hp + (int) round((float) points * (float) this->hp / (float) value);
-            this->damage = this->damage + (int) round((float) points * (float) this->damage / (float) value);
+
+			int mult = (aSkill.skillType == GROW) ? aSkill.amount : 1;
+            this->hp = this->hp + (int) round((float) points * mult * (float) this->hp / (float) value);
+            this->damage = this->damage + (int) round((float) points * mult * (float) this->damage / (float) value);
         }
     }
 }
@@ -76,7 +78,8 @@ HeroSkill::HeroSkill(SkillType aType, Element aTarget, Element aSource, float an
                                   aType == CHAMPION || aType == CHAMPION_L ||
                                   aType == AOE || aType == AOE_L || 
                                   aType == HEAL || aType == HEAL_L ||
-                                  aType == LIFESTEAL || aType == LIFESTEAL_L);
+                                  aType == LIFESTEAL || aType == LIFESTEAL_L ||
+								  aType == BEER || aType == AOEZero_L);
 }
 
 // JSON Functions to provide results in an easily readable output format. Used my Latas for example
@@ -129,18 +132,20 @@ std::string Army::toJSON() {
 void Instance::setTarget(Army aTarget) {
     this->target = aTarget;
     this->targetSize = aTarget.monsterAmount;
-    this->lowestBossHealth = -1;
+    this->lowestBossHealth = 0;
     
     HeroSkill currentSkill;
     this->hasAoe = false;
     this->hasHeal = false;
     this->hasAsymmetricAoe = false;
+	this->hasBeer = false;
     this->hasWorldBoss = false;
     for (size_t i = 0; i < this->targetSize; i++) {
         currentSkill = monsterReference[this->target.monsters[i]].skill;
         this->hasAoe |= currentSkill.hasAoe;
         this->hasHeal |= currentSkill.hasHeal;
         this->hasAsymmetricAoe |= currentSkill.hasAsymmetricAoe;
+		this->hasBeer |= currentSkill.skillType == BEER;
         this->hasWorldBoss |= monsterReference[this->target.monsters[i]].rarity == WORLDBOSS;
     }
     
@@ -288,7 +293,7 @@ void initMonsterData() {
                                                  
     monsterBaseList.push_back(Monster(378, 268,  32242000, "a20", AIR));
     monsterBaseList.push_back(Monster(382, 264,  32025000, "e20", EARTH));
-    monsterBaseList.push_back(Monster(388, 266,  33155000, "f20", FIRE));
+    monsterBaseList.push_back(Monster(388, 266,  33155600, "f20", FIRE));
     monsterBaseList.push_back(Monster(454, 232,  34182000, "w20", WATER));
                                                  
     monsterBaseList.push_back(Monster(428, 286,  42826000, "a21", AIR));
@@ -311,30 +316,30 @@ void initMonsterData() {
     monsterBaseList.push_back(Monster(534, 392,  95772000, "f24", FIRE));
     monsterBaseList.push_back(Monster(540, 388,  95903000, "w24", WATER));
 
-    monsterBaseList.push_back(Monster(580, 430, 124550000, "a25", AIR));
-    monsterBaseList.push_back(Monster(592, 418, 123100000, "e25", EARTH));
-    monsterBaseList.push_back(Monster(764, 328, 125440000, "f25", FIRE));
-    monsterBaseList.push_back(Monster(500, 506, 127260000, "w25", WATER));
+    monsterBaseList.push_back(Monster(580, 430, 124549000, "a25", AIR));
+    monsterBaseList.push_back(Monster(592, 418, 123096000, "e25", EARTH));
+    monsterBaseList.push_back(Monster(764, 328, 125443000, "f25", FIRE));
+    monsterBaseList.push_back(Monster(500, 506, 127256000, "w25", WATER));
 
-    monsterBaseList.push_back(Monster(496, 582, 155100000, "a26", AIR));
-    monsterBaseList.push_back(Monster(622, 468, 157060000, "e26", EARTH));
-    monsterBaseList.push_back(Monster(638, 462, 160030000, "f26", FIRE));
+    monsterBaseList.push_back(Monster(496, 582, 155097000, "a26", AIR));
+    monsterBaseList.push_back(Monster(622, 468, 157055000, "e26", EARTH));
+    monsterBaseList.push_back(Monster(638, 462, 160026000, "f26", FIRE));
     monsterBaseList.push_back(Monster(700, 416, 157140000, "w26", WATER));
 
-    monsterBaseList.push_back(Monster(712, 484, 202290000, "a27", AIR));
-    monsterBaseList.push_back(Monster(580, 602, 206320000, "e27", EARTH));
-    monsterBaseList.push_back(Monster(690, 498, 201430000, "f27", FIRE));
-    monsterBaseList.push_back(Monster(682, 500, 199340000, "w27", WATER));
+    monsterBaseList.push_back(Monster(712, 484, 202295000, "a27", AIR));
+    monsterBaseList.push_back(Monster(580, 602, 206317000, "e27", EARTH));
+    monsterBaseList.push_back(Monster(690, 498, 201426000, "f27", FIRE));
+    monsterBaseList.push_back(Monster(682, 500, 199344000, "w27", WATER));
 
-    monsterBaseList.push_back(Monster(644, 642, 265850000, "a28", AIR));
-    monsterBaseList.push_back(Monster(770, 540, 268120000, "e28", EARTH));
+    monsterBaseList.push_back(Monster(644, 642, 265846000, "a28", AIR));
+    monsterBaseList.push_back(Monster(770, 540, 268117000, "e28", EARTH));
     monsterBaseList.push_back(Monster(746, 552, 264250000, "f28", FIRE));
-    monsterBaseList.push_back(Monster(762, 536, 261020000, "w28", WATER));
+    monsterBaseList.push_back(Monster(762, 536, 261023000, "w28", WATER));
 
     monsterBaseList.push_back(Monster(834, 616, 368230000, "a29", AIR));
-    monsterBaseList.push_back(Monster(830, 614, 363810000, "e29", EARTH));
-    monsterBaseList.push_back(Monster(746, 676, 358120000, "f29", FIRE));
-    monsterBaseList.push_back(Monster(1008,512, 370760000, "w29", WATER));
+    monsterBaseList.push_back(Monster(830, 614, 363805000, "e29", EARTH));
+    monsterBaseList.push_back(Monster(746, 676, 358119000, "f29", FIRE));
+    monsterBaseList.push_back(Monster(1008,512, 370761000, "w29", WATER));
 
     monsterBaseList.push_back(Monster(700, 906, 505055000, "a30", AIR));
     monsterBaseList.push_back(Monster(1022,614, 497082000, "e30", EARTH));
@@ -371,7 +376,7 @@ void initBaseHeroes() {
 
     baseHeroes.push_back(Monster( 22, 32, "nicte",              AIR,   RARE,      {BUFF,          AIR, AIR, 4}));
 
-    baseHeroes.push_back(Monster( 50, 12, "james",              EARTH, LEGENDARY, {PIERCE,        ALL, EARTH, 1}));
+    baseHeroes.push_back(Monster( 50, 12, "james",              EARTH, LEGENDARY, {VALKYRIE,      ALL, EARTH, 0.75f}));
 
     baseHeroes.push_back(Monster( 28, 16, "k41ry",              AIR,   COMMON,    {BUFF,          AIR, AIR, 3}));
     baseHeroes.push_back(Monster( 46, 20, "t4urus",             EARTH, RARE,      {BUFF,          ALL, EARTH, 1}));
@@ -468,6 +473,30 @@ void initBaseHeroes() {
     baseHeroes.push_back(Monster( 32, 66, "takeda",             EARTH, LEGENDARY, {BUFF_L,        EARTH, EARTH, 0.112f}));
     baseHeroes.push_back(Monster( 38, 56, "hirate",             FIRE,  LEGENDARY, {BUFF_L,        FIRE, FIRE, 0.112f}));
     baseHeroes.push_back(Monster( 44, 48, "hattori",            WATER, LEGENDARY, {BUFF_L,        WATER, WATER, 0.112f}));
+
+	baseHeroes.push_back(Monster(135, 107,"adagda",				AIR,	ASCENDED,	{ ADAPT,      AIR, AIR, 3 }));
+
+	baseHeroes.push_back(Monster( 30, 20, "bylar",				EARTH,	COMMON,		{ BUFF,       EARTH, EARTH, 4 }));
+	baseHeroes.push_back(Monster( 36, 36, "boor",				FIRE,	RARE,		{ TRAINING,   SELF, FIRE, 3 }));
+	baseHeroes.push_back(Monster( 52, 52, "bavah",				WATER,	LEGENDARY,	{ CHAMPION,   ALL, WATER, 2 }));
+	
+	baseHeroes.push_back(Monster( 75, 25, "leprechaun",			EARTH,	LEGENDARY,	{ BEER,       ALL, EARTH, 0 }));
+
+	baseHeroes.push_back(Monster( 30, 30, "sparks",				FIRE,	COMMON,		{ GROW,       ALL, FIRE, 2 }));
+	baseHeroes.push_back(Monster( 48, 42, "leaf",				EARTH,	RARE,		{ GROW,       ALL, EARTH, 2 }));
+	baseHeroes.push_back(Monster( 70, 48, "flynn",				AIR,	LEGENDARY,	{ GROW,       ALL, AIR, 2 }));
+
+	baseHeroes.push_back(Monster(122,122, "abavah",				WATER,	ASCENDED,	{ CHAMPION_L, ALL, ALL, 0.152f }));
+
+	baseHeroes.push_back(Monster( 66, 60, "drhawking",			AIR,	LEGENDARY,	{ AOEZero_L,  ALL, AIR, 1 }));
+
+	baseHeroes.push_back(Monster(150, 90, "masterlee",			AIR,	ASCENDED,	{ COUNTER,    AIR, AIR, 0.5f }));
+
+	baseHeroes.push_back(Monster( 70, 38, "kumusan",			FIRE,	LEGENDARY,	{ COUNTER,    FIRE, FIRE, 0.2f }));
+	baseHeroes.push_back(Monster( 78, 42, "liucheng",			WATER,	LEGENDARY,	{ COUNTER,    WATER, WATER, 0.25f }));
+	baseHeroes.push_back(Monster( 86, 44, "hidoka",				EARTH,	LEGENDARY,	{ COUNTER,    EARTH, EARTH, 0.3f }));
+
+	baseHeroes.push_back(Monster(WORLDBOSS_HEALTH, 11, "kryton", AIR, WORLDBOSS, { TRAINING,      SELF, AIR, 10 }));
 }
 
 void initQuests() {
@@ -616,7 +645,7 @@ int getRealIndex(Monster & monster) {
     if (monster.rarity != NO_HERO) {
         for (i = 0; i < baseHeroes.size(); i++) {
             if (baseHeroes[i].baseName == monster.baseName) {
-                index = (int) (-i - 2);
+                index = (-int(i) - 2);
             }
         }
     } else {
